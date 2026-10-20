@@ -1,0 +1,31 @@
+import { test, expect } from '@playwright/test';
+
+test('honest dashboard, saved settings, unavailable features and responsive layout', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: '당신의 아이디어, 당신의 컴퓨터에서.' })).toBeVisible();
+  await expect(page.getByText('ComfyUI에 연결하지 못했습니다.', { exact: false }).first()).toBeVisible({ timeout: 15000 });
+  await page.getByRole('button', { name: '설정', exact: true }).click();
+  await expect(page.getByLabel('ComfyUI 서버 주소')).toBeVisible();
+  await page.getByLabel('ComfyUI 서버 주소').fill('http://192.168.1.10:8188');
+  await page.getByRole('button', { name: '설정 저장', exact: true }).click();
+  await expect(page.getByRole('alert')).toContainText('127.0.0.1');
+  await page.getByLabel('ComfyUI 서버 주소').fill('http://127.0.0.1:18288');
+  await page.getByRole('button', { name: '설정 저장', exact: true }).click();
+  await expect(page.getByRole('status').filter({ hasText: '설정을 저장했습니다' })).toBeVisible();
+  await page.reload();
+  await page.getByRole('button', { name: '설정', exact: true }).click();
+  await expect(page.getByLabel('ComfyUI 서버 주소')).toHaveValue('http://127.0.0.1:18288');
+  await page.getByRole('button', { name: '이미지 스튜디오', exact: true }).click();
+  await expect(page.getByRole('button', { name: '이미지 생성 · M1 예정' })).toBeDisabled();
+  await page.getByRole('button', { name: 'Krea 2 스튜디오', exact: true }).click();
+  await expect(page.getByText('8GB 실행 가능 여부는 실기 검증 전입니다.')).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole('button', { name: '홈 / 대시보드', exact: true }).click();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: 'test-results/dashboard-mobile.png', fullPage: true });
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.screenshot({ path: 'test-results/dashboard-desktop.png', fullPage: true });
+  expect(errors).toEqual([]);
+});

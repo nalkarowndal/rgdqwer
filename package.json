@@ -1,0 +1,55 @@
+{
+  "name": "rgdqwer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ComfyUI 기반 Windows 로컬 AI 스튜디오",
+  "type": "module",
+  "main": "dist/desktop/main.js",
+  "engines": {
+    "node": "^22.12.0 || ^24.0.0"
+  },
+  "scripts": {
+    "dev": "concurrently -k \"npm:dev:server\" \"npm:dev:ui\"",
+    "dev:server": "tsx watch server/index.ts",
+    "dev:ui": "vite",
+    "build": "tsc -p tsconfig.node.json && vite build",
+    "start": "electron .",
+    "setup:desktop": "node node_modules/electron/install.js",
+    "start:web": "node dist/server/index.js",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.node.json --noEmit",
+    "lint": "eslint .",
+    "check": "npm run typecheck && npm run lint && npm test"
+  },
+  "dependencies": {
+    "@fastify/static": "10.1.6",
+    "fastify": "5.12.7",
+    "lucide-react": "0.468.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "sql.js": "1.15.1",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.2",
+    "@playwright/test": "1.58.2",
+    "@tailwindcss/vite": "4.1.18",
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "@types/sql.js": "1.4.9",
+    "@vitejs/plugin-react": "4.7.0",
+    "concurrently": "9.2.5",
+    "electron": "43.8.1",
+    "eslint": "9.39.2",
+    "eslint-plugin-react-hooks": "7.0.1",
+    "globals": "16.5.0",
+    "tailwindcss": "4.1.18",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.50.1",
+    "vite": "7.3.7",
+    "vitest": "4.1.11"
+  }
+}

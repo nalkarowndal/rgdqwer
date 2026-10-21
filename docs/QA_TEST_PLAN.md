@@ -13,8 +13,12 @@
 | Playwright | 3개 통과 | 생성→PNG 다운로드→기록→설정/시드 재사용, M0 UI 회귀 |
 | Electron smoke | 통과 (아래 제한 적용) | 실제 창·UI 로딩, 격리 설정 |
 | npm audit | 보고된 취약점 0 | 테스트용 ws를 8.22.0으로 갱신 |
-| Windows / Linux CI | 원격 결과 확인 중 | 아래에 실행 링크 기록 예정 |
+| Windows / Linux CI | 양쪽 모두 통과 | 설치, 타입/lint/43개 테스트, 빌드, Python, 브라우저 E2E |
 | 실제 모델/GPU, Windows Electron | 미검증 | M0/M1 실기 게이트 유지 |
+
+원격 검증: [Studio validation #39608518693](https://github.com/nalkarowndal/rgdqwer/actions/runs/39608518693),
+코드 커밋 `425673a90c687b3fae4251f7a9ab671396d85555`. Ubuntu 및 Windows 모두 성공했다.
+이후 QA 결과 문서만 갱신했으며 실행 코드는 같다.
 
 모의 엔진은 실제 HTTP와 WebSocket 서버이며, 생성 결과로 알려진 512px 흰색 PNG를 반환한다.
 이미지 품질·GPU 추론을 검증하는 테스트가 아니다. API payload, 큐 소유권, 진행률, PNG 파일 및 DB

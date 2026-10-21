@@ -16,12 +16,16 @@
 | `node scripts/smoke-desktop.mjs` | 통과 (제한 있음) | Electron 창 생성 및 실제 UI 로딩 |
 | 실제 Uvicorn → Node Worker adapter | 통과 | 진단 서버 연결, GPU unavailable, CUDA 검증 false |
 | `npm audit --audit-level=low` | 보고된 취약점 0 | 고정된 npm 의존성 트리 |
-| Windows GitHub Actions | 설정만 작성 | 원격 실행 결과 아직 확인하지 않음 |
+| Linux / Windows GitHub Actions | 양쪽 모두 통과 | 설치, 타입/린트/API, 빌드, Python, 브라우저 E2E |
 | 실제 ComfyUI/GPU 생성 | 미검증 | 엔진·모델·대상 GPU 없음 |
 
 Python 테스트에 upstream Starlette TestClient의 httpx 사용 중단 예정 경고 1건이 있다.
 테스트 실패는 아니다. Playwright 색상 환경 변수 경고도 있으며 브라우저 런타임 오류는 없었다.
 Python 패키지 보안 감사는 수행하지 않았다. npm 결과를 Python 또는 전체 제품 안전성으로 확대하지 않는다.
+
+원격 검증: [M0 validation #39519083630](https://github.com/nalkarowndal/rgdqwer/actions/runs/39519083630),
+코드 커밋 `dc745541d1fb7b357d2d391300cec13e6a6c1b8d`에서 Ubuntu 및 Windows runner 모두 성공.
+Windows CI는 웹 환경에서 테스트하며 Windows Electron 창 실행이나 실제 NVIDIA GPU 테스트를 포함하지 않는다.
 
 ## UI 검수
 

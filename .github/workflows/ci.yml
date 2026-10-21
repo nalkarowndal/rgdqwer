@@ -1,4 +1,4 @@
-name: M0 validation
+name: Studio validation
 on: [push, pull_request]
 permissions:
   contents: read

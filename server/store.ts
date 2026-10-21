@@ -1,7 +1,7 @@
 import initSqlJs from 'sql.js';
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import type { Settings, Job } from '../src/contracts.js';
+import type { Settings, Job, Artifact } from '../src/contracts.js';
 import { defaults, settingsSchema } from './settings.js';
 
 /** One owner per data directory; the Electron single-instance lock enforces this in desktop mode. */
@@ -21,12 +21,19 @@ export async function openStore(dataDir: string) {
       id TEXT PRIMARY KEY, job_id TEXT NOT NULL REFERENCES jobs(id),
       path TEXT NOT NULL, media_type TEXT NOT NULL, metadata_json TEXT NOT NULL
     );
-    PRAGMA user_version = 1;
   `);
   const persist = () => {
     writeFileSync(`${file}.tmp`, db.export(), { mode: 0o600 });
     renameSync(`${file}.tmp`, file);
   };
+  const mutate = (operation: () => void) => {
+    const snapshot = db.export();
+    try { operation(); persist(); }
+    catch (error) { db.close(); db = new SQL.Database(snapshot); db.run('PRAGMA foreign_keys = ON'); throw error; }
+  };
+  const version = Number(db.exec('PRAGMA user_version')[0].values[0][0]);
+  if (version > 2) { db.close(); throw new Error('더 새로운 데이터베이스입니다. 최신 앱을 사용하세요.'); }
+  if (version < 2) mutate(() => db.run('PRAGMA user_version = 2'));
   if (!db.exec('SELECT value FROM settings WHERE id=1').length) {
     db.run('INSERT INTO settings VALUES(1, ?)', [JSON.stringify(defaults)]);
     persist();
@@ -37,23 +44,31 @@ export async function openStore(dataDir: string) {
     },
     saveSettings(value: Settings): Settings {
       const settings = settingsSchema.parse(value);
-      const snapshot = db.export();
-      try {
+      mutate(() => {
         db.run('UPDATE settings SET value=? WHERE id=1', [JSON.stringify(settings)]);
-        persist();
-      } catch (error) {
-        db.close();
-        db = new SQL.Database(snapshot);
-        db.run('PRAGMA foreign_keys = ON');
-        throw error;
-      }
+      });
       return settings;
     },
     listJobs(): Job[] {
-      const rows = db.exec('SELECT id,kind,state,created_at FROM jobs ORDER BY created_at DESC LIMIT 100');
-      return (rows[0]?.values ?? []).map(row => ({
-        id: String(row[0]), kind: String(row[1]), state: String(row[2]), createdAt: String(row[3]),
-      }));
+      const rows = db.exec('SELECT settings_json FROM jobs ORDER BY created_at DESC LIMIT 100');
+      return (rows[0]?.values ?? []).map(row => JSON.parse(String(row[0])) as Job);
+    },
+    getJob(id: string): Job | undefined {
+      const result = db.exec('SELECT settings_json FROM jobs WHERE id=?', [id]);
+      return result[0]?.values[0] ? JSON.parse(String(result[0].values[0][0])) as Job : undefined;
+    },
+    putJob(job: Job) {
+      mutate(() => {
+        db.run(`INSERT INTO jobs(id,kind,state,settings_json,created_at,error) VALUES(?,?,?,?,?,?)
+          ON CONFLICT(id) DO UPDATE SET state=excluded.state,settings_json=excluded.settings_json,error=excluded.error`,
+        [job.id, job.kind, job.state, JSON.stringify(job), job.createdAt, job.error]);
+        for (const artifact of job.artifacts) db.run('INSERT OR IGNORE INTO artifacts VALUES(?,?,?,?,?)',
+          [artifact.id, job.id, artifact.fileName, 'image/png', JSON.stringify(artifact)]);
+      });
+    },
+    getArtifact(id: string): Artifact | undefined {
+      const result = db.exec('SELECT metadata_json FROM artifacts WHERE id=?', [id]);
+      return result[0]?.values[0] ? JSON.parse(String(result[0].values[0][0])) as Artifact : undefined;
     },
     close() { db.close(); },
   };

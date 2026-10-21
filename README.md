@@ -7,7 +7,7 @@ ComfyUI를 연결해 사용하는 Windows 로컬 AI 스튜디오입니다.
 
 - Electron 데스크톱 앱 및 동일한 React 브라우저 UI
 - 한국어 대시보드, 10개 내비게이션, 명확한 단계별 제공 상태
-- 기존 ComfyUI 연결 검사, GPU/VRAM/RAM 표시, SD 체크포인트 조회
+- 기존 ComfyUI 연결 검사, GPU/VRAM 표시, RAM 정보 API 조회, SD 체크포인트 조회
 - SQLite에 연결 주소와 참조 경로·저VRAM 선호값 저장
 - 독립 Python Worker 연결 및 NVIDIA 장치 진단
 - 세션 인증, loopback 제한, 연결 시간 초과 및 오류 안내

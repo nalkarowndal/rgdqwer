@@ -14,7 +14,10 @@ export async function readLocalJson(base: string, path: string, timeoutMs = 3000
 }
 const bytes = z.number().nonnegative().finite().optional();
 const statsSchema = z.object({
-  system: z.object({ ram_total: bytes, comfyui_version: z.string().optional() }).passthrough(),
+  system: z.object({
+    os: z.string().min(1), python_version: z.string().min(1),
+    ram_total: bytes, comfyui_version: z.string().optional(),
+  }).passthrough(),
   devices: z.array(z.object({
     name: z.string(), type: z.string(), vram_total: bytes, vram_free: bytes,
   })),

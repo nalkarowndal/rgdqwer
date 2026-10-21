@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { createServer } from 'node:http';
 
 test('honest dashboard, saved settings, unavailable features and responsive layout', async ({ page }) => {
   const errors: string[] = [];
@@ -28,4 +29,36 @@ test('honest dashboard, saved settings, unavailable features and responsive layo
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.screenshot({ path: 'test-results/dashboard-desktop.png', fullPage: true });
   expect(errors).toEqual([]);
+});
+
+test('displays actual adapter responses from an explicitly simulated local engine', async ({ page }) => {
+  let cpuMode = false;
+  const fixture = createServer((req, res) => {
+    res.setHeader('content-type', 'application/json');
+    res.end(JSON.stringify(req.url === '/system_stats' ? {
+      system: { os: 'nt', python_version: '3.12', ram_total: 17179869184, comfyui_version: 'simulated' },
+      devices: [{ name: cpuMode ? 'cpu' : 'SIMULATED GPU', type: cpuMode ? 'cpu' : 'cuda', vram_total: 8589934592, vram_free: 4294967296 }],
+    } : { CheckpointLoaderSimple: { input: { required: { ckpt_name: [['SIMULATED.safetensors'], {}] } } } }));
+  });
+  await new Promise<void>((resolve, reject) => { fixture.once('error', reject); fixture.listen(0, '127.0.0.1', resolve); });
+  try {
+    await page.goto('/');
+    await page.getByRole('button', { name: '설정', exact: true }).click();
+    await page.getByLabel('ComfyUI 서버 주소').fill(`http://127.0.0.1:${(fixture.address() as { port: number }).port}`);
+    await page.getByRole('button', { name: '설정 저장', exact: true }).click();
+    await expect(page.getByText('ComfyUI 연결됨', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: '홈 / 대시보드', exact: true }).click();
+    await expect(page.getByText('SIMULATED GPU')).toBeVisible();
+    await expect(page.getByText('8.0 GB', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: '모델·확장 관리자', exact: true }).click();
+    await expect(page.getByText('SIMULATED.safetensors')).toBeVisible();
+    cpuMode = true;
+    await page.getByRole('button', { name: '홈 / 대시보드', exact: true }).click();
+    await page.getByRole('button', { name: '연결 상태 새로고침' }).click();
+    await expect(page.getByText('CPU 모드 · GPU 메모리 측정 없음')).toBeVisible();
+    await expect(page.getByText('8.0 GB', { exact: true })).toHaveCount(0);
+  } finally {
+    fixture.closeAllConnections();
+    await new Promise<void>(resolve => fixture.close(() => resolve()));
+  }
 });

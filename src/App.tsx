@@ -56,6 +56,9 @@ export default function App() {
   }, [refresh, cancelRequests]);
   const current = sections.find(s => s.id === page)!;
   const connected = engine?.state === 'connected';
+  const gpu = engine?.devices.find(device => ['cuda', 'mps', 'xpu', 'privateuseone'].includes(device.type));
+  const deviceDescription = gpu?.name ?? (engine?.devices.some(device => device.type === 'cpu')
+    ? 'CPU 모드 · GPU 메모리 측정 없음' : 'ComfyUI 연결 후 장치를 표시합니다');
   const statusLabel = !engine ? '확인 중' : connected ? '연결됨' : '연결 필요';
   return <div className="app-shell">
     <aside className="sidebar">
@@ -114,7 +117,7 @@ export default function App() {
             <RefreshCw size={13} className={busy ? 'spin' : ''} /> 상태 다시 확인</button></div>
           <section className="status-grid" aria-label="작업 환경 상태">
             <StatusCard icon={Plug} label="생성 엔진" value={`ComfyUI ${statusLabel}`} detail={settings?.comfyUrl ?? '설정 불러오는 중'} tone={connected ? 'good' : 'waiting'} />
-            <StatusCard icon={Cpu} label="GPU 메모리" value={gib(engine?.devices[0]?.vramTotal)} detail={engine?.devices[0]?.name ?? 'ComfyUI 연결 후 장치를 표시합니다'} />
+            <StatusCard icon={Cpu} label="GPU 메모리" value={gib(gpu?.vramTotal)} detail={deviceDescription} />
             <StatusCard icon={Box} label="SD 체크포인트" value={connected ? `${engine.checkpoints.length}개 확인됨` : '확인 전'} detail="CheckpointLoaderSimple 기준" />
             <StatusCard icon={AudioLines} label="Python Worker" value={!worker ? '확인 중' : worker.state === 'connected' ? '연결됨' : '연결 필요'} detail="독립 실행 · M0 하드웨어 진단" />
           </section>

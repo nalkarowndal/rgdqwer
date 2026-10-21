@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createServer, type RequestListener } from 'node:http';
@@ -43,6 +43,30 @@ describe('persistent settings and safe local API', () => {
     const { api } = await app();
     expect((await api.inject({ url: '/api/settings', headers: { host: '127.0.0.1' } })).statusCode).toBe(401);
   });
+  it.each(['/%61pi/settings', '/%61pi/health', '/%61pi/jobs'])('requires auth after route decoding: %s', async url => {
+    const { api } = await app();
+    expect((await api.inject({ url, headers: { host: '127.0.0.1' } })).statusCode).toBe(401);
+  });
+  it('rejects unauthenticated writes with encoded routes', async () => {
+    const { api, headers } = await app();
+    const before = (await api.inject({ url: '/api/settings', headers })).json();
+    const result = await api.inject({ method: 'PUT', url: '/%61pi/settings',
+      headers: { host: '127.0.0.1' }, payload: { ...before, lowVram: false } });
+    expect(result.statusCode).toBe(401);
+    expect((await api.inject({ url: '/api/settings', headers })).json()).toEqual(before);
+  });
+  it('keeps memory and disk settings unchanged after a write failure', async () => {
+    const dir = await dataDir();
+    const store = await openStore(dir);
+    const before = store.getSettings();
+    await mkdir(join(dir, 'studio.sqlite.tmp'));
+    expect(() => store.saveSettings({ ...before, lowVram: false })).toThrow();
+    expect(store.getSettings()).toEqual(before);
+    store.close();
+    const reopened = await openStore(dir);
+    expect(reopened.getSettings()).toEqual(before);
+    reopened.close();
+  });
   it('rejects cross-site requests and DNS rebinding hosts, including session bootstrap', async () => {
     const { api, headers } = await app();
     for (const extra of [{ origin: 'https://evil.example' }, { 'sec-fetch-site': 'cross-site' }, { host: 'evil.example' }]) {
@@ -71,7 +95,7 @@ describe('real HTTP adapter against a simulated ComfyUI server', () => {
     const url = await mockServer((req, res) => {
       res.setHeader('content-type', 'application/json');
       res.end(JSON.stringify(req.url === '/system_stats'
-        ? { system: { ram_total: 17179869184, comfyui_version: 'test-fixture' }, devices: [{ name: 'fixture GPU', type: 'cuda', vram_total: 8589934592, vram_free: 4294967296 }] }
+        ? { system: { os: 'nt', python_version: '3.12', ram_total: 17179869184, comfyui_version: 'test-fixture' }, devices: [{ name: 'fixture GPU', type: 'cuda', vram_total: 8589934592, vram_free: 4294967296 }] }
         : { CheckpointLoaderSimple: { input: { required: { ckpt_name: [['model.safetensors'], {}] } } } }));
     });
     const status = await probeComfy(url);
@@ -79,6 +103,10 @@ describe('real HTTP adapter against a simulated ComfyUI server', () => {
   });
   it('does not accept a random JSON service as ComfyUI', async () => {
     const url = await mockServer((_req, res) => res.end('{"ok":true}'));
+    expect((await probeComfy(url)).state).toBe('error');
+  });
+  it('does not accept empty placeholder system data as a working engine', async () => {
+    const url = await mockServer((_req, res) => res.end('{"system":{},"devices":[]}'));
     expect((await probeComfy(url)).state).toBe('error');
   });
   it('times out and provides actionable recovery text', async () => {
@@ -92,7 +120,7 @@ describe('real HTTP adapter against a simulated ComfyUI server', () => {
     expect((await probeComfy(url)).state).toBe('error');
   });
   it('reports connected without inventing available models when loader is missing', async () => {
-    const url = await mockServer((req, res) => res.end(JSON.stringify(req.url === '/system_stats' ? { system: {}, devices: [] } : {})));
+    const url = await mockServer((req, res) => res.end(JSON.stringify(req.url === '/system_stats' ? { system: { os: 'nt', python_version: '3.12' }, devices: [] } : {})));
     const result = await probeComfy(url);
     expect(result.state).toBe('connected');
     expect(result.checkpoints).toEqual([]);

@@ -1,6 +1,6 @@
 # 저VRAM 전략
 
-현재: ComfyUI가 반환한 장치/VRAM/RAM 정보 표시. Worker는 nvidia-smi 장치/메모리 검사.
+현재: ComfyUI가 반환한 GPU/VRAM 정보 표시와 RAM 정보 API 조회. Worker는 nvidia-smi 장치/메모리 검사.
 PyTorch를 설치하거나 CUDA 커널을 실행하지 않으므로 cuda_inference_verified=false.
 GPU 정보가 없으면 '확인 전' 또는 unavailable이다. 8GB를 고정 표시하지 않는다.
 lowVram 설정은 선호값만 저장되며 실행 옵션에 적용되지 않는다.

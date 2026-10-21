@@ -22,7 +22,10 @@ export async function createApp(options: { dataDir: string; uiDir?: string; devO
     if (request.headers['sec-fetch-site'] === 'cross-site' || (origin && !allowed)) {
       return reply.code(403).send({ error: '다른 웹사이트의 요청은 허용되지 않습니다.' });
     }
-    if (request.url.startsWith('/api/') && request.url.split('?')[0] !== '/api/session') {
+    // Fastify decodes escaped static paths before matching. Authorize the matched
+    // route, not the raw URL, so /%61pi/settings cannot bypass the token check.
+    const route = request.routeOptions.url ?? '';
+    if (route.startsWith('/api/') && route !== '/api/session') {
       const actual = Buffer.from(request.headers.authorization ?? '');
       const expected = Buffer.from(`Bearer ${token}`);
       if (actual.length !== expected.length || !timingSafeEqual(actual, expected)) {

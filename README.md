@@ -1,10 +1,12 @@
 # rgdqwer
 
 ComfyUI를 연결해 사용하는 Windows 로컬 AI 스튜디오입니다.
-**현재는 M0 기반 구현 버전입니다. 이미지·영상·음성 생성 기능은 아직 제공하지 않습니다.**
+**현재 M1 이미지 생성 구현 버전입니다. 실제 모델/GPU 검증은 보류 중이며 영상·음성 생성은 아직 제공하지 않습니다.**
 
 ## 현재 사용할 수 있는 기능
 
+- SD1.5 / SDXL / Illustrious 기본 Text to Image, 샘플러 진행률 및 작업별 취소
+- PNG 미리보기·다운로드, 작업 기록, 설정/시드 재사용, 재시작 후 기존 작업 추적
 - Electron 데스크톱 앱 및 동일한 React 브라우저 UI
 - 한국어 대시보드, 10개 내비게이션, 명확한 단계별 제공 상태
 - 기존 ComfyUI 연결 검사, GPU/VRAM 표시, RAM 정보 API 조회, SD 체크포인트 조회
@@ -16,13 +18,13 @@ ComfyUI를 연결해 사용하는 Windows 로컬 AI 스튜디오입니다.
 ## 빠른 시작 (Windows PowerShell)
 
 Node.js **24 LTS**와 Python **3.12**를 권장합니다. Node 22.12+도 허용하지만 이 작업에서
-실행 검증한 Node는 24.19.0입니다. GPU용 PyTorch는 M0 의존성에 포함되지 않습니다.
+실행 검증한 Node는 24.19.0입니다. GPU용 PyTorch와 모델은 앱 의존성에 포함되지 않습니다.
 
 ```powershell
 git clone https://github.com/nalkarowndal/rgdqwer.git
 cd rgdqwer
 # 작업 브랜치가 원격에 있는 경우:
-git switch codex/m0-foundation
+git switch codex/m1-image-generation
 npm ci
 npm run setup:desktop
 npm run build
@@ -30,7 +32,7 @@ npm start
 ```
 
 Electron 실행 파일을 별도로 설치하는 `setup:desktop`은 최초 1회 인터넷을 사용합니다.
-ComfyUI 및 모델은 별도로 준비해야 합니다. 정상 설치 이후 앱의 M0 기능은 인터넷을 요구하지 않습니다.
+ComfyUI 및 모델은 별도로 준비해야 합니다. 정상 설치 이후 앱의 구현된 기능은 인터넷을 요구하지 않습니다.
 Windows 설치 프로그램은 M8 범위이며 아직 없습니다.
 
 ### Python Worker (선택)
@@ -49,9 +51,24 @@ Worker가 없어도 ComfyUI 연결 검사는 가능합니다.
 ### ComfyUI 연결
 
 기존 설치를 평소 방식으로 실행한 후 앱의 **설정**에 주소를 저장합니다.
-기본값은 `http://127.0.0.1:8188`입니다. 원격 서버, API 키, API Proxy는 M0에서 지원하지 않습니다.
+기본값은 `http://127.0.0.1:8188`입니다. 원격 서버, API 키, API Proxy는 현재 지원하지 않습니다.
 체크포인트 목록은 `CheckpointLoaderSimple` 기준이며 모든 모델 종류의 인벤토리는 아닙니다.
 설치·모델 경로 및 저VRAM 선택값은 현재 **참조용 저장값**입니다. ComfyUI 설정을 바꾸지 않습니다.
+
+### 이미지 생성
+
+1. ComfyUI에 호환 체크포인트를 준비하고 서버를 실행합니다. 안전한 작업별 취소와
+   제출 응답 유실 시 복구를 위해 최신 ComfyUI를 권장합니다.
+2. 앱의 **설정**에서 연결한 후 **이미지 스튜디오**에서 모델 계열과 체크포인트를 선택합니다.
+3. 프롬프트를 입력하고 필요하면 상세 설정에서 크기/스텝/CFG/시드를 조정한 후 생성합니다.
+4. 결과를 PNG로 다운로드하거나 **작업 기록 / 라이브러리**에서 설정을 재사용합니다.
+
+한 번에 이미지 1개를 생성합니다. 입력은 번역하지 않고 그대로 전달합니다.
+SD1.5는 512px, SDXL/Illustrious는 1024px가 기본이며 8GB 안정성은 실기 검증 전입니다.
+Anima·Krea·LoRA는 현재 기본 그래프에서 지원하지 않습니다.
+상태 미확인 시 **상태 추적 재개**로 기존 작업부터 확인합니다. 자동 재제출하지 않습니다.
+구버전 ComfyUI가 안전 취소를 지원하지 않으면 ComfyUI에서 직접 취소해야 합니다.
+자세한 제한과 복구 동작은 [이미지 시스템](docs/IMAGE_SYSTEM.md)을 참고하세요.
 
 ### 웹 실행 / 개발
 
@@ -67,6 +84,7 @@ npm run dev
 ```
 
 데스크톱 데이터는 Electron userData 아래 `studio/studio.sqlite`, 웹 데이터는 `.data/studio.sqlite`입니다.
+생성 PNG는 같은 데이터 폴더의 `outputs/`에 저장합니다.
 웹 포트와 데이터 경로는 `STUDIO_PORT`, `STUDIO_DATA_DIR`로 지정합니다.
 동일 데이터 폴더를 여러 서버에서 동시에 열지 마세요.
 
@@ -86,6 +104,5 @@ Linux에서 이미 설치된 Chromium을 사용하려면
 
 ## 다음 단계
 
-M0의 Windows 및 실제 ComfyUI 연결 검증 후 M1에서 SD 계열 Text to Image 실행·저장·진행률을
-연결합니다. [전체 로드맵](docs/DEVELOPMENT_PHASES.md), [구조](docs/ARCHITECTURE.md),
+M0/M1의 Windows 데스크톱·실제 모델/GPU 검증 게이트를 완료한 후 M2 프롬프트 모드로 진행합니다. [전체 로드맵](docs/DEVELOPMENT_PHASES.md), [구조](docs/ARCHITECTURE.md),
 [요구사항 원문](docs/REQUIREMENTS.md), [보안](docs/SECURITY.md)을 참고하세요.

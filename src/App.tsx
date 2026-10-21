@@ -6,6 +6,8 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { api } from './api';
+import { ImageStudio, JobHistory, initialDraft } from './ImageStudio';
+import type { ImageInput } from './contracts';
 import type { EngineStatus, Job, Settings, WorkerStatus } from './contracts';
 
 const sections: { id: string; title: string; icon: LucideIcon; phase?: string; description?: string }[] = [
@@ -29,6 +31,9 @@ export default function App() {
   const [engine, setEngine] = useState<EngineStatus>();
   const [worker, setWorker] = useState<WorkerStatus>();
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [imageDraft, setImageDraft] = useState(initialDraft);
+  const refreshJobs = useCallback(async () => { setJobs(await api<Job[]>('jobs')); }, []);
+  function reuse(input: ImageInput) { setImageDraft({ ...input, seed: String(input.seed) }); setPage('image'); }
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const sequence = useRef(0);
@@ -51,8 +56,9 @@ export default function App() {
       .then(([value, list]) => { if (active) { setSettings(value); setJobs(list); } })
       .catch(err => { if (active) setError(errorMessage(err)); });
     void refresh();
+    const jobTimer = setInterval(() => { void api<Job[]>('jobs').then(value => { if (active) setJobs(value); }).catch(err => { if (active) setError(errorMessage(err)); }); }, 1000);
     const timer = setInterval(() => { void refresh(); }, 15000);
-    return () => { active = false; cancelRequests(); clearInterval(timer); };
+    return () => { active = false; cancelRequests(); clearInterval(timer); clearInterval(jobTimer); };
   }, [refresh, cancelRequests]);
   const current = sections.find(s => s.id === page)!;
   const connected = engine?.state === 'connected';
@@ -80,7 +86,7 @@ export default function App() {
       <div className="sidebar-bottom">
         <div className="local-note"><ShieldCheck size={17} /><span>로컬에서, 나만의 작업</span></div>
         <p>모델과 파일을 내 컴퓨터에서 관리합니다.</p>
-        <div className="version">v0.1.0 <span>M0 · 기반 구성</span></div>
+        <div className="version">v0.2.0 <span>M1 · 이미지 생성</span></div>
       </div>
     </aside>
     <div className="workspace">
@@ -98,7 +104,7 @@ export default function App() {
           <div className="page-heading"><div><p className="eyebrow">YOUR LOCAL CREATIVE SPACE</p>
             <h1>당신의 아이디어,<br className="mobile-break" /> 당신의 컴퓨터에서.</h1>
             <p className="subtitle">이미지부터 영상, 목소리까지. 나만의 AI 작업 공간을 준비하세요.</p>
-          </div><span className="milestone-tag">M0 FOUNDATION</span></div>
+          </div><span className="milestone-tag">M1 IMAGE STUDIO</span></div>
           <section className="onboarding">
             <div className="onboarding-copy"><span className="hero-label"><Plug size={14} /> 처음 시작하시나요?</span>
               <h2>ComfyUI를 연결하고<br />창작할 준비를 시작하세요.</h2>
@@ -122,39 +128,37 @@ export default function App() {
             <StatusCard icon={AudioLines} label="Python Worker" value={!worker ? '확인 중' : worker.state === 'connected' ? '연결됨' : '연결 필요'} detail="독립 실행 · M0 하드웨어 진단" />
           </section>
           {engine && !connected && <div className="notice" role="status"><CircleHelp size={17} /><span>{engine.message}</span></div>}
-          <div className="section-heading"><div><h2>무엇을 만들어 볼까요?</h2><p>공통 기반을 먼저 준비하고, 단계별로 기능을 연결합니다.</p></div><span className="subtle-label">생성 기능은 후속 단계에서 제공</span></div>
+          <div className="section-heading"><div><h2>무엇을 만들어 볼까요?</h2><p>공통 기반을 먼저 준비하고, 단계별로 기능을 연결합니다.</p></div><span className="subtle-label">이미지 T2I 지원 · 나머지 단계별 제공</span></div>
           <section className="studio-grid">
             {sections.slice(1, 7).map((section, index) => <button key={section.id} className="studio-card" onClick={() => setPage(section.id)}>
               <div className={`studio-icon tone-${index}`}><section.icon size={24} /></div>
-              <span className="phase-chip">{section.phase} 예정</span>
+              <span className="phase-chip">{section.id === 'image' ? 'T2I 지원' : `${section.phase} 예정`}</span>
               <h3>{section.title}</h3><p>{section.description}</p>
               <span className="card-link">개발 범위 보기 <ArrowRight size={15} /></span>
             </button>)}
           </section>
           <section className="recent-section"><div className="section-heading"><h2>최근 작업</h2><button className="text-button" onClick={() => setPage('library')}>라이브러리 열기 <ArrowRight size={14} /></button></div>
-            <div className="empty-inline"><FolderClock size={27} /><div><strong>아직 생성한 작업이 없습니다</strong><p>생성 기능이 연결되면 결과와 설정을 이곳에서 다시 찾을 수 있어요.</p></div><span>M1 이후</span></div>
+            <div className="empty-inline"><FolderClock size={27} /><div><strong>{jobs.length ? `최근 작업 ${jobs.length}개` : '아직 생성한 작업이 없습니다'}</strong><p>라이브러리에서 결과와 설정을 다시 찾을 수 있어요.</p></div><span>이미지 기록</span></div>
           </section>
         </> : page === 'settings' ? <SettingsPanel settings={settings} onSaved={value => { setSettings(value); void refresh(); }} engine={engine} busy={busy} refresh={refresh} />
-          : page === 'library' ? <><PageTitle title={current.title} text="생성 결과와 모델, 프롬프트, 시드를 함께 보관하는 공간입니다." />
-            <div className="panel empty-state"><FolderClock size={38} /><h2>{jobs.length ? `${jobs.length}개의 작업` : '저장된 작업이 없습니다'}</h2><p>SQLite 저장 기반이 준비되었습니다. 생성 작업 기록과 결과물 관리는 M1부터 연결합니다.</p>
-              {jobs.map(job => <p key={job.id}>{job.kind} · {job.state} · {job.createdAt}</p>)}</div></>
+          : page === 'image' ? <ImageStudio engine={engine} jobs={jobs} draft={imageDraft} setDraft={setImageDraft} onChanged={refreshJobs} reuse={reuse} />
+          : page === 'library' ? <JobHistory jobs={jobs} onChanged={refreshJobs} reuse={reuse} />
           : page === 'models' ? <><PageTitle title={current.title} text="현재 연결한 ComfyUI의 SD 체크포인트를 읽기 전용으로 확인합니다." />
             <ModelList engine={engine} /><div className="notice"><CircleHelp size={18} />다운로드·설치·삭제와 LoRA 관리는 M7에서 제공됩니다. 자동 설치는 실행하지 않습니다.</div></>
           : <><PageTitle title={current.title} text={current.description ?? ''} />
             <div className="panel feature-detail"><span className="phase-chip">{current.phase} 개발 예정</span><current.icon size={42} />
               <h2>다음 창작 도구를 준비하고 있습니다.</h2>
-              <p>현재 버전은 M0 기반 구성 단계입니다. 이 카테고리의 AI 생성 기능은 아직 구현되지 않았습니다.</p>
+              <p>현재는 M1 이미지 생성 구현 단계입니다. 이 카테고리의 AI 생성 기능은 아직 구현되지 않았습니다.</p>
               {page === 'krea' && <div className="notice">8GB 실행 가능 여부는 실기 검증 전입니다.</div>}
               <p className="feature-note">{({
-                image: 'Text to Image부터 실제 모델 생성·저장·진행률을 연결합니다.',
                 video: 'Wan 계열의 해상도·프레임·오프로딩 조건을 실기 검증합니다.',
                 voice: '독립 Worker에서 TTS와 Voice Conversion을 단계별로 추가합니다.',
                 krea: 'RAW/Turbo 워크플로와 메모리·라이선스를 확인한 뒤 선택적으로 연결합니다.',
                 prompt: '규칙 기반 한국어 입력과 모델별 프롬프트 어댑터부터 구현합니다.',
                 caption: '이미지를 기반으로 재구성한 프롬프트를 편집하도록 구현합니다.',
               } as Record<string, string>)[page]}</p>
-              <button className="primary-button" disabled>{page === 'image' ? '이미지 생성 · M1 예정' : `${current.phase}에서 제공 예정`}</button>
-            </div>{page === 'image' && <ModelList engine={engine} />}</>}
+              <button className="primary-button" disabled>{`${current.phase}에서 제공 예정`}</button>
+            </div></>}
         <footer><span>rgdqwer · 로컬 AI 스튜디오</span><span>실행 가능 여부는 연결된 엔진과 모델에 따라 달라집니다.</span></footer>
       </main>
     </div>
@@ -202,7 +206,7 @@ function SettingsPanel({ settings, onSaved, engine, busy, refresh }: {
         <input id="worker-url" type="url" required value={draft.workerUrl} disabled={saving} onChange={e => setDraft({ ...draft, workerUrl: e.target.value })} />
         <p className="field-help">기본값 http://127.0.0.1:8189 · Worker는 별도 Python 환경에서 실행합니다.</p>
         <details><summary><SlidersHorizontal size={16} /> 경로 및 저VRAM 환경 설정</summary>
-          <div className="notice">경로와 저VRAM 선호값을 저장합니다. M0에서는 ComfyUI 실행 옵션이나 모델 경로에 자동 적용되지 않습니다.</div>
+          <div className="notice">경로와 저VRAM 선호값을 저장합니다. 현재 ComfyUI 실행 옵션이나 모델 경로에 자동 적용되지 않습니다.</div>
           <label htmlFor="comfy-path">ComfyUI 설치 경로 (참조용)</label>
           <input id="comfy-path" value={draft.comfyPath} disabled={saving} placeholder="예: D:\AI\ComfyUI" onChange={e => setDraft({ ...draft, comfyPath: e.target.value })} />
           <label htmlFor="model-path">모델 경로 (참조용)</label>

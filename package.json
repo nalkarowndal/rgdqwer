@@ -1,6 +1,6 @@
 {
   "name": "rgdqwer",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "ComfyUI 기반 Windows 로컬 AI 스튜디오",
   "type": "module",
@@ -26,6 +26,7 @@
     "@fastify/static": "10.1.6",
     "fastify": "5.12.7",
     "lucide-react": "0.468.0",
+    "pngjs": "7.0.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "sql.js": "1.15.1",
@@ -36,9 +37,11 @@
     "@playwright/test": "1.58.2",
     "@tailwindcss/vite": "4.1.18",
     "@types/node": "24.10.1",
+    "@types/pngjs": "6.0.5",
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
     "@types/sql.js": "1.4.9",
+    "@types/ws": "8.18.1",
     "@vitejs/plugin-react": "4.7.0",
     "concurrently": "9.2.5",
     "electron": "43.8.1",
@@ -50,6 +53,7 @@
     "typescript": "5.9.3",
     "typescript-eslint": "8.50.1",
     "vite": "7.3.7",
-    "vitest": "4.1.11"
+    "vitest": "4.1.11",
+    "ws": "8.22.0"
   }
 }

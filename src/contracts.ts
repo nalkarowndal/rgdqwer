@@ -32,7 +32,23 @@ export interface WorkerStatus {
 }
 export interface Job {
   id: string;
-  kind: string;
-  state: string;
+  kind: 'image';
+  state: 'preparing' | 'queued' | 'running' | 'cancelling' | 'postprocessing' | 'completed' | 'failed' | 'cancelled' | 'interrupted' | 'unknown';
   createdAt: string;
+  updatedAt: string;
+  input: ImageInput;
+  workflowVersion: string;
+  engineUrl: string;
+  promptId: string | null;
+  progress: number | null;
+  error: string | null;
+  artifacts: Artifact[];
+  log: string[];
+  cancelRequested: boolean;
 }
+export interface ImageInput {
+  profile: 'sd15' | 'sdxl' | 'illustrious'; checkpoint: string;
+  prompt: string; negative: string; width: number; height: number;
+  seed: number; steps: number; cfg: number;
+}
+export interface Artifact { id: string; fileName: string; width: number; height: number }

@@ -17,7 +17,7 @@ Electron이 Node 제어 서버의 생명주기를 관리하고 OS 사용자 데�
 ComfyUI/Worker는 사용자가 별도로 실행한다. 자동 프로세스 관리와 설치는 후속 단계다.
 
 `server/settings.ts`는 입력 검증, `store.ts`는 영속성, `comfy.ts`는 외부 로컬 서비스 어댑터,
-`app.ts`는 HTTP 계약을 담당한다. Python Worker에 GPU 연산 의존성은 아직 없다.
+`app.ts`는 HTTP 계약, `generation/`은 그래프·ComfyUI HTTP/WS·작업 생명주기·PNG 검증을 담당한다. Python Worker에 GPU 연산 의존성은 아직 없다.
 
 ## API 비교 및 선택
 
@@ -29,7 +29,8 @@ ComfyUI/Worker는 사용자가 별도로 실행한다. 자동 프로세스 관�
 
 공식 출처: [API 비교](https://docs.comfy.org/development/run-workflows/overview),
 [로컬 서버 경로](https://docs.comfy.org/development/comfyui-server/comms_routes).
-M1에서 API 형식 JSON, client_id, prompt_id 기반 이벤트 연계와 history 결과 수집을 구현한다.
+M1은 API 형식 JSON, client_id/prompt_id 기반 이벤트 연계와 history 결과 수집을 구현한다.
+React는 인증된 API를 폴링하며 Node가 ComfyUI WebSocket을 관리한다.
 
 ## 버전 선택
 

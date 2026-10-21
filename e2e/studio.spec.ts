@@ -19,7 +19,7 @@ test('honest dashboard, saved settings, unavailable features and responsive layo
   await page.getByRole('button', { name: '설정', exact: true }).click();
   await expect(page.getByLabel('ComfyUI 서버 주소')).toHaveValue('http://127.0.0.1:18288');
   await page.getByRole('button', { name: '이미지 스튜디오', exact: true }).click();
-  await expect(page.getByRole('button', { name: '이미지 생성 · M1 예정' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: '이미지 생성' })).toBeDisabled();
   await page.getByRole('button', { name: 'Krea 2 스튜디오', exact: true }).click();
   await expect(page.getByText('8GB 실행 가능 여부는 실기 검증 전입니다.')).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });

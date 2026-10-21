@@ -1,4 +1,4 @@
-# M0 API
+# M1 API
 
 기본 웹 서버 `http://127.0.0.1:4310`. Electron은 OS가 배정한 loopback 포트를 사용한다.
 JSON, 최대 요청 본문 32KiB, no-store. CORS 개방 없음.
@@ -6,12 +6,17 @@ JSON, 최대 요청 본문 32KiB, no-store. CORS 개방 없음.
 | 메서드 / 경로 | 응답 / 동작 |
 |---|---|
 | GET /api/session | `{token}`. 같은 origin UI가 시작 시 호출 |
-| GET /api/health | `{status:"ok",app:"rgdqwer",milestone:"M0"}` |
+| GET /api/health | `{status:"ok",app:"rgdqwer",milestone:"M1"}` |
 | GET /api/settings | Settings |
 | PUT /api/settings | 검증된 Settings 전체 교체, 영속화 후 반환 |
 | GET /api/engine/status | EngineStatus |
 | GET /api/worker/status | WorkerStatus |
-| GET /api/jobs | 최근 최대 100개 작업. M0는 생성 기능이 없어 빈 목록 |
+| POST /api/jobs | ImageInput → 202 Job. 잘못된 입력 400, 기존 작업 추적 중 409 |
+| GET /api/jobs/:id | Job 또는 404 |
+| POST /api/jobs/:id/cancel | 해당 작업 취소 요청. 종료 확인 전 완료로 간주하지 않음 |
+| POST /api/jobs/:id/resume | 기존 prompt ID 추적만 재개. 생성 재제출 없음 |
+| GET /api/artifacts/:id | 인증된 image/png 스트림. 파일 없음 404 |
+| GET /api/jobs | 최근 최대 100개 Job (생성 시각 내림차순) |
 
 세션 경로 이외에는 `Authorization: Bearer <token>`이 필요하다.
 Host는 127.0.0.1/localhost만 허용한다. 외부 Origin, cross-site 요청은 403.
@@ -31,4 +36,13 @@ Worker GET /health는 `{status:"ok",engine:"rgdqwer-worker",capabilities:[],hard
 GPU 메모리는 명시적으로 MiB를 사용한다. Node 조회 제한 4.5초, nvidia-smi 3초.
 M0에는 파일 변경/모델 실행 Worker API가 없다. 추가 전 인증 계약을 설계해야 한다.
 
-생성 API, WebSocket 진행률 전달, 취소, 파일 다운로드는 M1 이후 별도 계약으로 추가한다.
+ImageInput: profile(sd15/sdxl/illustrious), checkpoint, prompt, negative,
+width, height, seed, steps, cfg. 상세 상한은 [이미지 시스템](IMAGE_SYSTEM.md) 참고.
+
+Job: id, kind=image, state, createdAt, updatedAt, input, workflowVersion,
+engineUrl, promptId, progress(샘플러 0–100 또는 null), error, artifacts[], log[], cancelRequested.
+상태: preparing → queued/running → postprocessing → completed.
+추가 상태 failed/cancelled/cancelling/interrupted/unknown. unknown/interrupted는 신규 생성을 막는다.
+Artifact: id, fileName(UUID.png), width, height. 절대 파일 경로는 노출하지 않는다.
+UI는 1초 간격 Job API를 조회한다. ComfyUI WebSocket은 Node가 구독하며 브라우저 WS API는 없다.
+취소 API가 없는 구버전 엔진은 409, 취소 결과 미확인은 502로 안내한다.

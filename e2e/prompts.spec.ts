@@ -1,0 +1,51 @@
+import { test, expect } from '@playwright/test';
+import { simulatedComfy } from '../tests/fixtures/comfy.js';
+
+test('Korean composition preserves edits across modes and pages, persists presets and generates the exact text', async ({ page }) => {
+  const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
+  const fixture = await simulatedComfy();
+  try {
+    await page.goto('/');
+    await page.getByRole('button', { name: '설정', exact: true }).click();
+    await page.getByLabel('ComfyUI 서버 주소').fill(fixture.url);
+    await page.getByRole('button', { name: '설정 저장', exact: true }).click();
+    await expect(page.getByText('ComfyUI 연결됨', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: '프롬프트 스튜디오', exact: true }).click();
+    await expect(page.getByRole('button', { name: '간편', exact: true })).toBeVisible({ timeout: 3000 });
+    await page.getByLabel('한국어 아이디어').fill('고양이, 숲');
+    await expect(page.getByLabel('프롬프트', { exact: true })).toHaveValue('cat, forest');
+    await page.getByRole('button', { name: '전문가', exact: true }).click();
+    const raw = '  (cat:1.2), forest  ';
+    await page.getByLabel('프롬프트', { exact: true }).fill(raw);
+    await page.getByLabel('Negative Prompt', { exact: true }).fill('');
+    await page.getByRole('button', { name: '상세', exact: true }).click();
+    await page.getByLabel('배경', { exact: true }).fill('바다');
+    await expect(page.getByLabel('프롬프트', { exact: true })).toHaveValue(raw);
+    await page.getByRole('button', { name: '홈 / 대시보드', exact: true }).click();
+    await page.getByRole('button', { name: '프롬프트 스튜디오', exact: true }).click();
+    await expect(page.getByLabel('프롬프트', { exact: true })).toHaveValue(raw);
+    await page.getByLabel('프리셋 이름').fill('M2 테스트 프리셋');
+    await page.getByRole('button', { name: '프리셋 저장', exact: true }).click();
+    await expect(page.getByText('M2 테스트 프리셋', { exact: true })).toBeVisible();
+    await page.reload();
+    await page.getByRole('button', { name: '프롬프트 스튜디오', exact: true }).click();
+    await page.getByRole('article').filter({ hasText: 'M2 테스트 프리셋' }).getByRole('button', { name: '불러오기' }).click();
+    await expect(page.getByLabel('프롬프트', { exact: true })).toHaveValue(raw);
+    await page.evaluate(() => window.scrollTo(0,0));
+    await page.screenshot({ path: 'test-results/m2-prompt-studio.png', fullPage: true });
+    await page.setViewportSize({ width: 390, height: 844 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    await page.screenshot({ path: 'test-results/m2-prompt-mobile.png', fullPage: true });
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.getByRole('button', { name: '이미지 스튜디오로 보내기' }).click();
+    await expect(page.getByLabel('프롬프트', { exact: true })).toHaveValue(raw);
+    await page.getByRole('button', { name: '이미지 생성', exact: true }).click();
+    await expect.poll(() => fixture.calls.some(c => c.path === '/prompt')).toBe(true);
+    expect(fixture.calls.find(c => c.path === '/prompt')?.body).toMatchObject({ prompt: { '6': { inputs: { text: raw } }, '7': { inputs: { text: '' } } } });
+    await expect(page.getByRole('img', { name: '생성 결과' }).first()).toBeVisible({ timeout: 15000 });
+    await page.getByRole('button', { name: '이미지 생성', exact: true }).click();
+    await expect.poll(() => fixture.calls.filter(c => c.path === '/prompt').length).toBe(2);
+    await expect(page.getByRole('img', { name: '생성 결과' }).first()).toBeVisible({ timeout: 15000 });
+    expect(errors).toEqual([]);
+  } finally { await fixture.close(); }
+});

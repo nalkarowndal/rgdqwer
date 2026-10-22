@@ -6,7 +6,7 @@ function token() {
   }).catch(error => { session = undefined; throw error; });
   return session;
 }
-export async function api<T>(path: string, body?: unknown, method?: 'POST' | 'PUT'): Promise<T> {
+export async function api<T>(path: string, body?: unknown, method?: 'POST' | 'PUT' | 'DELETE'): Promise<T> {
   const response = await fetch(`/api/${path}`, {
     method: method ?? (body === undefined ? 'GET' : 'PUT'),
     headers: { Authorization: `Bearer ${await token()}`, ...(body === undefined ? {} : { 'Content-Type': 'application/json' }) },

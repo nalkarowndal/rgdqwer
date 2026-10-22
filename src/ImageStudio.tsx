@@ -1,10 +1,12 @@
 import { useEffect, useState, type Dispatch, type SetStateAction, type FormEvent } from 'react';
 import { Download, Image as ImageIcon, RefreshCw, Square, WandSparkles } from 'lucide-react';
+import { PromptEditor } from './PromptEditor';
+import { compilePrompt, createPromptDocument, type PromptDocument } from './prompt';
 import { api, artifactBlob } from './api';
 import type { EngineStatus, ImageInput, Job } from './contracts';
 
-export type ImageDraft = Omit<ImageInput, 'seed'> & { seed: string };
-export const initialDraft: ImageDraft = { profile: 'sd15', checkpoint: '', prompt: '', negative: '', width: 512, height: 512, seed: '', steps: 20, cfg: 7 };
+export type ImageDraft = Omit<ImageInput, 'seed' | 'prompt' | 'negative' | 'promptDocument'> & { seed: string; promptDocument: PromptDocument };
+export const initialDraft: ImageDraft = { profile: 'sd15', checkpoint: '', promptDocument: createPromptDocument(), width: 512, height: 512, seed: '', steps: 20, cfg: 7 };
 const labels: Record<Job['state'], string> = { preparing: '준비 중', queued: '대기 중', running: '생성 중', cancelling: '취소 확인 중', postprocessing: '결과 저장 중', completed: '완료', failed: '실패', cancelled: '취소됨', interrupted: '추적 중단', unknown: '상태 미확인' };
 export const isPending = (job: Job) => !['completed','failed','cancelled'].includes(job.state);
 
@@ -20,14 +22,15 @@ export function ImageStudio({ engine, jobs, draft, setDraft, onChanged, reuse }:
     event.preventDefault(); setSending(true); setError('');
     try {
       const seed = draft.seed.trim() ? Number(draft.seed) : crypto.getRandomValues(new Uint32Array(1))[0];
-      await api<Job>('jobs', { ...draft, seed }, 'POST'); await onChanged();
+      const result = compilePrompt(draft.promptDocument, draft.profile);
+      await api<Job>('jobs', { ...draft, seed, prompt: result.positive, negative: result.negative }, 'POST'); await onChanged();
     } catch (err) { setError(err instanceof Error ? err.message : '생성 요청 실패'); }
     finally { setSending(false); }
   }
   const ready = engine?.state === 'connected' && engine.checkpoints.includes(draft.checkpoint);
   const pending = jobs.some(isPending);
   const maximum = draft.profile === 'sd15' ? 768 : 1024;
-  return <><div className="page-heading"><div><p className="eyebrow">TEXT TO IMAGE</p><h1>이미지 스튜디오</h1><p className="subtitle">내 ComfyUI의 체크포인트로 이미지를 생성하고 설정을 함께 보관합니다.</p></div><span className="milestone-tag">M1 · 배치 1</span></div>
+  return <><div className="page-heading"><div><p className="eyebrow">TEXT TO IMAGE</p><h1>이미지 스튜디오</h1><p className="subtitle">내 ComfyUI의 체크포인트로 이미지를 생성하고 설정을 함께 보관합니다.</p></div><span className="milestone-tag">M2 · 배치 1</span></div>
     <div className="image-layout"><form className="panel settings-panel image-form" onSubmit={event => void submit(event)}>
       <h2><WandSparkles size={19} /> 새로운 이미지</h2>
       <label htmlFor="model-profile">모델 프로필</label>
@@ -38,9 +41,7 @@ export function ImageStudio({ engine, jobs, draft, setDraft, onChanged, reuse }:
         <option value="">모델을 선택하세요</option>{engine?.checkpoints.map(name => <option key={name}>{name}</option>)}
         {draft.checkpoint && !engine?.checkpoints.includes(draft.checkpoint) && <option value={draft.checkpoint}>{draft.checkpoint} · 현재 찾을 수 없음</option>}
       </select>
-      <label htmlFor="image-prompt">프롬프트</label><textarea id="image-prompt" required maxLength={8000} rows={5} value={draft.prompt} onChange={e => setDraft({ ...draft, prompt: e.target.value })} placeholder="예: a quiet forest, soft morning light, detailed photography" />
-      <p className="field-help">입력한 문장을 그대로 엔진에 전달합니다. 한국어 자동 변환은 M2 예정입니다.</p>
-      <label htmlFor="negative-prompt">Negative Prompt</label><textarea id="negative-prompt" maxLength={8000} rows={2} value={draft.negative} onChange={e => setDraft({ ...draft, negative: e.target.value })} placeholder="예: blurry, low quality" />
+      <PromptEditor document={draft.promptDocument} profile={draft.profile} onChange={promptDocument => setDraft(value => ({ ...value, promptDocument }))} />
       <details><summary>상세 생성 설정</summary><div className="parameter-grid">
         <div><label htmlFor="width">가로 (px)</label><input id="width" type="number" min={256} max={maximum} step={64} required value={draft.width} onChange={e => setDraft({ ...draft, width: Number(e.target.value) })} /></div>
         <div><label htmlFor="height">세로 (px)</label><input id="height" type="number" min={256} max={maximum} step={64} required value={draft.height} onChange={e => setDraft({ ...draft, height: Number(e.target.value) })} /></div>
@@ -51,11 +52,11 @@ export function ImageStudio({ engine, jobs, draft, setDraft, onChanged, reuse }:
       </details>
       <div className="notice">8GB에서 모델별 안정성은 실기 검증 전입니다. 메모리 오류 시 해상도를 낮추세요. 안전 취소는 최신 ComfyUI의 작업별 취소 API가 필요합니다.</div>
       {error && <div className="notice error" role="alert">{error}</div>}
-      <button className="primary-button generate-button" disabled={sending || pending || !ready || !draft.prompt.trim()}><ImageIcon size={16} />{sending ? '요청 중…' : '이미지 생성'}</button>
+      <button className="primary-button generate-button" disabled={sending || pending || !ready || !compilePrompt(draft.promptDocument, draft.profile).valid}><ImageIcon size={16} />{sending ? '요청 중…' : '이미지 생성'}</button>
       {!ready && <p className="field-help">설정에서 ComfyUI를 연결하고 설치된 체크포인트를 선택하세요.</p>}
       {pending && <p className="field-help">기존 작업의 실행 또는 상태 확인이 끝난 뒤 새로 생성할 수 있습니다.</p>}
     </form><section className="image-result" aria-label="현재 작업">
-      {jobs[0] ? <JobCard job={jobs[0]} onChanged={onChanged} reuse={reuse} /> : <div className="panel empty-state"><ImageIcon size={42} /><h2>첫 이미지를 만들어 보세요</h2><p>생성 결과와 진행 상태가 여기에 표시됩니다.</p></div>}
+      {jobs[0] ? <JobCard key={jobs[0].id} job={jobs[0]} onChanged={onChanged} reuse={reuse} /> : <div className="panel empty-state"><ImageIcon size={42} /><h2>첫 이미지를 만들어 보세요</h2><p>생성 결과와 진행 상태가 여기에 표시됩니다.</p></div>}
     </section></div></>;
 }
 export function JobHistory({ jobs, onChanged, reuse }: { jobs: Job[]; onChanged: () => Promise<void>; reuse: (input: ImageInput) => void }) {

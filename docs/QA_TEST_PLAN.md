@@ -15,8 +15,11 @@ M2는 실제 GPU를 제공받지 않은 동일한 Linux 개발 환경에서 검�
 | Playwright | 4개 통과 | 모드/페이지 이동 수정 보존, preset 복원, 생성 문자열 일치, 연속 생성,390px 및 M0/M1 회귀 |
 | Electron smoke | 통과 (기존 Linux 제한 동일) | 실제 창/격리 설정 |
 | npm audit | 보고된 취약점 0 | 테스트용 Vitest4.1.12 패치 후 전체 검증 |
-| Windows / Linux CI | 실행 예정 | 원격 실행 결과 후 갱신 |
+| Windows / Linux CI | 양쪽 모두 통과 | 설치, 타입/lint/58개 테스트, 빌드, Python, 브라우저4개 |
 | 실제 모델/GPU | 미검증 | 전체 문장 번역 또는 생성 품질 증거로 해석하지 않음 |
+
+원격 검증: [Studio validation #39699683006](https://github.com/nalkarowndal/rgdqwer/actions/runs/39699683006),
+코드 커밋 `6d79b3f565d9cfa36af8358ba8daeb255748b77d`. 이후 QA 결과 문서만 갱신했다.
 
 사전의 정확한 키워드만 변환하고 부정/미지원 한국어 구절은 그대로 보존한다.
 공백·가중치·빈 negative를 유지하며 수동 결과가 원문/모드 변경으로 덮어써지지 않는지 검사했다.

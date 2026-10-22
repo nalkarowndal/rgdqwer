@@ -1,12 +1,17 @@
-"""Independent diagnostics worker. AI engines are deliberately absent in M0."""
+"""Independent diagnostics and optional local image analysis worker."""
 import csv
 import io
 import platform
 import subprocess
 
 from fastapi import FastAPI
+from .analysis import router
+from .security import WorkerSecurity
 
-app = FastAPI(title="rgdqwer worker", version="0.1.0", docs_url=None, redoc_url=None)
+app = FastAPI(title="rgdqwer worker", version="0.4.0", docs_url=None, redoc_url=None)
+
+app.add_middleware(WorkerSecurity)
+app.include_router(router)
 
 
 def detect_hardware() -> dict:

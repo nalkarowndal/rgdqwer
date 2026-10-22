@@ -1,3 +1,4 @@
+export class ApiError extends Error { constructor(message: string, public tokenFile?: string) { super(message); } }
 let session: Promise<string> | undefined;
 function token() {
   session ??= fetch('/api/session').then(async response => {
@@ -6,17 +7,17 @@ function token() {
   }).catch(error => { session = undefined; throw error; });
   return session;
 }
-export async function api<T>(path: string, body?: unknown, method?: 'POST' | 'PUT' | 'DELETE'): Promise<T> {
+export async function api<T>(path: string, body?: unknown, method?: 'POST' | 'PUT' | 'DELETE', timeout = 12000): Promise<T> {
   const response = await fetch(`/api/${path}`, {
     method: method ?? (body === undefined ? 'GET' : 'PUT'),
     headers: { Authorization: `Bearer ${await token()}`, ...(body === undefined ? {} : { 'Content-Type': 'application/json' }) },
     body: body === undefined ? undefined : JSON.stringify(body),
-    signal: AbortSignal.timeout(12000),
+    signal: AbortSignal.timeout(timeout),
   });
   const result = await response.json();
   if (!response.ok) {
     if (response.status === 401) session = undefined;
-    throw new Error(result.error ?? '요청을 처리하지 못했습니다.');
+    throw new ApiError(result.error ?? '요청을 처리하지 못했습니다.', result.tokenFile);
   }
   return result as T;
 }

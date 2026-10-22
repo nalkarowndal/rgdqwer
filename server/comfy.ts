@@ -68,7 +68,7 @@ const workerSchema = z.object({
 export async function probeWorker(base: string): Promise<WorkerStatus> {
   try {
     const data = workerSchema.parse(await readLocalJson(base, '/health', 4500));
-    return { state: 'connected', message: 'Worker 연결됨 · M0 진단 기능만 제공됩니다.', capabilities: data.capabilities, hardware: data.hardware };
+    return { state: 'connected', message: 'Worker 연결됨 · 분석 모델 준비 상태는 Image to Prompt에서 확인하세요.', capabilities: data.capabilities, hardware: data.hardware };
   } catch {
     return { state: 'disconnected', message: 'Python Worker를 실행하세요. 이미지 엔진 연결과는 독립적입니다.', capabilities: [] };
   }

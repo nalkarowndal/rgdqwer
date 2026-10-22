@@ -1,12 +1,12 @@
-# M2 API
+# M3 API
 
 기본 웹 서버 `http://127.0.0.1:4310`. Electron은 OS가 배정한 loopback 포트를 사용한다.
-JSON, 최대 요청 본문 128KiB, no-store. CORS 개방 없음.
+JSON, 기본 요청 본문 128KiB (분석 POST만7MiB), no-store. CORS 개방 없음.
 
 | 메서드 / 경로 | 응답 / 동작 |
 |---|---|
 | GET /api/session | `{token}`. 같은 origin UI가 시작 시 호출 |
-| GET /api/health | `{status:"ok",app:"rgdqwer",milestone:"M2"}` |
+| GET /api/health | `{status:"ok",app:"rgdqwer",milestone:"M3"}` |
 | GET /api/settings | Settings |
 | PUT /api/settings | 검증된 Settings 전체 교체, 영속화 후 반환 |
 | GET /api/engine/status | EngineStatus |
@@ -37,7 +37,7 @@ devices[{name,type,vramTotal,vramFree}], ramTotal, checkpoints[], version.
 WorkerStatus: state, message, capabilities[], 선택 hardware.
 Worker GET /health는 `{status:"ok",engine:"rgdqwer-worker",capabilities:[],hardware}`.
 GPU 메모리는 명시적으로 MiB를 사용한다. Node 조회 제한 4.5초, nvidia-smi 3초.
-M0에는 파일 변경/모델 실행 Worker API가 없다. 추가 전 인증 계약을 설계해야 한다.
+M3 분석 API는 별도 영속 Worker 토큰으로 인증한다 (아래 참조).
 
 ImageInput: profile(sd15/sdxl/illustrious), checkpoint, prompt, negative,
 width, height, seed, steps, cfg. 상세 상한은 [이미지 시스템](IMAGE_SYSTEM.md) 참고.
@@ -53,3 +53,12 @@ UI는 1초 간격 Job API를 조회한다. ComfyUI WebSocket은 Node가 구독�
 ImageInput은 optional promptDocument(v1)를 받는다. 있으면 컴파일 결과와 prompt/negative의 정확한 일치를 요구한다.
 PromptRecord는 id,createdAt,kind(preset/history),name,profile,document,result를 포함한다.
 result에는 positive,negative,style,unresolved,warnings,engineVersion,valid가 있다. 모든 새 API도 인증이 필요하다.
+
+## M3 분석 API
+
+- GET /api/analysis/status → `{busy,device:"cpu",models:[{id,available,reason}],tokenFile}`. 오류에도 tokenFile 경로만 반환.
+- POST /api/analysis → `{image:base64,model:"florence"|"wd14"|"both"}` → `{caption,ocr,tags:[{name,score,category}],models,width,height}`.
+- Node 인증 후 Worker `/analysis/status`, `/analysis`로 프록시. 토큰 내용은 브라우저에 미공개. redirect 금지, 응답128KiB, 상태5초/분석300초.
+- Worker body7MiB, image5MiB/16×1024²픽셀/8192, PNG/JPEG/WebP 단일 프레임. auth/Host/Origin 검사 후 본문 읽기.
+- 400 입력, 401 인증, 409 분석 중, 413 크기, 422 이미지, 503 미준비, 502 연결/모델 실패/응답 이상. 원시 Worker 오류는 노출하지 않는다.
+- 모델 경로는 Worker 시작 시만 지정; 요청에서 임의 경로나 실행 옵션을 받지 않는다.

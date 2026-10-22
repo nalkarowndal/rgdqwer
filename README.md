@@ -1,9 +1,11 @@
 # rgdqwer
 
 ComfyUI를 연결해 사용하는 Windows 로컬 AI 스튜디오입니다.
-**현재 M2 프롬프트·이미지 생성 구현 버전입니다. 실제 모델/GPU 검증은 보류 중이며 영상·음성 생성은 아직 제공하지 않습니다.**
+**현재 M3 이미지 분석·프롬프트·이미지 생성 구현 버전입니다. 실제 모델/GPU 검증은 보류 중이며 영상·음성 생성은 아직 제공하지 않습니다.**
 
 ## 현재 사용할 수 있는 기능
+
+- 로컬 Florence-2 캡션/OCR·WD14 태그 어댑터, 이미지 업로드·필드 수정/잠금·생성 연결 (모델 별도 준비)
 
 - 간편·상세·전문가 프롬프트 편집, 한국어 키워드 변환, 프리셋·기록 저장/재사용
 - SD1.5 / SDXL / Illustrious 기본 Text to Image, 샘플러 진행률 및 작업별 취소
@@ -25,7 +27,7 @@ Node.js **24 LTS**와 Python **3.12**를 권장합니다. Node 22.12+도 허용�
 git clone https://github.com/nalkarowndal/rgdqwer.git
 cd rgdqwer
 # 작업 브랜치가 원격에 있는 경우:
-git switch codex/m2-prompt-studio
+git switch codex/m3-image-to-prompt
 npm ci
 npm run setup:desktop
 npm run build
@@ -46,7 +48,9 @@ py -3.12 -m venv .venv
 .\.venv\Scripts\python -m uvicorn worker.app:app --host 127.0.0.1 --port 8189
 ```
 
-Worker는 M0에서 진단만 제공합니다. CUDA 추론 검증 여부는 항상 false입니다.
+위 명령은 하드웨어 진단용입니다. M3 이미지 분석에는 인증 토큰과 선택형 CPU 패키지/로컬 모델이 필요합니다.
+[Image to Prompt 설치·사용법](docs/IMAGE_TO_PROMPT.md)을 따라 `python -m worker.run --token-file ...`로 실행하세요.
+CUDA 추론 검증 여부는 항상 false입니다.
 Worker가 없어도 ComfyUI 연결 검사는 가능합니다.
 
 ### ComfyUI 연결
@@ -115,5 +119,5 @@ Linux에서 이미 설치된 Chromium을 사용하려면
 
 ## 다음 단계
 
-M0–M2의 Windows 데스크톱·실제 모델/GPU 검증 게이트를 유지합니다. 다음 구현 단계는 M3 Image to Prompt입니다. [전체 로드맵](docs/DEVELOPMENT_PHASES.md), [구조](docs/ARCHITECTURE.md),
+M0–M3의 Windows 데스크톱·실제 모델/GPU 검증 게이트를 유지합니다. 다음 구현 단계는 M4 Krea 2입니다. [전체 로드맵](docs/DEVELOPMENT_PHASES.md), [구조](docs/ARCHITECTURE.md),
 [요구사항 원문](docs/REQUIREMENTS.md), [보안](docs/SECURITY.md)을 참고하세요.

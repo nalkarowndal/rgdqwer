@@ -3,6 +3,33 @@
 검증일: 2026-10-21 (Asia/Seoul). 작업 환경: Linux, Node 24.19.0, Python 3.12.14.
 모델/GPU 검증 결과와 애플리케이션 검증 결과를 구분한다.
 
+## M3 실행 기록 — 2026-10-22
+
+| 검사 | 결과 | 범위 |
+|---|---|---|
+| 타입 / lint / build | 통과 | v0.4.0, 가상환경 vendor 코드는 lint 제외 |
+| Vitest | 67개 통과 | 기존58 + 분석 계약/잠금5 + 인증 프록시4 |
+| Python | 14개 통과 | 기존5 + 보안/디코딩/동시 실행/전처리/adapter seam9 |
+| Playwright | 6개 통과 | 기존4 + 업로드/재분석/잠금/진행 중 수정/페이지 이동/실패 보존/생성 요청 + 미설치 안내 |
+| 실제 Node↔Python HTTP smoke | 통과 | token 인증, PNG 디코딩, 미설치503, 직접 미인증401 |
+| Linux Electron smoke | 통과 | 테스트 전용 sandbox override 사용, 제품 sandbox 설정 true |
+| 선택형 CPU 패키지 | 설치/import/pip check 통과 | torch2.10.0+cpu / torchvision0.25.0+cpu / Transformers5.20.2 / ONNX Runtime1.31.0 |
+| npm audit | 0건 | moderate 이상 포함 |
+| 실제 Florence/WD14 가중치 / 품질 | 미검증 | 로컬 가중치 없음; fixture를 실추론으로 주장하지 않음 |
+| Windows optional 추론 / Electron / RTX2060SUPER | 미검증 | CI와 사용자의 실제 데스크톱 검증은 구분 |
+
+M3 초기 API/UI 테스트는 미구현 경로에서 실패 후 통과했다. Worker 초기 실패 실행은 socket sandbox로 정지해,
+별도 M2 기준 복사본에서 새7개 테스트의 실패를 확인한 뒤 현재14개 통과를 확인했다.
+추가2개 adapter seam은 synthetic dependency 출력 계약 테스트다. 원래 캡션 제외 회귀는 RED→GREEN.
+캡션과 수정 필드의 모순을 자동으로 해결한다고 주장하지 않으며 포함 스위치와 안내를 제공한다.
+
+캡처: [분석 화면](qa/m3-analysis.png), [390px 화면](qa/m3-analysis-mobile.png).
+흰색 업로드/캡션/태그/생성 이미지는 명시적 모의 fixture다. 실제 분석 결과가 아니다.
+
+남은 M3 통과 조건: Windows에서 선택형 패키지 설치 및 로컬 Florence/WD14 실제 추론,
+잠금/수정 후 실제 ComfyUI 생성, CPU 시간/RAM/분석 품질 기록. 이후 GPU 경로를 별도 설계/검증한다.
+원격 Windows/Linux CI와 독립 리뷰는 PR 기록에 결과를 추가한다.
+
 ## M2 실행 기록 — 2026-10-22 (Asia/Seoul)
 
 M2는 실제 GPU를 제공받지 않은 동일한 Linux 개발 환경에서 검증했다.

@@ -13,8 +13,10 @@
 - GPU 진단은 고정 인자 배열로 nvidia-smi 실행. shell=True 사용 안 함.
 
 loopback과 브라우저 방어는 동일 사용자 권한의 악성 로컬 프로그램을 막는 경계가 아니다.
-Worker의 M0 진단 endpoint는 인증을 요구하지 않는다. 생성/파일 변경 API를 추가하기 전에
-토큰과 권한 범위를 별도로 설계해야 한다.
+Worker의 읽기 전용 /health 진단은 인증을 요구하지 않는다. M3 /analysis 및 /analysis/status는
+앱 데이터 폴더의 별도 256-bit worker.token으로 인증한다. 파일은 POSIX0600, Windows는 사용자 데이터 폴더 ACL에 의존한다.
+Worker Host/Origin/본문 크기를 JSON 파싱 전에 검사한다. 모델 실행은 로컬 CPU·safetensors/native Transformers·ONNX만 사용한다.
+원격 Python 코드/모델 자동 다운로드를 허용하지 않으며 Hugging Face/ONNX telemetry를 비활성화한다.
 모델/사용자 파일, 음성 프로필은 외부로 업로드하지 않는다.
 
 ## 후속 필수 조건

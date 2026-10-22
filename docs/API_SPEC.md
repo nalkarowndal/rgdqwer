@@ -1,12 +1,12 @@
-# M1 API
+# M2 API
 
 기본 웹 서버 `http://127.0.0.1:4310`. Electron은 OS가 배정한 loopback 포트를 사용한다.
-JSON, 최대 요청 본문 32KiB, no-store. CORS 개방 없음.
+JSON, 최대 요청 본문 128KiB, no-store. CORS 개방 없음.
 
 | 메서드 / 경로 | 응답 / 동작 |
 |---|---|
 | GET /api/session | `{token}`. 같은 origin UI가 시작 시 호출 |
-| GET /api/health | `{status:"ok",app:"rgdqwer",milestone:"M1"}` |
+| GET /api/health | `{status:"ok",app:"rgdqwer",milestone:"M2"}` |
 | GET /api/settings | Settings |
 | PUT /api/settings | 검증된 Settings 전체 교체, 영속화 후 반환 |
 | GET /api/engine/status | EngineStatus |
@@ -16,6 +16,9 @@ JSON, 최대 요청 본문 32KiB, no-store. CORS 개방 없음.
 | POST /api/jobs/:id/cancel | 해당 작업 취소 요청. 종료 확인 전 완료로 간주하지 않음 |
 | POST /api/jobs/:id/resume | 기존 prompt ID 추적만 재개. 생성 재제출 없음 |
 | GET /api/artifacts/:id | 인증된 image/png 스트림. 파일 없음 404 |
+| GET /api/prompt-records | 프리셋/기록 snapshot, 생성 시각 내림차순 |
+| POST /api/prompt-records | `{kind,name,profile,document}` → 201 PromptRecord. 잘못된 문서 400, 프리셋 100개 상한 409 |
+| DELETE /api/prompt-records/:id | `{deleted:true}` 또는 404. 이미지/Job 보존 |
 | GET /api/jobs | 최근 최대 100개 Job (생성 시각 내림차순) |
 
 세션 경로 이외에는 `Authorization: Bearer <token>`이 필요하다.
@@ -46,3 +49,7 @@ engineUrl, promptId, progress(샘플러 0–100 또는 null), error, artifacts[]
 Artifact: id, fileName(UUID.png), width, height. 절대 파일 경로는 노출하지 않는다.
 UI는 1초 간격 Job API를 조회한다. ComfyUI WebSocket은 Node가 구독하며 브라우저 WS API는 없다.
 취소 API가 없는 구버전 엔진은 409, 취소 결과 미확인은 502로 안내한다.
+
+ImageInput은 optional promptDocument(v1)를 받는다. 있으면 컴파일 결과와 prompt/negative의 정확한 일치를 요구한다.
+PromptRecord는 id,createdAt,kind(preset/history),name,profile,document,result를 포함한다.
+result에는 positive,negative,style,unresolved,warnings,engineVersion,valid가 있다. 모든 새 API도 인증이 필요하다.

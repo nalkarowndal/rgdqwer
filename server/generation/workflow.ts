@@ -1,17 +1,23 @@
+import { compilePrompt, promptDocumentSchema } from '../../src/prompt.js';
 import { z } from 'zod';
 import type { ImageInput } from '../../src/contracts.js';
 
 export const imageInputSchema = z.object({
+  promptDocument: promptDocumentSchema.optional(),
   profile: z.enum(['sd15', 'sdxl', 'illustrious']),
   checkpoint: z.string().min(1).max(1024),
-  prompt: z.string().trim().min(1, '프롬프트를 입력하세요.').max(8000),
+  prompt: z.string().max(8000).refine(value => !!value.trim(), '프롬프트를 입력하세요.'),
   negative: z.string().max(8000),
   width: z.number().int().min(256).max(1024).multipleOf(64),
   height: z.number().int().min(256).max(1024).multipleOf(64),
   seed: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER),
   steps: z.number().int().min(1).max(80), cfg: z.number().min(1).max(30),
 }).strict().refine(v => v.profile !== 'sd15' || (v.width <= 768 && v.height <= 768),
-  'SD 1.5는 가로·세로 최대 768px입니다.');
+  'SD 1.5는 가로·세로 최대 768px입니다.').refine(value => {
+    if (!value.promptDocument) return true;
+    const result = compilePrompt(value.promptDocument, value.profile);
+    return result.valid && value.prompt === result.positive && value.negative === result.negative;
+  }, '프롬프트 원문과 최종 결과가 다릅니다. 현재 결과로 다시 요청하세요.');
 
 export const requiredNodes = ['KSampler', 'CheckpointLoaderSimple', 'EmptyLatentImage', 'CLIPTextEncode', 'VAEDecode', 'SaveImage'];
 export type Workflow = Record<string, { class_type: string; inputs: Record<string, unknown> }>;

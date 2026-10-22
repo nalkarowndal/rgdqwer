@@ -41,3 +41,7 @@ Fastify 5.12.7과 static 10.1.6은 통합 빌드 및 테스트로 검증한다.
 sql.js 1.15.1은 네이티브 ABI 재빌드가 없는 SQLite WASM 구현이다.
 검증된 정확한 의존성 트리는 package-lock.json 및 worker/requirements-lock.txt를 기준으로 한다.
 Windows/RTX 호환성까지 검증했다는 의미는 아니다.
+
+M2의 `src/prompt.ts`는 순수한 문서 스키마/규칙 compiler이며 UI와 서버가 같은 계약을 사용한다.
+PromptEditor는 제어형 입력이고 App 부모의 페이지별 초안을 사용한다. PromptStudio는 인증된 snapshot
+저장/조회/삭제를 제공한다. 세대별 LLM/영상 adapter는 아직 실행 구현하지 않았다.

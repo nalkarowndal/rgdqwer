@@ -10,6 +10,7 @@ test('image generation, download, history and exact setting reuse through the re
     await page.getByRole('button', { name: '설정 저장', exact: true }).click();
     await expect(page.getByText('ComfyUI 연결됨', { exact: true })).toBeVisible();
     await page.getByRole('button', { name: '이미지 스튜디오', exact: true }).click();
+    await page.getByRole('button', { name: '전문가', exact: true }).click();
     await page.getByLabel('프롬프트', { exact: true }).fill('a quiet forest');
     await page.getByText('상세 생성 설정', { exact: true }).click();
     await page.getByLabel('시드 (비우면 무작위)').fill('12345');

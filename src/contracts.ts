@@ -1,3 +1,4 @@
+import type { PromptDocument } from './prompt.js';
 export interface Settings {
   comfyUrl: string;
   workerUrl: string;
@@ -47,6 +48,7 @@ export interface Job {
   cancelRequested: boolean;
 }
 export interface ImageInput {
+  promptDocument?: PromptDocument;
   profile: 'sd15' | 'sdxl' | 'illustrious'; checkpoint: string;
   prompt: string; negative: string; width: number; height: number;
   seed: number; steps: number; cfg: number;

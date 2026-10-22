@@ -1,10 +1,11 @@
 # rgdqwer
 
 ComfyUI를 연결해 사용하는 Windows 로컬 AI 스튜디오입니다.
-**현재 M1 이미지 생성 구현 버전입니다. 실제 모델/GPU 검증은 보류 중이며 영상·음성 생성은 아직 제공하지 않습니다.**
+**현재 M2 프롬프트·이미지 생성 구현 버전입니다. 실제 모델/GPU 검증은 보류 중이며 영상·음성 생성은 아직 제공하지 않습니다.**
 
 ## 현재 사용할 수 있는 기능
 
+- 간편·상세·전문가 프롬프트 편집, 한국어 키워드 변환, 프리셋·기록 저장/재사용
 - SD1.5 / SDXL / Illustrious 기본 Text to Image, 샘플러 진행률 및 작업별 취소
 - PNG 미리보기·다운로드, 작업 기록, 설정/시드 재사용, 재시작 후 기존 작업 추적
 - Electron 데스크톱 앱 및 동일한 React 브라우저 UI
@@ -24,7 +25,7 @@ Node.js **24 LTS**와 Python **3.12**를 권장합니다. Node 22.12+도 허용�
 git clone https://github.com/nalkarowndal/rgdqwer.git
 cd rgdqwer
 # 작업 브랜치가 원격에 있는 경우:
-git switch codex/m1-image-generation
+git switch codex/m2-prompt-studio
 npm ci
 npm run setup:desktop
 npm run build
@@ -63,12 +64,22 @@ Worker가 없어도 ComfyUI 연결 검사는 가능합니다.
 3. 프롬프트를 입력하고 필요하면 상세 설정에서 크기/스텝/CFG/시드를 조정한 후 생성합니다.
 4. 결과를 PNG로 다운로드하거나 **작업 기록 / 라이브러리**에서 설정을 재사용합니다.
 
-한 번에 이미지 1개를 생성합니다. 입력은 번역하지 않고 그대로 전달합니다.
+한 번에 이미지 1개를 생성합니다. 간편 모드는 지원 한국어 키워드를 변환하며, 최종 입력은 직접 편집할 수 있습니다.
+자유 문장 전체를 번역하지 않습니다. 정확한 원문 전달은 전문가 모드를 사용하세요.
 SD1.5는 512px, SDXL/Illustrious는 1024px가 기본이며 8GB 안정성은 실기 검증 전입니다.
 Anima·Krea·LoRA는 현재 기본 그래프에서 지원하지 않습니다.
 상태 미확인 시 **상태 추적 재개**로 기존 작업부터 확인합니다. 자동 재제출하지 않습니다.
 구버전 ComfyUI가 안전 취소를 지원하지 않으면 ComfyUI에서 직접 취소해야 합니다.
 자세한 제한과 복구 동작은 [이미지 시스템](docs/IMAGE_SYSTEM.md)을 참고하세요.
+
+### 프롬프트 스튜디오
+
+간편 모드에서 `고양이, 숲, 부드러운 조명`을 입력하거나 상세 모드의 항목을 채웁니다.
+최종 프롬프트를 직접 수정하면 모드/프로필을 바꿔도 그 값을 유지합니다.
+추천을 다시 쓰려면 **수정값 지우고 추천 재적용**을 선택합니다.
+프리셋을 저장하고 **이미지 스튜디오로 보내기**로 생성에 연결할 수 있습니다.
+미지원 한국어 구절은 원문 그대로 남기며, LLM이나 외부 번역 서비스를 사용하지 않습니다.
+미저장 초안은 새로고침 시 초기화됩니다. 자세한 동작은 [프롬프트 시스템](docs/PROMPT_SYSTEM.md)을 참고하세요.
 
 ### 웹 실행 / 개발
 
@@ -104,5 +115,5 @@ Linux에서 이미 설치된 Chromium을 사용하려면
 
 ## 다음 단계
 
-M0/M1의 Windows 데스크톱·실제 모델/GPU 검증 게이트를 완료한 후 M2 프롬프트 모드로 진행합니다. [전체 로드맵](docs/DEVELOPMENT_PHASES.md), [구조](docs/ARCHITECTURE.md),
+M0–M2의 Windows 데스크톱·실제 모델/GPU 검증 게이트를 유지합니다. 다음 구현 단계는 M3 Image to Prompt입니다. [전체 로드맵](docs/DEVELOPMENT_PHASES.md), [구조](docs/ARCHITECTURE.md),
 [요구사항 원문](docs/REQUIREMENTS.md), [보안](docs/SECURITY.md)을 참고하세요.

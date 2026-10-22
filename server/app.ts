@@ -1,3 +1,4 @@
+import { promptRecordInputSchema } from '../src/prompt.js';
 import Fastify, { type FastifyError } from 'fastify';
 import staticFiles from '@fastify/static';
 import { randomBytes, timingSafeEqual } from 'node:crypto';
@@ -12,7 +13,7 @@ import { join } from 'node:path';
 
 export async function createApp(options: { dataDir: string; uiDir?: string; devOrigin?: string }) {
   const store = await openStore(options.dataDir);
-  const app = Fastify({ logger: false, bodyLimit: 32768 });
+  const app = Fastify({ logger: false, bodyLimit: 131072 });
   const token = randomBytes(32).toString('hex');
   const generation = new GenerationManager(store, options.dataDir);
   generation.recover();
@@ -46,7 +47,7 @@ export async function createApp(options: { dataDir: string; uiDir?: string; devO
     reply.code(status).send({ error: status === 500 ? '로컬 처리에 실패했습니다. 저장 경로와 디스크 공간을 확인하세요.' : '요청 형식을 확인하세요.' });
   });
   app.get('/api/session', async () => ({ token }));
-  app.get('/api/health', async () => ({ status: 'ok', app: 'rgdqwer', milestone: 'M1' }));
+  app.get('/api/health', async () => ({ status: 'ok', app: 'rgdqwer', milestone: 'M2' }));
   app.get('/api/settings', async () => store.getSettings());
   app.put('/api/settings', async (request, reply) => {
     const result = settingsSchema.safeParse(request.body);
@@ -55,6 +56,17 @@ export async function createApp(options: { dataDir: string; uiDir?: string; devO
   });
   app.get('/api/engine/status', async () => probeComfy(store.getSettings().comfyUrl));
   app.get('/api/worker/status', async () => probeWorker(store.getSettings().workerUrl));
+  app.get('/api/prompt-records', async () => store.listPromptRecords());
+  app.post('/api/prompt-records', async (request, reply) => {
+    const parsed = promptRecordInputSchema.safeParse(request.body);
+    if (!parsed.success) return reply.code(400).send({ error: '프롬프트 문서·이름·최종 결과를 확인하세요.' });
+    try { return reply.code(201).send(store.savePromptRecord(parsed.data)); }
+    catch (error) { if (error instanceof Error && error.message === 'PRESET_LIMIT') return reply.code(409).send({ error: '프리셋은 최대 100개입니다. 기존 항목을 삭제한 뒤 저장하세요.' }); throw error; }
+  });
+  app.delete<{ Params: { id: string } }>('/api/prompt-records/:id', async (request, reply) => {
+    if (!store.deletePromptRecord(request.params.id)) return reply.code(404).send({ error: '프롬프트 기록을 찾을 수 없습니다.' });
+    return { deleted: true };
+  });
   app.get('/api/jobs', async () => store.listJobs());
   app.post('/api/jobs', async (request, reply) => {
     const parsed = imageInputSchema.safeParse(request.body);

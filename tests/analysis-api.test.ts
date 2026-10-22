@@ -47,3 +47,22 @@ it('rejects duplicate requests until active analysis completes and persists toke
   const token = await readFile(join(dataDir,'worker.token'),'utf8'); await app.close();
   const reopened = await createApp({dataDir}); cleanup.push(()=>reopened.close()); expect(await readFile(join(dataDir,'worker.token'),'utf8')).toBe(token);
 });
+it('accepts a valid multi-megabyte PNG within the advertised upload limit', async () => {
+  const { app, headers, worker } = await setup();
+  const { PNG } = await import('pngjs'); const { randomFillSync } = await import('node:crypto');
+  const png = new PNG({ width: 1024, height: 1024 }); randomFillSync(png.data);
+  const bytes = PNG.sync.write(png); expect(bytes.length).toBeLessThanOrEqual(5 * 1024 * 1024);
+  const response = await app.inject({ method: 'POST', url: '/api/analysis', headers, payload: { image: bytes.toString('base64'), model: 'both' } });
+  expect(response.statusCode).toBe(200);
+  expect(worker.calls).toHaveLength(1);
+});
+it('closes the app during active analysis without waiting for inference timeout', async () => {
+  const { app, headers, worker } = await setup(); worker.control.hold = true;
+  const address = await app.listen({ host: '127.0.0.1', port: 0 });
+  const request = fetch(`${address}/api/analysis`, { method: 'POST', headers: { authorization: headers.authorization, 'content-type': 'application/json' }, body: JSON.stringify(payload) }).then(async response => { await response.text(); return response.status; });
+  await expect.poll(() => worker.calls.length).toBe(1);
+  const closing = app.close();
+  const closedPromptly = await Promise.race([closing.then(() => true), new Promise<boolean>(resolve => setTimeout(() => resolve(false), 1000))]);
+  worker.release(); await request; await closing;
+  expect(closedPromptly).toBe(true);
+});

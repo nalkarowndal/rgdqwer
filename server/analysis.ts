@@ -4,7 +4,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { z } from 'zod';
 import { analysisModelSchema, analysisResultSchema, analysisStatusSchema } from '../src/analysis.js';
-const input = z.object({ image: z.string().min(4).max(6990508).regex(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/), model: analysisModelSchema }).strict();
+const input = z.object({ image: z.string().min(4).max(6990508).refine(value => value.length % 4 === 0 && /^[A-Za-z0-9+/]*={0,2}$/.test(value)), model: analysisModelSchema }).strict();
 const messages: Record<number,string> = {
   401: 'Worker 인증 실패: 화면의 토큰 파일 경로로 Worker를 실행하세요.',
   403: 'Worker 연결 설정을 확인하세요.', 409: 'Worker가 이미 분석 중입니다. 종료 후 다시 시도하세요.',
@@ -20,7 +20,7 @@ export async function registerAnalysisRoutes(app: FastifyInstance, dataDir: stri
   if (!/^[a-f0-9]{64}$/.test(secret)) throw new Error('Worker 토큰 파일이 손상되었습니다. 파일을 백업 후 다시 시작하세요.');
   let busy = false;
   const controllers = new Set<AbortController>();
-  app.addHook('onClose', async () => { for (const controller of controllers) controller.abort(); });
+  app.addHook('preClose', async () => { for (const controller of controllers) controller.abort(); });
   async function call(path: string, body?: unknown) {
     const controller = new AbortController(); controllers.add(controller);
     const timer = setTimeout(()=>controller.abort(),body ? 300000 : 5000);

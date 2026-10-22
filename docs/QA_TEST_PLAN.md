@@ -8,7 +8,7 @@
 | 검사 | 결과 | 범위 |
 |---|---|---|
 | 타입 / lint / build | 통과 | v0.4.0, 가상환경 vendor 코드는 lint 제외 |
-| Vitest | 67개 통과 | 기존58 + 분석 계약/잠금5 + 인증 프록시4 |
+| Vitest | 69개 통과 | 기존58 + 분석 계약/잠금5 + 인증 프록시6 (큰 PNG/종료 회귀 포함) |
 | Python | 14개 통과 | 기존5 + 보안/디코딩/동시 실행/전처리/adapter seam9 |
 | Playwright | 6개 통과 | 기존4 + 업로드/재분석/잠금/진행 중 수정/페이지 이동/실패 보존/생성 요청 + 미설치 안내 |
 | 실제 Node↔Python HTTP smoke | 통과 | token 인증, PNG 디코딩, 미설치503, 직접 미인증401 |
@@ -28,7 +28,12 @@ M3 초기 API/UI 테스트는 미구현 경로에서 실패 후 통과했다. Wo
 
 남은 M3 통과 조건: Windows에서 선택형 패키지 설치 및 로컬 Florence/WD14 실제 추론,
 잠금/수정 후 실제 ComfyUI 생성, CPU 시간/RAM/분석 품질 기록. 이후 GPU 경로를 별도 설계/검증한다.
-원격 Windows/Linux CI와 독립 리뷰는 PR 기록에 결과를 추가한다.
+2026-10-23 (Asia/Seoul) 후속: 독립 리뷰가 허용 크기 PNG의 base64 정규식 stack overflow를 발견했고,
+실제4.2MiB PNG API 회귀의 500→200으로 수정했다. 추가로 분석 중 앱 종료가 요청 종료를 기다리는 문제를
+preClose abort와 실제 HTTP 종료 회귀로 수정했다. 다른 주요 리뷰 결함/유예 minor는 없었다.
+수정 전 76e8406의 [Windows/Linux CI](https://github.com/nalkarowndal/rgdqwer/actions/runs/39762147368)는 모두 통과했다.
+수정 후 전체 타입/lint/build, Vitest69, Python14 및 Node→Python smoke를 다시 통과했다.
+최종 수정 커밋 CI 결과는 PR #3에 추가한다.
 
 ## M2 실행 기록 — 2026-10-22 (Asia/Seoul)
 

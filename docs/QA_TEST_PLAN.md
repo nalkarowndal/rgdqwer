@@ -33,7 +33,9 @@ M3 초기 API/UI 테스트는 미구현 경로에서 실패 후 통과했다. Wo
 preClose abort와 실제 HTTP 종료 회귀로 수정했다. 다른 주요 리뷰 결함/유예 minor는 없었다.
 수정 전 76e8406의 [Windows/Linux CI](https://github.com/nalkarowndal/rgdqwer/actions/runs/39762147368)는 모두 통과했다.
 수정 후 전체 타입/lint/build, Vitest69, Python14 및 Node→Python smoke를 다시 통과했다.
-최종 수정 커밋 CI 결과는 PR #3에 추가한다.
+최종 수정 코드 `782cc13`의 [Windows/Linux CI #39875093552](https://github.com/nalkarowndal/rgdqwer/actions/runs/39875093552)도 모두 통과했다.
+각 OS의69개 JS·14개 Python·6개 E2E와 실제 Worker HTTP smoke를 포함한다. 이후 커밋은 검증 기록 문서만 갱신했다.
+[독립 리뷰·수정·실행 결정 기록](superpowers/reviews/2026-10-23-m3-review.md).
 
 ## M2 실행 기록 — 2026-10-22 (Asia/Seoul)
 

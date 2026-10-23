@@ -1,7 +1,7 @@
 # rgdqwer
 
 ComfyUI를 연결해 사용하는 Windows 로컬 AI 스튜디오입니다.
-**현재 M4 Krea 2·이미지 분석·프롬프트·이미지 생성 구현 버전입니다. 실제 모델/GPU 검증은 보류 중이며 영상·음성 생성은 아직 제공하지 않습니다.**
+**현재 M5 영상·Krea 2·이미지 분석·프롬프트·이미지 생성 구현 버전입니다. FFmpeg 실제 변환·재생을 검증했으며, Wan/Krea/SD 실제 모델·GPU 실행은 실기 검증 전입니다. 음성은 후속 단계입니다.**
 
 ## 현재 사용할 수 있는 기능
 
@@ -124,5 +124,11 @@ Linux에서 이미 설치된 Chromium을 사용하려면
 
 ## 다음 단계
 
-M0–M4의 Windows 데스크톱·실제 모델/GPU 검증 게이트를 유지합니다. 다음 구현 단계는 M5 영상 스튜디오입니다. [전체 로드맵](docs/DEVELOPMENT_PHASES.md), [구조](docs/ARCHITECTURE.md),
+M0–M5의 Windows 데스크톱·실제 모델/GPU 검증 게이트를 유지합니다. 다음 구현 단계는 M6 음성 스튜디오입니다. [전체 로드맵](docs/DEVELOPMENT_PHASES.md), [구조](docs/ARCHITECTURE.md),
 [요구사항 원문](docs/REQUIREMENTS.md), [보안](docs/SECURITY.md)을 참고하세요.
+
+## 영상 스튜디오 (M5)
+
+Wan 2.2 TI2V 5B의 T2V/I2V와 실험적 V2V, FFmpeg MP4 변환·프레임 추출을 제공합니다. FFmpeg와 ffprobe를 직접 설치해 PATH에 등록하세요. 앱에서 자동 설치하지 않습니다. 원본 PNG/MP4 업로드, 영상 프롬프트 8개 항목, 프레임/FPS/크기 조절, MP4 재생·다운로드, 설정 재사용을 지원합니다.
+
+실제 CPU 변환·보간·프레임 추출은 합성 테스트 클립으로 검증했습니다. Wan 영상 생성과 8GB GPU 안정성은 검증 전입니다. [설치·모델·제한·검증 가이드](docs/VIDEO_SYSTEM.md)를 확인하세요.

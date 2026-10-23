@@ -23,8 +23,16 @@ export async function api<T>(path: string, body?: unknown, method?: 'POST' | 'PU
 }
 export async function artifactBlob(id: string): Promise<Blob> {
   const response = await fetch(`/api/artifacts/${encodeURIComponent(id)}`, {
-    headers: { Authorization: `Bearer ${await token()}` }, signal: AbortSignal.timeout(15000),
+    headers: { Authorization: `Bearer ${await token()}` }, signal: AbortSignal.timeout(60000),
   });
   if (!response.ok) throw new Error('결과 파일을 읽지 못했습니다. 파일이 이동되거나 삭제되었는지 확인하세요.');
   return response.blob();
+}
+export async function uploadMedia(kind:'image'|'video',file:File) {
+ const response=await fetch(`/api/media/${kind}`,{method:'POST',headers:{Authorization:`Bearer ${await token()}`,'Content-Type':'application/octet-stream'},body:file,signal:AbortSignal.timeout(300000)});
+ const result=await response.json();if(!response.ok){if(response.status===401)session=undefined;throw new ApiError(result.error??'업로드 실패');}return result as import('./video').MediaInput;
+}
+export async function sourceBlob(id:string):Promise<Blob> {
+ const response=await fetch(`/api/media/${encodeURIComponent(id)}/file`,{headers:{Authorization:`Bearer ${await token()}`},signal:AbortSignal.timeout(60000)});
+ if(!response.ok)throw new Error('원본 파일을 읽지 못했습니다. 다시 업로드하세요.');return response.blob();
 }

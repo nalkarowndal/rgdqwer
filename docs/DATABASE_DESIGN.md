@@ -38,3 +38,7 @@ value는 PromptRecord 전체 snapshot이며 문서 버전과 변환 엔진 버�
 ## M4 확장
 
 스키마 v3 유지. jobs.settings_json의 input은 SD ImageInput 또는 KreaInput union이다. Krea도 kind=image이며 workflowVersion=krea2-v1. 선택형 effectivePrompt는 엔진 확장 후 실제 문장이다. 기존 job은 새 필드 없이 읽힌다. Krea 원문/최종입력/모델3종/LoRA/확장방식은 job JSON에 보존하고 SD prompt_records에는 삽입하지 않는다.
+
+## M5 확장 · user_version 4
+
+media_inputs(id TEXT PRIMARY KEY,value TEXT NOT NULL)에 서버UUID 원본메타데이터를 보관한다. 파일명은 UUID+고정확장자. Job JSON의 VideoInput.sourceId가 참조하면 삭제를거절한다. Artifact media_type에video/mp4 추가, JSON에 optional frames/fps/duration. 기존 v3 PNG자료호환. v3앱의상위버전거절로downgrade손상방지.

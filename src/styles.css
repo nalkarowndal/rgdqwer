@@ -43,3 +43,5 @@
 .krea-memory dt { color: var(--muted); }
 .krea-memory dd { margin: 0; overflow-wrap: anywhere; }
 .image-result .field-help { overflow-wrap: anywhere; }
+.source-preview { width:100%; max-height:240px; object-fit:contain; border-radius:12px; background:#0b111b; }
+video.generated-image { width:100%; max-height:560px; background:#0b111b; }

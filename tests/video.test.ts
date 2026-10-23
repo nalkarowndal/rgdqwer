@@ -35,3 +35,8 @@ describe('video contract and native Wan graph',()=>{
   expect(result.text).toContain('cat'); expect(result.text).toContain('Preserve'); expect(result.text).toContain(fields.movement); expect(result.warnings.length).toBeGreaterThan(0);
  });
 });
+
+it('rejects misleading dynamic codec labels without the actual h264 option',()=>{
+ const nodes=videoNodes();nodes.SaveVideo={input:{required:{format:['COMFY_DYNAMICCOMBO_V3',{options:[{key:'mp4',inputs:{required:{codec:['COMFY_DYNAMICCOMBO_V3',{tooltip:'h264 unavailable',options:[{key:'av1',inputs:{}}]}]}}}]}]}}};
+ expect(inspectVideo(nodes).saveDialect).toBeNull();
+});

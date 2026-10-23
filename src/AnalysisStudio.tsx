@@ -6,7 +6,7 @@ import { analysisFields, analysisLabels, createAnalysisDraft, mergeAnalysis, toP
 import { compilePrompt, profiles, type PromptProfile } from './prompt';
 import type { PromptDraft } from './PromptStudio';
 
-export function AnalysisStudio({ send, active }: { send: (draft: PromptDraft, target: 'image'|'prompt'|'krea') => void; active: boolean }) {
+export function AnalysisStudio({ send, active }: { send: (draft: PromptDraft, target: 'image'|'prompt'|'krea'|'video') => void; active: boolean }) {
   const [draft,setDraft] = useState(createAnalysisDraft);
   const [profile,setProfile] = useState<PromptProfile>('sd15');
   const [model,setModel] = useState<AnalysisModel>('florence');
@@ -89,7 +89,7 @@ export function AnalysisStudio({ send, active }: { send: (draft: PromptDraft, ta
         <label className="checkbox-label"><input type="checkbox" checked={draft.includeOcr} onChange={e=>setDraft(value=>({...value,includeOcr:e.target.checked}))}/>OCR 텍스트를 프롬프트에 포함</label>
         <label htmlFor="analysis-output">재구성 프롬프트</label><textarea id="analysis-output" rows={5} readOnly value={compiled.positive}/><p className="field-help">{compiled.positive.length} / 8,000자 · 최종 문장은 보내기 후 프롬프트 편집기에서 직접 수정할 수 있습니다.</p>
         {compiled.warnings.map(message=><p className="notice" key={message}>{message}</p>)}
-        <div className="form-actions"><button className="primary-button" disabled={!compiled.valid || busy} onClick={()=>send({profile,document},'image')}>이미지 스튜디오에 적용 <ArrowRight size={16}/></button><button className="secondary-button" disabled={!compiled.valid || busy} onClick={()=>send({profile,document},'prompt')}>프롬프트 스튜디오에 적용</button><button className="secondary-button" disabled={!compiled.valid || busy} onClick={()=>send({profile,document},'krea')}>Krea 2 스튜디오에 적용</button></div>
+        <div className="form-actions"><button className="primary-button" disabled={!compiled.valid || busy} onClick={()=>send({profile,document},'image')}>이미지 스튜디오에 적용 <ArrowRight size={16}/></button><button className="secondary-button" disabled={!compiled.valid || busy} onClick={()=>send({profile,document},'prompt')}>프롬프트 스튜디오에 적용</button><button className="secondary-button" disabled={!compiled.valid || busy} onClick={()=>send({profile,document},'krea')}>Krea 2 스튜디오에 적용</button><button className="secondary-button" disabled={!compiled.valid || busy} onClick={()=>send({profile,document},'video')}>영상 스튜디오에 적용</button></div>
         <p className="field-help">보내면 대상 화면의 현재 프롬프트를 바꿉니다. 생성은 해당 화면에서 실행하세요. 이미지·분석 초안은 앱 내 이동 시 유지되며 새로고침하면 사라집니다. 필요한 문장은 프롬프트 스튜디오에서 프리셋으로 저장하세요.</p>
       </section>
     </div>

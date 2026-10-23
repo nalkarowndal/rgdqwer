@@ -13,7 +13,11 @@ export function inspectVideo(raw:unknown):VideoInventory {
  let saveDialect:VideoInventory['saveDialect']=null;
  if(format?.[0]==='COMFY_DYNAMICCOMBO_V3') {
   const config=z.object({options:z.array(z.object({key:z.string(),inputs:z.unknown()}))}).safeParse(format[1]);
-  if(config.success&&config.data.options.some(o=>o.key==='mp4'&&JSON.stringify(o.inputs).includes('h264'))) saveDialect='dynamic';
+  if(config.success) {
+   const mp4=config.data.options.find(o=>o.key==='mp4');
+   const nested=z.object({required:z.object({codec:z.tuple([z.literal('COMFY_DYNAMICCOMBO_V3'),z.object({options:z.array(z.object({key:z.string()}))})]).rest(z.unknown())})}).safeParse(mp4?.inputs);
+   if(nested.success&&nested.data.required.codec[1].options.some(o=>o.key==='h264'))saveDialect='dynamic';
+  }
  } else if(options('SaveVideo','format').includes('mp4')&&options('SaveVideo','codec').includes('h264')) saveDialect='legacy';
  if(!saveDialect) issues.push('SaveVideo MP4/H264 형식 지원 필요');
  return {diffusionModels:options('UNETLoader','unet_name'),textEncoders:options('CLIPLoader','clip_name'),vaes:options('VAELoader','vae_name'),issues,i2vIssues:missing(['LoadImage']),v2vIssues:missing(['LoadVideo','GetVideoComponents','VAEEncode']),cpuSupported:options('CLIPLoader','device').includes('cpu'),saveDialect};

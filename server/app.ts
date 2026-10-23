@@ -1,3 +1,4 @@
+import { registerAnalysisRoutes } from './analysis.js';
 import { promptRecordInputSchema } from '../src/prompt.js';
 import Fastify, { type FastifyError } from 'fastify';
 import staticFiles from '@fastify/static';
@@ -47,7 +48,7 @@ export async function createApp(options: { dataDir: string; uiDir?: string; devO
     reply.code(status).send({ error: status === 500 ? '로컬 처리에 실패했습니다. 저장 경로와 디스크 공간을 확인하세요.' : '요청 형식을 확인하세요.' });
   });
   app.get('/api/session', async () => ({ token }));
-  app.get('/api/health', async () => ({ status: 'ok', app: 'rgdqwer', milestone: 'M2' }));
+  app.get('/api/health', async () => ({ status: 'ok', app: 'rgdqwer', milestone: 'M3' }));
   app.get('/api/settings', async () => store.getSettings());
   app.put('/api/settings', async (request, reply) => {
     const result = settingsSchema.safeParse(request.body);
@@ -86,6 +87,7 @@ export async function createApp(options: { dataDir: string; uiDir?: string; devO
     try { await access(path); } catch { return reply.code(404).send({ error: '결과 파일이 이동되거나 삭제되었습니다.' }); }
     return reply.type('image/png').header('Content-Disposition', `inline; filename="${artifact.fileName}"`).send(createReadStream(path));
   });
+  await registerAnalysisRoutes(app, options.dataDir, () => store.getSettings().workerUrl);
   if (options.uiDir) await app.register(staticFiles, { root: options.uiDir, index: 'index.html' });
   return app;
 }

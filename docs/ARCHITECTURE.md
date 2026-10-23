@@ -17,7 +17,8 @@ Electron이 Node 제어 서버의 생명주기를 관리하고 OS 사용자 데�
 ComfyUI/Worker는 사용자가 별도로 실행한다. 자동 프로세스 관리와 설치는 후속 단계다.
 
 `server/settings.ts`는 입력 검증, `store.ts`는 영속성, `comfy.ts`는 외부 로컬 서비스 어댑터,
-`app.ts`는 HTTP 계약, `generation/`은 그래프·ComfyUI HTTP/WS·작업 생명주기·PNG 검증을 담당한다. Python Worker에 GPU 연산 의존성은 아직 없다.
+`app.ts`는 HTTP 계약, `generation/`은 그래프·ComfyUI HTTP/WS·작업 생명주기·PNG 검증을 담당한다. `server/analysis.ts`는 인증된 이미지 분석 프록시, `worker/analysis.py`는 입력/동시 실행 제한,
+`worker/adapters.py`는 선택형 Florence/WD14 CPU 추론을 담당한다. GPU 추론 경로는 아직 없다.
 
 ## API 비교 및 선택
 
@@ -45,3 +46,6 @@ Windows/RTX 호환성까지 검증했다는 의미는 아니다.
 M2의 `src/prompt.ts`는 순수한 문서 스키마/규칙 compiler이며 UI와 서버가 같은 계약을 사용한다.
 PromptEditor는 제어형 입력이고 App 부모의 페이지별 초안을 사용한다. PromptStudio는 인증된 snapshot
 저장/조회/삭제를 제공한다. 세대별 LLM/영상 adapter는 아직 실행 구현하지 않았다.
+
+M3 AnalysisStudio는 페이지 이동에도 mounted 상태를 유지한다. 순수 analysis.ts에서 잠금/진행 중 수정값을 병합하고 M2 최종 문서로 변환한다.
+모델 폴더는 Worker CLI, 인증 파일은 Node 데이터 폴더에 속한다. 업로드와 분석 원문은 메모리에서만 유지한다.

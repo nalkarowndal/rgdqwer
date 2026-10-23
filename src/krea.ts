@@ -44,3 +44,13 @@ export function kreaMemoryNotes(engine: EngineStatus): string[] {
   notes.push('공식 FP8 파일은 확산 모델 약 13.1GB + 인코더 약 5.2GB + VAE입니다. 파일 크기는 실행 VRAM 요구량과 다릅니다.');
   return notes;
 }
+
+export function kreaIssues(input: KreaInput, status: KreaInventory): string[] {
+  const issues=[...status.issues];
+  for(const [name,list] of [[input.checkpoint,status.diffusionModels],[input.textEncoder,status.textEncoders],[input.vae,status.vaes]] as const)
+    if(!list.includes(name)) issues.push(`선택한 모델 파일 없음: ${name}`);
+  if(input.profile==='krea-raw') issues.push(...status.rawIssues);
+  if(input.enhancer==='engine') issues.push(...status.enhancerIssues);
+  if(input.lora) {issues.push(...status.loraIssues); if(!status.loras.includes(input.lora.name)) issues.push(`선택한 LoRA 파일 없음: ${input.lora.name}`);}
+  return issues;
+}

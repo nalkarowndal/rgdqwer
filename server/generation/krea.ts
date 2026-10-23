@@ -19,15 +19,7 @@ export function inspectKrea(raw: unknown): KreaInventory {
   return {diffusionModels:options('UNETLoader','unet_name'),textEncoders:options('CLIPLoader','clip_name'),vaes:options('VAELoader','vae_name'),loras:options('LoraLoaderModelOnly','lora_name'),
     issues,enhancerIssues:missing(['TextGenerate']),rawIssues:missing(['ModelSamplingFlux']),loraIssues:missing(['LoraLoaderModelOnly','StringConcatenate'])};
 }
-export function kreaIssues(input: KreaInput, status: KreaInventory): string[] {
-  const issues=[...status.issues];
-  for(const [name,list] of [[input.checkpoint,status.diffusionModels],[input.textEncoder,status.textEncoders],[input.vae,status.vaes]] as const)
-    if(!list.includes(name)) issues.push(`선택한 모델 파일 없음: ${name}`);
-  if(input.profile==='krea-raw') issues.push(...status.rawIssues);
-  if(input.enhancer==='engine') issues.push(...status.enhancerIssues);
-  if(input.lora) {issues.push(...status.loraIssues); if(!status.loras.includes(input.lora.name)) issues.push(`선택한 LoRA 파일 없음: ${input.lora.name}`);}
-  return issues;
-}
+export { kreaIssues } from '../../src/krea.js';
 export function buildKreaWorkflow(input: KreaInput,id: string): Workflow {
   const raw=input.profile==='krea-raw';
   const graph:Workflow={

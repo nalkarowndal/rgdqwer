@@ -1,14 +1,15 @@
 import { createServer } from 'node:http';
 import { WebSocketServer } from 'ws';
 import { PNG } from 'pngjs';
-export async function simulatedComfy() {
+export async function simulatedComfy(options: { extraNodes?: Record<string, unknown>; width?: number; height?: number } = {}) {
   const calls: { path: string; body: Record<string, unknown> }[] = [];
   let id = ''; let history: Record<string, unknown> = {}; let running = false;
   let releaseCancel = () => {};
   const control = { autoFinish: true, corruptImage: false, externalBusy: false, rejectPrompt: false, cancelSupported: true, holdResponse: false, rejectHistory: false, wrongOutput: false, holdCancelResponse: false, outputBytes: null as Buffer | null };
-  const png = new PNG({ width: 512, height: 512 }); png.data.fill(255);
+  const png = new PNG({ width: options.width ?? 512, height: options.height ?? 512 }); png.data.fill(255);
   const bytes = PNG.sync.write(png);
-  const nodes = Object.fromEntries(['KSampler','CheckpointLoaderSimple','EmptyLatentImage','CLIPTextEncode','VAEDecode','SaveImage'].map(name => [name, { input: { required: name === 'CheckpointLoaderSimple' ? { ckpt_name: [['test.safetensors']] } : name === 'KSampler' ? { sampler_name: [['euler']], scheduler: [['normal']] } : {} } }]));
+  const nodes: Record<string, unknown> = Object.fromEntries(['KSampler','CheckpointLoaderSimple','EmptyLatentImage','CLIPTextEncode','VAEDecode','SaveImage'].map(name => [name, { input: { required: name === 'CheckpointLoaderSimple' ? { ckpt_name: [['test.safetensors']] } : name === 'KSampler' ? { sampler_name: [['euler']], scheduler: [['normal']] } : {} } }]));
+  Object.assign(nodes, options.extraNodes);
   const server = createServer(async (req, res) => {
     const path = new URL(req.url!, 'http://localhost').pathname;
     let body: Record<string, unknown> = {};
@@ -48,7 +49,7 @@ export async function simulatedComfy() {
     history = { [id]: { status: { completed: true, status_str: 'success', messages: [] }, outputs: { '9': { images: [{ filename: control.wrongOutput ? '../foreign.png' : `${id}_00001_.png`, subfolder: 'rgdqwer', type: 'output' }] } } } };
   }
   await new Promise<void>((resolve, reject) => { server.once('error', reject); server.listen(0, '127.0.0.1', resolve); });
-  return { url: `http://127.0.0.1:${(server.address() as { port: number }).port}`, calls, control, progress, finish,
+  return { url: `http://127.0.0.1:${(server.address() as { port: number }).port}`, calls, control, progress, finish, nodes,
     releaseCancel: () => releaseCancel(),
     forget: () => { running = false; history = {}; },
     close: async () => { for (const client of ws.clients) client.terminate(); ws.close(); server.closeAllConnections(); await new Promise<void>(resolve => server.close(() => resolve())); } };

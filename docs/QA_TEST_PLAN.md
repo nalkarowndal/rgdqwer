@@ -8,19 +8,21 @@
 | 검증 | 결과 | 범위 |
 |---|---|---|
 | 타입 / lint / build | 통과 | v0.6.0 |
-| Vitest | 94개 통과 | 기존82 + 영상 계약5/실제미디어3/HTTP·lifecycle4 |
+| Vitest | 99개 통과 | 기존82 + 영상 계약5/실제미디어8/HTTP·lifecycle4 |
 | Python | 14개 통과 | 기존 분석 어댑터 회귀 |
 | Playwright | 10개 통과 | 기존8 + 실제 MP4 업로드/변환/재생/다운로드/재사용/추출/390px + 분석 전달 |
 | 실제 FFmpeg | 통과 | 합성 testsrc2 MP4, Lanczos 확대/minterpolate/PNG추출, ffprobe와 전체디코드 |
 | Node/Python HTTP smoke | 통과 | 실제 로컬서버, 세션인증, PNG디코드, 모델없음503 |
 | Electron Linux smoke | 통과 | sandbox/contextIsolation true, nodeIntegration false; 테스트전용Linux sandbox override |
 | npm audit production | 0건 | 실제 모델/FFmpeg 외부 설치파일은 별도 |
-| Windows/Linux CI | 대기 | PR 생성 후 확인 |
+| Windows/Linux CI | 초기 커밋 양쪽 통과 | 482dd1a, run39945655662. 리뷰 수정 커밋 확인 중 |
 | 실제 Wan/Krea/SD GPU 추론 | 미검증 | Comfy/모델/GPU가 없는 환경; 모의 엔진은 그래프/상태검증만 |
 
 영상 검증물은 **합성 테스트 패턴**이며 AI 영상으로 표시하지 않는다. M5의 실제 변환/MP4재생 경로를 검증했다. Wan AI V2V는 실험적이며 품질/시간적일관성/8GB VRAM은 별도실기게이트. 화면: `docs/qa/m5-video.png`, `m5-video-mobile.png`.
 
 RED→GREEN: 영상계약/미디어모듈 부재, 업로드API404, jobs400, 전용UI부재를 확인 후 구현. 연속업로드409는응답전cleanup완료로수정했고, dynamic codec의설명문자열오인검사는실제nested옵션검사로수정했다. 제한sandbox의자식Node eval무출력은network권한이포함된표준테스트환경에서재검증했다. 존재하지않는smoke.mjs호출은실제Node HTTP스크립트로대체했다.
+
+2026-10-24 독립리뷰 Important3건(프레임해상도변경,오디오/컨테이너길이,저FPS출력/V2V패딩)을 실제파일 RED→GREEN으로 수정했다. [리뷰와 판단 기록](superpowers/reviews/2026-10-24-m5-review.md). 새Minor없음.
 
 ## M4 실행 기록 — 2026-10-23
 

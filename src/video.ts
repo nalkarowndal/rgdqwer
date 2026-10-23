@@ -27,7 +27,7 @@ export function compileVideoPrompt(value:VideoInput['promptFields'],mode:VideoIn
  return {text,warnings:/[가-힣]/.test(text)?['사전에 없는 한국어는 원문을 유지합니다. 번역 모델이 아닌 제한된 키워드 변환입니다.']:[]};
 }
 export interface VideoInventory {diffusionModels:string[];textEncoders:string[];vaes:string[];issues:string[];i2vIssues:string[];v2vIssues:string[];cpuSupported:boolean;saveDialect:'dynamic'|'legacy'|null}
-export interface MediaInput {id:string;kind:'image'|'video';fileName:string;width:number;height:number;frames?:number;fps?:number;duration?:number;createdAt:string}
+export interface MediaInput {id:string;kind:'image'|'video';fileName:string;width:number;height:number;frames?:number;fps?:number;duration?:number;presentationDuration?:number;hasAudio?:boolean;createdAt:string}
 export function videoIssues(input:VideoInput,status:VideoInventory) {
  const issues=[...status.issues,...(input.mode==='i2v'?status.i2vIssues:input.mode==='v2v'?status.v2vIssues:[])];
  for(const [name,list] of [[input.checkpoint,status.diffusionModels],[input.textEncoder,status.textEncoders],[input.vae,status.vaes]] as const) if(!list.includes(name)) issues.push(`선택한 모델 파일 없음: ${name}`);

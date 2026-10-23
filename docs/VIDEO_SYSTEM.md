@@ -16,7 +16,7 @@ ComfyUI 최신 버전을 별도로 실행한다. 아래 파일을 설치하고 �
 | umt5_xxl_fp8_e4m3fn_scaled.safetensors | models/text_encoders |
 | wan2.2_vae.safetensors | models/vae |
 
-T2V는 Wan22ImageToVideoLatent, I2V는 PNG LoadImage/start_image를 추가한다. 20steps/CFG5/uni_pc/simple, ModelSamplingSD3 shift8, 640×384/33frames/24FPS가 초기값이다. 크기는32배수, 프레임5..121의4n+1, 최대1280×704픽셀, FPS1..30. CPU 인코더 옵션은 실제 CLIPLoader device=cpu를 사용한다. `--lowvram` 등의 Comfy 실행 옵션은 사용자가 엔진 환경에 맞춰 설정한다. 앱은 서버 실행 플래그를 변경하지 않는다.
+T2V는 Wan22ImageToVideoLatent, I2V는 PNG LoadImage/start_image를 추가한다. 20steps/CFG5/uni_pc/simple, ModelSamplingSD3 shift8, 640×384/33frames/24FPS가 초기값이다. 크기는32배수, 프레임5..121의4n+1, 최대1280×704픽셀, FPS1..30. 저FPS에서는 출력이30초를넘을수있고최대121초지만원본MP4의30초제한은유지한다. CPU 인코더 옵션은 실제 CLIPLoader device=cpu를 사용한다. `--lowvram` 등의 Comfy 실행 옵션은 사용자가 엔진 환경에 맞춰 설정한다. 앱은 서버 실행 플래그를 변경하지 않는다.
 
 AI V2V는 **실험적**이다. 업로드한 MP4를 크기/FPS/프레임 수로 정규화한 뒤 LoadVideo/GetVideoComponents/VAEEncode→KSampler(denoise .05..95)로 재생성한다. 공식5B 템플릿의 T2V/I2V와 구별한다. 실제 품질·시간적 일관성·GPU 추론은 미검증이다. Wan 출력은 무음이며, 오디오 보존은 FFmpeg 변환 모드에서만 선택할 수 있다.
 
@@ -32,7 +32,7 @@ Comfy 문서는 native offloading의8GB 가능성을 안내하지만 독립 Wan 
 
 로컬 bearer 인증, Host/Origin 검사 유지. PNG≤5MiB/4096px/16MP, MP4≤32MiB/H264/yuv420p/최대30초/60FPS/1920×1080픽셀. 서버UUID만 경로에 사용한다. 원본은 dataDir/inputs, 출력은 outputs, 메타데이터는 SQLite v4. 이전이미지 기록은 호환되며 이전v3앱은 새DB를 열지 않는다. 작업이 참조하는 원본은 삭제 API로 지울 수 없다. 추출 PNG는 최대300개이므로 디스크 여유 공간을 확인한다.
 
-FFmpeg는 shell=false, MOV demux 강제, protocol file/pipe만, external data reference/absolute path비활성화, 스레드/시간/프로세스출력/최대할당 제한. 헤더 크기 검사 후 전체디코드와실제프레임수 검증. MP4출력≤64MiB 및 요청한크기/FPS/프레임 일치 후 atomic rename. 취소/종료 시 subprocess종료와부분파일정리. 여러미디어검사는동시실행하지않는다.
+FFmpeg는 shell=false, MOV demux 강제, protocol file/pipe만, external data reference/absolute path비활성화, 스레드/시간/프로세스출력/최대할당 제한. 디코더 max_pixels 제한과 모든 디코드 프레임의 크기 일치 검사, 영상·오디오 전체디코드와실제프레임수 검증. 영상·오디오·컨테이너 시간축 모두 원본30초 제한을 적용한다. 출력은 원본제한과 분리해 요청한 frames/fps 재생 길이(0.1초 허용오차)와 오디오 포함 정책을 검사한다. MP4출력≤64MiB 및 요청한크기/FPS/프레임 일치 후 atomic rename. 취소/종료 시 subprocess종료와부분파일정리. 여러미디어검사는동시실행하지않는다.
 
 Comfy input에 `rgdqwer_<job UUID>.png|mp4`가 남는다. 앱은 이 폴더를 직접 삭제하지 않는다. 완료·실패·취소가 확정되고 해당 작업을 Comfy에서 재실행할 필요가 없을 때 사용자가 해당 파일만 수동 정리할 수 있다. 앱 inputs 원본은 따로 보존되므로 재사용 시 새 UUID로 다시 업로드한다. 크래시의 고아 tmp 파일은 앱/엔진이 정지한 상태에서 수동 정리한다.
 

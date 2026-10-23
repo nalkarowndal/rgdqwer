@@ -56,6 +56,6 @@ export interface ImageInput {
   prompt: string; negative: string; width: number; height: number;
   seed: number; steps: number; cfg: number;
 }
-export interface Artifact { id: string; fileName: string; width: number; height: number; mediaType?: 'image/png' | 'video/mp4'; frames?: number; fps?: number; duration?: number }
+export interface Artifact { id: string; fileName: string; width: number; height: number; mediaType?: 'image/png' | 'video/mp4'; frames?: number; fps?: number; duration?: number; presentationDuration?: number; hasAudio?: boolean }
 
 export type GenerationInput = ImageInput | KreaInput | VideoInput;

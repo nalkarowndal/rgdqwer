@@ -27,8 +27,8 @@ export async function registerMediaRoutes(app:FastifyInstance,dataDir:string,sto
    } else {await writeFile(temp,bytes,{mode:0o600,flag:'wx'});metadata=await probeVideo(temp,stopped.signal);}
    const media:MediaInput={id,kind,fileName,...metadata,createdAt:new Date().toISOString()};
    await rename(temp,file);try{store.putMedia(media);}catch(error){await rm(file,{force:true});throw error;}
-   return reply.code(201).send(media);
-  }catch(error){return reply.code(400).send({error:error instanceof Error?error.message:'미디어 검사 실패'});}
+   reply.code(201);return media;
+  }catch(error){reply.code(400);return {error:error instanceof Error?error.message:'미디어 검사 실패'};}
   finally{await rm(temp,{force:true});busy=false;}
  });
  app.get<{Params:{id:string}}>('/api/media/:id',async(request,reply)=>store.getMedia(request.params.id)??reply.code(404).send({error:'원본 파일이 없습니다.'}));

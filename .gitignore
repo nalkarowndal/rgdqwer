@@ -11,3 +11,6 @@ playwright-report/
 .worktrees/
 *.log
 .env
+
+.venv-chatterbox/
+.venv-rvc/

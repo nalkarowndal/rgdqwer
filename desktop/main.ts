@@ -1,3 +1,4 @@
+import { allowAudioPermission } from './permissions.js';
 import { app, BrowserWindow, dialog, session } from 'electron';
 import { resolve } from 'node:path';
 import { createApp } from '../server/app.js';
@@ -12,8 +13,8 @@ if (!app.requestSingleInstanceLock()) {
   void app.whenReady().then(async () => {
     server = await createApp({ dataDir: resolve(app.getPath('userData'), 'studio'), uiDir: resolve(app.getAppPath(), 'dist/ui') });
     const address = await server.listen({ host: '127.0.0.1', port: 0 });
-    session.defaultSession.setPermissionRequestHandler((_contents, _permission, callback) => callback(false));
-    session.defaultSession.setPermissionCheckHandler(() => false);
+    session.defaultSession.setPermissionRequestHandler((contents, permission, callback, details) => callback(allowAudioPermission({permission,origin:details.requestingUrl,appOrigin:address,sameContents:!!window&&contents===window.webContents,mainFrame:details.isMainFrame,mediaTypes:'mediaTypes' in details ? details.mediaTypes??[]:[]})));
+    session.defaultSession.setPermissionCheckHandler((contents,permission,origin,details)=>allowAudioPermission({permission,origin,appOrigin:address,sameContents:!!window&&contents===window.webContents,mainFrame:details.isMainFrame,mediaTypes:details.mediaType?[details.mediaType]:[]}));
     window = new BrowserWindow({
       width: 1420, height: 1000, minWidth: 760, minHeight: 620,
       title: 'rgdqwer · 로컬 AI 스튜디오', backgroundColor: '#f6f7f8',

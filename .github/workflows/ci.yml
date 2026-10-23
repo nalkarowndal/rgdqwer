@@ -29,7 +29,7 @@ jobs:
       - run: npm run check
       - run: npm run build
       - run: python -m pip install -r worker/requirements-lock.txt
-      - run: python -m pytest worker/tests -q
+      - run: python -m pytest worker/tests voice_worker/tests -q
       - run: node scripts/smoke-analysis.mjs
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e

@@ -1,3 +1,5 @@
+import { VoiceStudio,defaultVoiceInput } from './VoiceStudio';
+import { isVoiceInput } from './voice';
 import { VideoStudio, initialVideoDraft } from './VideoStudio';
 import { isVideoInput } from './video';
 import { KreaStudio, initialKreaDraft } from './KreaStudio';
@@ -38,12 +40,14 @@ export default function App() {
   const [engine, setEngine] = useState<EngineStatus>();
   const [worker, setWorker] = useState<WorkerStatus>();
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [voiceDraft,setVoiceDraft]=useState(defaultVoiceInput);
   const [videoDraft,setVideoDraft]=useState(initialVideoDraft);
   const [kreaDraft, setKreaDraft] = useState(initialKreaDraft);
   const [imageDraft, setImageDraft] = useState(initialDraft);
   const refreshJobs = useCallback(async () => { setJobs(await api<Job[]>('jobs')); }, []);
   const [promptDraft, setPromptDraft] = useState<PromptDraft>({ profile: 'sd15', document: createPromptDocument() });
   function reuse(input: GenerationInput) {
+    if (isVoiceInput(input)) {setVoiceDraft(input);setPage('voice');return;}
     if (isVideoInput(input)) { setVideoDraft({...input,seed:String(input.seed)}); setPage('video'); return; }
     if (isKreaInput(input)) { setKreaDraft({ ...input, seed: String(input.seed) }); setPage('krea'); return; }
     setImageDraft({ ...input, seed: String(input.seed), promptDocument: input.promptDocument ? { ...input.promptDocument, editedPositive: input.prompt, editedNegative: input.negative } : documentFromRaw(input.prompt, input.negative) }); setPage('image');
@@ -105,7 +109,7 @@ export default function App() {
       <div className="sidebar-bottom">
         <div className="local-note"><ShieldCheck size={17} /><span>로컬에서, 나만의 작업</span></div>
         <p>모델과 파일을 내 컴퓨터에서 관리합니다.</p>
-        <div className="version">v0.6.0 <span>M5 · 영상</span></div>
+        <div className="version">v0.7.0 <span>M6 · 음성</span></div>
       </div>
     </aside>
     <div className="workspace">
@@ -124,7 +128,7 @@ export default function App() {
           <div className="page-heading"><div><p className="eyebrow">YOUR LOCAL CREATIVE SPACE</p>
             <h1>당신의 아이디어,<br className="mobile-break" /> 당신의 컴퓨터에서.</h1>
             <p className="subtitle">이미지부터 영상, 목소리까지. 나만의 AI 작업 공간을 준비하세요.</p>
-          </div><span className="milestone-tag">M5 VIDEO STUDIO</span></div>
+          </div><span className="milestone-tag">M6 VOICE STUDIO</span></div>
           <section className="onboarding">
             <div className="onboarding-copy"><span className="hero-label"><Plug size={14} /> 처음 시작하시나요?</span>
               <h2>ComfyUI를 연결하고<br />창작할 준비를 시작하세요.</h2>
@@ -162,6 +166,7 @@ export default function App() {
           </section>
         </> : page === 'settings' ? <SettingsPanel settings={settings} onSaved={value => { setSettings(value); void refresh(); }} engine={engine} busy={busy} refresh={refresh} />
           : page === 'image' ? <ImageStudio engine={engine} jobs={jobs} draft={imageDraft} setDraft={setImageDraft} onChanged={refreshJobs} reuse={reuse} />
+          : page === 'voice' ? <VoiceStudio draft={voiceDraft} setDraft={setVoiceDraft} jobs={jobs} onChanged={refreshJobs} reuse={reuse}/>
           : page === 'video' ? <VideoStudio draft={videoDraft} setDraft={setVideoDraft} jobs={jobs} onChanged={refreshJobs} reuse={reuse} />
           : page === 'krea' ? <KreaStudio draft={kreaDraft} setDraft={setKreaDraft} jobs={jobs} onChanged={refreshJobs} reuse={reuse} />
           : page === 'prompt' ? <PromptStudio draft={promptDraft} setDraft={setPromptDraft} send={() => sendPrompt()} />
@@ -172,7 +177,7 @@ export default function App() {
           : <><PageTitle title={current.title} text={current.description ?? ''} />
             <div className="panel feature-detail"><span className="phase-chip">{current.phase} 개발 예정</span><current.icon size={42} />
               <h2>다음 창작 도구를 준비하고 있습니다.</h2>
-              <p>현재는 M5 영상 구현 단계입니다. 이 카테고리의 AI 생성 기능은 아직 구현되지 않았습니다.</p>
+              <p>현재는 M6 음성 구현 단계입니다. 이 카테고리의 AI 생성 기능은 아직 구현되지 않았습니다.</p>
               {page === 'krea' && <div className="notice">8GB 실행 가능 여부는 실기 검증 전입니다.</div>}
               <p className="feature-note">{({
                 video: 'Wan 계열의 해상도·프레임·오프로딩 조건을 실기 검증합니다.',

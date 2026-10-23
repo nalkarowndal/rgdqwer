@@ -1,3 +1,5 @@
+import { isVoiceInput } from './voice';
+import { VoiceJobCard } from './VoiceJobCard';
 import { isVideoInput } from './video';
 import { isKreaInput } from './krea';
 import { useEffect, useState, type Dispatch, type SetStateAction, type FormEvent } from 'react';
@@ -31,7 +33,7 @@ export function ImageStudio({ engine, jobs, draft, setDraft, onChanged, reuse }:
   }
   const ready = engine?.state === 'connected' && engine.checkpoints.includes(draft.checkpoint);
   const pending = jobs.some(isPending);
-  const latest = jobs.find(job => !isKreaInput(job.input) && !isVideoInput(job.input));
+  const latest = jobs.find(job => !isVoiceInput(job.input) && !isKreaInput(job.input) && !isVideoInput(job.input));
   const maximum = draft.profile === 'sd15' ? 768 : 1024;
   return <><div className="page-heading"><div><p className="eyebrow">TEXT TO IMAGE</p><h1>이미지 스튜디오</h1><p className="subtitle">내 ComfyUI의 체크포인트로 이미지를 생성하고 설정을 함께 보관합니다.</p></div><span className="milestone-tag">M2 · 배치 1</span></div>
     <div className="image-layout"><form className="panel settings-panel image-form" onSubmit={event => void submit(event)}>
@@ -66,7 +68,10 @@ export function JobHistory({ jobs, onChanged, reuse }: { jobs: Job[]; onChanged:
   return <><div className="page-heading"><div><p className="eyebrow">YOUR CREATIONS</p><h1>작업 기록 / 라이브러리</h1><p className="subtitle">최근 20개 작업 · 생성 설정과 저장된 결과를 다시 사용할 수 있습니다.</p></div></div>
     {jobs.length ? <div className="history-grid">{jobs.slice(0,20).map(job => <JobCard key={job.id} job={job} onChanged={onChanged} reuse={reuse} />)}</div> : <div className="panel empty-state"><h2>저장된 작업이 없습니다</h2><p>이미지 스튜디오에서 첫 생성을 시작하세요.</p></div>}</>;
 }
-export function JobCard({ job, onChanged, reuse }: { job: Job; onChanged: () => Promise<void>; reuse: (input: GenerationInput) => void }) {
+export function JobCard(props: {job:Job;onChanged:()=>Promise<void>;reuse:(input:GenerationInput)=>void}) {
+  return isVoiceInput(props.job.input)?<VoiceJobCard {...props}/>:<VisualJobCard {...props}/>;
+}
+function VisualJobCard({ job, onChanged, reuse }: { job: Job; onChanged: () => Promise<void>; reuse: (input: GenerationInput) => void }) {
   const [image, setImage] = useState(''); const [imageError, setImageError] = useState('');
   const [error, setError] = useState(''); const [busy, setBusy] = useState(false);
   const localVideo=isVideoInput(job.input)&&job.input.profile==='video-tools';
@@ -85,6 +90,7 @@ export function JobCard({ job, onChanged, reuse }: { job: Job; onChanged: () => 
     catch (err) { setError(err instanceof Error ? err.message : '요청 실패'); }
     finally { setBusy(false); }
   }
+  if(isVoiceInput(job.input))return null;
   return <article className="panel job-card"><div className="job-heading"><h2>{labels[job.state]}</h2><time>{new Date(job.createdAt).toLocaleString('ko-KR')}</time></div>
     {image ? artifact?.mediaType==='video/mp4' ? <video src={image} controls preload="metadata" aria-label="영상 결과 플레이어" className="generated-image" /> : <img src={image} alt="생성 결과" className="generated-image" /> : <div className="result-placeholder"><ImageIcon size={34} /><span>{job.state === 'completed' ? '결과 불러오는 중' : labels[job.state]}</span></div>}
     {job.artifacts.length>1&&<label>결과 프레임<select value={frameIndex} onChange={e=>setFrameIndex(Number(e.target.value))}>{job.artifacts.map((a,i)=><option key={a.id} value={i}>프레임 {i+1}</option>)}</select></label>}

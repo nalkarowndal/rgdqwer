@@ -1,0 +1,5 @@
+# Independent Python 3.10 environment (fairseq 0.12.2 and NumPy <=1.23.5).
+# Install with pip 24.0 because upstream OmegaConf metadata is rejected by newer pip.
+torch==2.6.0
+torchaudio==2.6.0
+rvc-python @ git+https://github.com/daswer123/rvc-python.git@cff3ffbe99ce2e062831e4377f8cef587d0f38f9

@@ -70,7 +70,8 @@ def rvc(req, model, root, output):
     def local_load(path, *args, **kwargs):
         # Fairseq HuBERT contains OmegaConf metadata; only this explicitly provisioned
         # base asset may deserialize metadata. Speaker/RMVPE checkpoints stay weights-only.
-        kwargs['weights_only'] = not (isinstance(path, (str, Path)) and Path(path).resolve() == trusted_hubert)
+        filename = path if isinstance(path, (str, Path)) else getattr(path, 'name', None)
+        kwargs['weights_only'] = not (isinstance(filename, (str, Path)) and Path(filename).resolve() == trusted_hubert)
         return original_load(path, *args, **kwargs)
     torch.load = local_load
     checkpoint = torch.load(model['path'], map_location='cpu', weights_only=True)

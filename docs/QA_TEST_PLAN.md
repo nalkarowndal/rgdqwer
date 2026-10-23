@@ -229,3 +229,12 @@ headless 디스플레이 크기 때문에 Electron 캡처는 좁은 레이아웃
 모델 교체, 앱 재시작 기록 복구를 검사한다. 영상은 재생/FPS/프레임/길이,
 음성은 TTS 및 VC 각각 출력/재생/권한 확인을 추가한다.
 장시간 작업·메모리 누수·Windows 신규 설치는 M8 필수 항목이다.
+
+## M6 실행 기록 — 2026-10-24
+
+- `npm run check`: 타입·lint 및 JS 111개 통과. 프로필 권한/음성 입력, 공유 작업 잠금, 프로세스 취소/실패/복구, 손상 출력 거부, 녹음 지연 이벤트 검증 포함.
+- Python: 기존 14 + 음성 7 = 21개 통과. Chatterbox/RVC 외부 API 계약 대역은 실제 추론으로 간주하지 않는다.
+- 전체 기존 브라우저 10 + 음성 프로필/업로드 1 통과. 추가 비교/재사용 및 Chromium 가상 마이크로 실제 WebM 녹음·WAV 정규화 검사 통과(음성 브라우저 3개, 기존 10개).
+- 실제 FFmpeg PCM/MP3 정규화, 오디오 재생과 390px 화면을 확인. `docs/qa/m6-voice.png`, `m6-voice-mobile.png`.
+- Linux Electron sandbox/contextIsolation 스모크 및 실제 Python HTTP 인증/이미지 디코드/모델 누락 503 스모크 통과.
+- 음성 모델/GPU 없음: 실제 TTS/ChatterboxVC/RVC, 다국어 품질, 8GB 최고 VRAM, Windows 마이크 검증 보류. `scripts/smoke-voice.mjs`로 실제 모델을 검증해야 M6 통과를 선언할 수 있다.

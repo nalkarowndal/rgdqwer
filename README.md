@@ -1,7 +1,7 @@
 # rgdqwer
 
 ComfyUI를 연결해 사용하는 Windows 로컬 AI 스튜디오입니다.
-**현재 M5 영상·Krea 2·이미지 분석·프롬프트·이미지 생성 구현 버전입니다. FFmpeg 실제 변환·재생을 검증했으며, Wan/Krea/SD 실제 모델·GPU 실행은 실기 검증 전입니다. 음성은 후속 단계입니다.**
+**현재 M6 음성·영상·Krea 2·이미지 분석·프롬프트·이미지 생성 구현 버전입니다. FFmpeg 실제 변환·재생을 검증했으며, Wan/Krea/SD 실제 모델·GPU 실행은 실기 검증 전입니다. 음성 엔진 연동의 실제 모델 추론도 검증 전입니다.**
 
 ## 현재 사용할 수 있는 기능
 
@@ -115,7 +115,7 @@ npm run check
 npm run build
 npx playwright install chromium
 npm run test:e2e
-.\.venv\Scripts\python -m pytest worker/tests -q
+.\.venv\Scripts\python -m pytest worker/tests voice_worker/tests -q
 ```
 
 Linux에서 이미 설치된 Chromium을 사용하려면
@@ -124,7 +124,7 @@ Linux에서 이미 설치된 Chromium을 사용하려면
 
 ## 다음 단계
 
-M0–M5의 Windows 데스크톱·실제 모델/GPU 검증 게이트를 유지합니다. 다음 구현 단계는 M6 음성 스튜디오입니다. [전체 로드맵](docs/DEVELOPMENT_PHASES.md), [구조](docs/ARCHITECTURE.md),
+M0–M6의 Windows 데스크톱·실제 모델/GPU 검증 게이트를 유지합니다. 다음 구현 단계는 M7 모델·확장 관리자입니다. [전체 로드맵](docs/DEVELOPMENT_PHASES.md), [구조](docs/ARCHITECTURE.md),
 [요구사항 원문](docs/REQUIREMENTS.md), [보안](docs/SECURITY.md)을 참고하세요.
 
 ## 영상 스튜디오 (M5)
@@ -132,3 +132,7 @@ M0–M5의 Windows 데스크톱·실제 모델/GPU 검증 게이트를 유지합
 Wan 2.2 TI2V 5B의 T2V/I2V와 실험적 V2V, FFmpeg MP4 변환·프레임 추출을 제공합니다. FFmpeg와 ffprobe를 직접 설치해 PATH에 등록하세요. 앱에서 자동 설치하지 않습니다. 원본 PNG/MP4 업로드, 영상 프롬프트 8개 항목, 프레임/FPS/크기 조절, MP4 재생·다운로드, 설정 재사용을 지원합니다.
 
 실제 CPU 변환·보간·프레임 추출은 합성 테스트 클립으로 검증했습니다. Wan 영상 생성과 8GB GPU 안정성은 검증 전입니다. [설치·모델·제한·검증 가이드](docs/VIDEO_SYSTEM.md)를 확인하세요.
+
+## 음성 스튜디오 (M6)
+
+Chatterbox Multilingual TTS, ChatterboxVC, RVC 연동, 권한을 기록하는 음성 프로필, 마이크/파일 입력, 긴 대사 분할, WAV·MP3 저장과 전후/다중 결과 비교를 제공합니다. 음성 엔진은 별도 Python 환경과 로컬 모델이 필요합니다. 실제 모델 추론과 Windows 마이크·8GB GPU 검증은 남아 있으며, M6 통과 판정은 보류합니다. [설치·사용·실제 모델 검증 안내](docs/VOICE_SYSTEM.md)를 확인하세요.

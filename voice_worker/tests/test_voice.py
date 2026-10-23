@@ -72,3 +72,61 @@ def test_rvc_catalog_rejects_path_and_version_errors(tmp_path, monkeypatch):
     model.write_bytes(b'fixture')
     file.write_text(json.dumps([{'id':'my_voice','path':str(model),'version':'v2'}]))
     assert rvc_catalog()[0]['id'] == 'my_voice'
+
+
+def test_segmentation_never_sends_blank_chunks_to_tts():
+    chunks=split_text('첫 문장.'+' '*500+'마지막 문장.')
+    assert all(part.strip() for part in chunks)
+
+
+def test_rvc_adapter_uses_native_sample_rate_and_local_models(tmp_path, monkeypatch):
+    import sys
+    import types
+    import numpy as np
+    root=tmp_path/'rvc'
+    (root/'base_model').mkdir(parents=True)
+    for name in ('hubert_base.pt','rmvpe.pt'):
+        (root/'base_model'/name).write_bytes(b'fixture')
+    observed={}
+    torch=types.ModuleType('torch')
+    load_options=[]
+    def torch_load(*args, **kwargs):
+        load_options.append(kwargs)
+        return {'config': [],'weight':{}}
+    torch.load=torch_load
+    torch.cuda=types.SimpleNamespace(is_available=lambda:False)
+    scipy=types.ModuleType('scipy');scipy.__path__=[]
+    scipy.signal=types.ModuleType('scipy.signal')
+    scipy.io=types.ModuleType('scipy.io');scipy.io.__path__=[]
+    scipy.io.wavfile=types.ModuleType('scipy.io.wavfile')
+    class Converter:
+        def __init__(self,**kwargs): observed.update(kwargs)
+        def set_params(self,**kwargs): observed.update(kwargs)
+        def infer_file(self,source,output):
+            observed['source']=source
+            # Native model rate must remain 40 kHz; parent normalizes this correctly.
+            with wave.open(output,'wb') as f:
+                f.setnchannels(1);f.setsampwidth(2);f.setframerate(40000);f.writeframes(np.zeros(4000,dtype='<i2').tobytes())
+    infer=types.ModuleType('rvc_python.infer');infer.RVCInference=Converter
+    modules=types.ModuleType('rvc_python.modules.vc.modules')
+    for name,module in [('torch',torch),('scipy',scipy),('scipy.signal',scipy.signal),('scipy.io',scipy.io),('scipy.io.wavfile',scipy.io.wavfile),('rvc_python',types.ModuleType('rvc_python')),('rvc_python.infer',infer),('rvc_python.modules',types.ModuleType('rvc_python.modules')),('rvc_python.modules.vc',types.ModuleType('rvc_python.modules.vc')),('rvc_python.modules.vc.modules',modules)]:
+        monkeypatch.setitem(sys.modules,name,module)
+    from voice_worker.adapters import rvc
+    out=tmp_path/'rvc.wav'
+    rvc({'device':'cpu','source':'source.wav','pitch':-3},{'path':str(tmp_path/'speaker.pth'),'version':'v2'},root,str(out))
+    assert observed['f0up_key']==-3
+    assert observed['resample_sr']==0
+    assert observed['index_rate']==0
+    assert observed['model_path']==str(tmp_path/'speaker.pth')
+    assert observed['source']=='source.wav'
+    with wave.open(str(out)) as f:
+        assert f.getframerate()==40000
+    with (root/'base_model'/'hubert_base.pt').open('rb') as handle:
+        torch.load(handle, map_location='cpu')
+    assert load_options[-1]['weights_only'] is False
+    torch.load(str(tmp_path/'speaker.pth'), weights_only=False)
+    assert load_options[-1]['weights_only'] is True
+    infer.download_rvc_models(str(root))
+    (root/'base_model'/'rmvpe.pt').unlink()
+    with pytest.raises(ValueError):
+        infer.download_rvc_models(str(root))

@@ -58,7 +58,7 @@ export async function createApp(options: { dataDir: string; uiDir?: string; devO
     reply.code(status).send({ error: status === 500 ? '로컬 처리에 실패했습니다. 저장 경로와 디스크 공간을 확인하세요.' : '요청 형식을 확인하세요.' });
   });
   app.get('/api/session', async () => ({ token }));
-  app.get('/api/health', async () => ({ status: 'ok', app: 'rgdqwer', milestone: 'M5' }));
+  app.get('/api/health', async () => ({ status: 'ok', app: 'rgdqwer', milestone: 'M6' }));
   app.get('/api/settings', async () => store.getSettings());
   app.put('/api/settings', async (request, reply) => {
     const result = settingsSchema.safeParse(request.body);

@@ -26,7 +26,8 @@ def split_text(text):
             candidates = [m.end() for m in re.finditer(r'[.!?。！？\n\s]', text[:limit]) if m.end() >= 60]
             if candidates:
                 limit = candidates[-1]
-        parts.append(text[:limit])
+        if text[:limit].strip():
+            parts.append(text[:limit])
         text = text[limit:]
     return parts
 

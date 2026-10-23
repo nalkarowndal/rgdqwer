@@ -1,3 +1,4 @@
+import { registerMediaRoutes } from './video/routes.js';
 import { kreaInputSchema, isKreaInput } from '../src/krea.js';
 import { inspectKrea } from './generation/krea.js';
 import { ComfyClient } from './generation/client.js';
@@ -99,6 +100,7 @@ export async function createApp(options: { dataDir: string; uiDir?: string; devO
     try { await access(path); } catch { return reply.code(404).send({ error: '결과 파일이 이동되거나 삭제되었습니다.' }); }
     return reply.type('image/png').header('Content-Disposition', `inline; filename="${artifact.fileName}"`).send(createReadStream(path));
   });
+  await registerMediaRoutes(app, options.dataDir, store);
   await registerAnalysisRoutes(app, options.dataDir, () => store.getSettings().workerUrl);
   if (options.uiDir) await app.register(staticFiles, { root: options.uiDir, index: 'index.html' });
   return app;

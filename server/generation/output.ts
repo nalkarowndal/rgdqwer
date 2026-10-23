@@ -10,7 +10,7 @@ const crcTable = Uint32Array.from({ length: 256 }, (_, index) => {
   for (let bit = 0; bit < 8; bit++) value = value & 1 ? 0xedb88320 ^ (value >>> 1) : value >>> 1;
   return value >>> 0;
 });
-function validatePng(bytes: Buffer, width: number, height: number) {
+export function validatePng(bytes: Buffer, width: number, height: number) {
   const invalid = () => new Error('PNG 형식·크기·무결성 검증에 실패했습니다.');
   if (bytes.length < 33 || !bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]))) throw invalid();
   let ended = false;

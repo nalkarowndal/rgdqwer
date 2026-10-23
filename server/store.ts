@@ -1,3 +1,4 @@
+import type { AudioSource, VoiceProfile } from '../src/voice.js';
 import { isVideoInput, type MediaInput } from '../src/video.js';
 import { isKreaInput } from '../src/krea.js';
 import { randomUUID } from 'node:crypto';
@@ -16,6 +17,8 @@ export async function openStore(dataDir: string) {
   let db = new SQL.Database(existsSync(file) ? readFileSync(file) : undefined);
   db.run(`
     PRAGMA foreign_keys = ON;
+    CREATE TABLE IF NOT EXISTS voice_profiles (id TEXT PRIMARY KEY, value TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS audio_sources (id TEXT PRIMARY KEY, value TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS media_inputs (id TEXT PRIMARY KEY, value TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY CHECK(id=1), value TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS jobs (
@@ -38,8 +41,8 @@ export async function openStore(dataDir: string) {
     catch (error) { db.close(); db = new SQL.Database(snapshot); db.run('PRAGMA foreign_keys = ON'); throw error; }
   };
   const version = Number(db.exec('PRAGMA user_version')[0].values[0][0]);
-  if (version > 4) { db.close(); throw new Error('더 새로운 데이터베이스입니다. 최신 앱을 사용하세요.'); }
-  if (version < 4) mutate(() => db.run('PRAGMA user_version = 4'));
+  if (version > 5) { db.close(); throw new Error('더 새로운 데이터베이스입니다. 최신 앱을 사용하세요.'); }
+  if (version < 5) mutate(() => db.run('PRAGMA user_version = 5'));
   if (!db.exec('SELECT value FROM settings WHERE id=1').length) {
     db.run('INSERT INTO settings VALUES(1, ?)', [JSON.stringify(defaults)]);
     persist();
@@ -53,6 +56,17 @@ export async function openStore(dataDir: string) {
     return record;
   }
   return {
+    listVoiceProfiles(): VoiceProfile[] {return (db.exec('SELECT value FROM voice_profiles ORDER BY rowid DESC')[0]?.values??[]).map(row=>JSON.parse(String(row[0])) as VoiceProfile);},
+    getVoiceProfile(id:string):VoiceProfile|undefined {const row=db.exec('SELECT value FROM voice_profiles WHERE id=?',[id])[0]?.values[0];return row?JSON.parse(String(row[0])):undefined;},
+    putVoiceProfile(value:VoiceProfile){mutate(()=>db.run('INSERT INTO voice_profiles VALUES(?,?) ON CONFLICT(id) DO UPDATE SET value=excluded.value',[value.id,JSON.stringify(value)]));},
+    deleteVoiceProfile(id:string){mutate(()=>db.run('DELETE FROM voice_profiles WHERE id=?',[id]));},
+    getAudio(id:string):AudioSource|undefined {const row=db.exec('SELECT value FROM audio_sources WHERE id=?',[id])[0]?.values[0];return row?JSON.parse(String(row[0])):undefined;},
+    putAudio(value:AudioSource){mutate(()=>db.run('INSERT INTO audio_sources VALUES(?,?)',[value.id,JSON.stringify(value)]));},
+    deleteAudio(id:string){
+      const profiles=(db.exec('SELECT value FROM voice_profiles')[0]?.values??[]).some(row=>JSON.parse(String(row[0])).referenceId===id);
+      const jobs=(db.exec('SELECT settings_json FROM jobs')[0]?.values??[]).some(row=>{const j=JSON.parse(String(row[0]));return j.input?.sourceId===id||j.voiceProfile?.referenceId===id;});
+      if(profiles||jobs)return false;mutate(()=>db.run('DELETE FROM audio_sources WHERE id=?',[id]));return true;
+    },
     getMedia(id: string): MediaInput | undefined {
       const rows=db.exec('SELECT value FROM media_inputs WHERE id=?',[id]);
       return rows[0]?.values[0]?JSON.parse(String(rows[0].values[0][0])) as MediaInput:undefined;

@@ -1,3 +1,4 @@
+import { registerVoiceRoutes } from './voice/routes.js';
 import { isVideoInput,videoInputSchema } from '../src/video.js';
 import { inspectVideo } from './generation/video.js';
 import { mediaToolsStatus } from './video/process.js';
@@ -110,6 +111,7 @@ export async function createApp(options: { dataDir: string; uiDir?: string; devO
     return reply.type(artifact.mediaType ?? 'image/png').header('Content-Disposition', `inline; filename="${artifact.fileName}"`).send(createReadStream(path));
   });
   await registerMediaRoutes(app, options.dataDir, store);
+  await registerVoiceRoutes(app, options.dataDir, store);
   await registerAnalysisRoutes(app, options.dataDir, () => store.getSettings().workerUrl);
   if (options.uiDir) await app.register(staticFiles, { root: options.uiDir, index: 'index.html' });
   return app;

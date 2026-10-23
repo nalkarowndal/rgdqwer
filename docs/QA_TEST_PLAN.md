@@ -8,14 +8,14 @@
 | 검증 | 결과 | 범위 |
 |---|---|---|
 | 타입 / lint / build | 통과 | v0.6.0 |
-| Vitest | 99개 통과 | 기존82 + 영상 계약5/실제미디어8/HTTP·lifecycle4 |
+| Vitest | 100개 통과 | 기존82 + 영상 계약5/실제미디어9/HTTP·lifecycle4 |
 | Python | 14개 통과 | 기존 분석 어댑터 회귀 |
 | Playwright | 10개 통과 | 기존8 + 실제 MP4 업로드/변환/재생/다운로드/재사용/추출/390px + 분석 전달 |
 | 실제 FFmpeg | 통과 | 합성 testsrc2 MP4, Lanczos 확대/minterpolate/PNG추출, ffprobe와 전체디코드 |
 | Node/Python HTTP smoke | 통과 | 실제 로컬서버, 세션인증, PNG디코드, 모델없음503 |
 | Electron Linux smoke | 통과 | sandbox/contextIsolation true, nodeIntegration false; 테스트전용Linux sandbox override |
 | npm audit production | 0건 | 실제 모델/FFmpeg 외부 설치파일은 별도 |
-| Windows/Linux CI | 초기 커밋 양쪽 통과 | 482dd1a, run39945655662. 리뷰 수정 커밋 확인 중 |
+| Windows/Linux CI | 초기 커밋 양쪽 통과 | 482dd1a, run39945655662. 리뷰 수정 후 Ubuntu FFmpeg6의 오류프레임누락을 추가 발견, 호환수정 확인 중 |
 | 실제 Wan/Krea/SD GPU 추론 | 미검증 | Comfy/모델/GPU가 없는 환경; 모의 엔진은 그래프/상태검증만 |
 
 영상 검증물은 **합성 테스트 패턴**이며 AI 영상으로 표시하지 않는다. M5의 실제 변환/MP4재생 경로를 검증했다. Wan AI V2V는 실험적이며 품질/시간적일관성/8GB VRAM은 별도실기게이트. 화면: `docs/qa/m5-video.png`, `m5-video-mobile.png`.

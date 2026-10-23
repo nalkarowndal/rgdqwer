@@ -89,3 +89,6 @@ it('validates requested output audio policy and presentation length',async()=>{
   expect(await validateVideoOutput(converted,withAudio)).toMatchObject({hasAudio:true,frames:33});
  }finally{await rm(dir,{recursive:true,force:true});}
 },30000);
+it('rejects decoder error output even when an older FFmpeg exits successfully',async()=>{
+ await expect(runProcess(process.execPath,['-e','process.stderr.write("decoder dropped invalid frames")'],undefined,5000,true)).rejects.toThrow(/decoder dropped/);
+});

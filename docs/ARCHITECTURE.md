@@ -45,7 +45,7 @@ Windows/RTX 호환성까지 검증했다는 의미는 아니다.
 
 M2의 `src/prompt.ts`는 순수한 문서 스키마/규칙 compiler이며 UI와 서버가 같은 계약을 사용한다.
 PromptEditor는 제어형 입력이고 App 부모의 페이지별 초안을 사용한다. PromptStudio는 인증된 snapshot
-저장/조회/삭제를 제공한다. 세대별 LLM/영상 adapter는 아직 실행 구현하지 않았다.
+저장/조회/삭제를 제공한다. 선택형 LLM은 후속 범위이며 영상 adapter는 M5에 추가했다.
 
 M3 AnalysisStudio는 페이지 이동에도 mounted 상태를 유지한다. 순수 analysis.ts에서 잠금/진행 중 수정값을 병합하고 M2 최종 문서로 변환한다.
 모델 폴더는 Worker CLI, 인증 파일은 Node 데이터 폴더에 속한다. 업로드와 분석 원문은 메모리에서만 유지한다.
@@ -53,3 +53,7 @@ M3 AnalysisStudio는 페이지 이동에도 mounted 상태를 유지한다. 순�
 ## M4 Krea
 
 src/krea.ts는 입력·프리셋·진단 계약, server/generation/krea.ts는 공식 노드 그래프 어댑터다. KreaStudio는 전용 편집/진단 화면이며 AnalysisStudio의 전달 대상을 공유한다. SD와 GenerationManager/JobCard/PNG/artifacts 수명주기를 공유하고 한 번에 한 작업만 추적한다. 모델/노드/라이선스와 실제 하드웨어 검증 범위는 KREA_SYSTEM.md에 명시한다.
+
+## M5 영상
+
+server/video는 제한된 FFmpeg/ffprobe subprocess·입력 검증·업로드 API를 담당한다. generation/video는 native Wan 그래프, video-output은 원본준비와 MP4/PNG출력검증을 담당하며 기존 GenerationManager의 단일잠금·취소·복구를 공유한다. VideoStudio 초안은 App에 보존되고 JobCard는 인증된 blob MP4/PNG를 표시한다. 파일은 서버UUID로보관하며 SQLite v4 media_inputs가 원본메타데이터를 유지한다. FFmpeg는 PATH의외부프로그램이며 Worker와별도로실행한다.

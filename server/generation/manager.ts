@@ -1,3 +1,6 @@
+import { isVideoInput, videoIssues, type VideoInventory } from '../../src/video.js';
+import { buildVideoWorkflow, inspectVideo } from './video.js';
+import { localVideoArtifacts,prepareVideoSource,saveVideoOutput } from './video-output.js';
 import { isKreaInput } from '../../src/krea.js';
 import { buildKreaWorkflow, inspectKrea, kreaIssues } from './krea.js';
 import { randomUUID } from 'node:crypto';
@@ -16,6 +19,7 @@ const historySchema = z.object({ status: z.object({ completed: z.boolean(), stat
 type Store = Awaited<ReturnType<typeof openStore>>;
 export class GenerationManager {
   private active?: Job;
+  private localAbort=new AbortController();
   private task?: Promise<void>;
   private stopped = new AbortController();
   private readyToCancel = false;
@@ -29,8 +33,8 @@ export class GenerationManager {
   create(input: GenerationInput): Job {
     if (this.active || this.stopped.signal.aborted || this.store.listJobs().some(job => !terminal.has(job.state))) throw new GenerationError(409, '기존 작업의 실행 또는 상태 확인이 끝난 뒤 생성하세요. GPU 작업은 한 번에 하나만 실행합니다.');
     const now = new Date().toISOString();
-    const job: Job = { id: randomUUID(), kind: 'image', state: 'preparing', input, engineUrl: this.store.getSettings().comfyUrl,
-      workflowVersion: isKreaInput(input) ? 'krea2-v1' : 'sd-base-v1', createdAt: now, updatedAt: now, promptId: null, progress: null, error: null, artifacts: [], log: [], cancelRequested: false };
+    const job: Job = { id: randomUUID(), kind: isVideoInput(input) ? 'video' : 'image', state: 'preparing', input, engineUrl: this.store.getSettings().comfyUrl,
+      workflowVersion: isVideoInput(input) ? (input.profile==='wan22'?'wan22-v1':'ffmpeg-v1') : isKreaInput(input) ? 'krea2-v1' : 'sd-base-v1', createdAt: now, updatedAt: now, promptId: null, progress: null, error: null, artifacts: [], log: [], cancelRequested: false };
     this.store.putJob(job); this.launch(job, false); return job;
   }
   recover() {
@@ -46,6 +50,7 @@ export class GenerationManager {
     this.launch(job, true); return job;
   }
   private launch(job: Job, resumed: boolean) {
+    this.localAbort=new AbortController();
     this.active = job; this.readyToCancel = resumed; this.cancelConfirmed = false;
     this.task = this.run(job, resumed).catch(error => {
       console.error('작업 상태 저장 실패:', error instanceof Error ? error.message : String(error));
@@ -56,7 +61,7 @@ export class GenerationManager {
     if (!job) throw new GenerationError(404, '작업을 찾을 수 없습니다.');
     if (terminal.has(job.state)) return job;
     if (this.active?.id !== id) throw new GenerationError(409, '먼저 작업 상태 추적을 재개하세요.');
-    if (!this.readyToCancel) { this.update(job, { cancelRequested: true }, '제출 준비 후 취소 요청을 처리합니다.'); return job; }
+    if (!this.readyToCancel) { if(!job.promptId)this.localAbort.abort(); this.update(job, { cancelRequested: true }, '제출 준비 후 취소 요청을 처리합니다.'); return job; }
     const client = new ComfyClient(job.engineUrl, this.stopped.signal);
     try {
       const confirmed = await client.cancel(job.promptId!);
@@ -74,10 +79,22 @@ export class GenerationManager {
   }
   private async run(job: Job, resumed: boolean) {
     const client = new ComfyClient(job.engineUrl, this.stopped.signal);
+    const localSignal=AbortSignal.any([this.stopped.signal,this.localAbort.signal]);
+    let inventory:VideoInventory|undefined;let sourceName:string|undefined;
     let closeSocket = () => {}; let ambiguous = resumed; let outputStarted = false;
     try {
+      if(isVideoInput(job.input)&&job.input.profile==='video-tools') {
+        this.update(job,{state:'running'},'FFmpeg 로컬 처리를 시작합니다.');
+        const artifacts=await localVideoArtifacts(job,this.store.getMedia(job.input.sourceId!),this.dataDir,localSignal);
+        this.update(job,{state:'completed',progress:100,artifacts,error:null},'검증된 미디어 저장 완료');return;
+      }
       if (!resumed) {
-        if (isKreaInput(job.input)) {
+        if(isVideoInput(job.input)) {
+          inventory=inspectVideo(await client.json('/object_info'));
+          const issues=videoIssues(job.input,inventory);if(issues.length)throw new Error(issues.join(' · '));
+          if((await client.queue()).length)throw new Error('ComfyUI에 다른 작업이 있습니다.');
+          sourceName=await prepareVideoSource(client,job,job.input.sourceId?this.store.getMedia(job.input.sourceId):undefined,this.dataDir,localSignal);
+        } else if (isKreaInput(job.input)) {
           const issues = kreaIssues(job.input, inspectKrea(await client.json('/object_info')));
           if (issues.length) throw new Error(issues.join(' · '));
           if ((await client.queue()).length) throw new Error('ComfyUI에 다른 작업이 있습니다. 작업이 끝난 뒤 다시 시도하세요.');
@@ -93,7 +110,7 @@ export class GenerationManager {
         if (job.cancelRequested) { this.update(job, { state: 'cancelled' }, '제출 전에 취소했습니다.'); return; }
         this.update(job, { state: 'queued', promptId: job.id }, 'ComfyUI에 생성 요청을 제출합니다.'); ambiguous = true;
         let promptId: string;
-        try { promptId = await client.submit(isKreaInput(job.input) ? buildKreaWorkflow(job.input, job.id) : buildWorkflow(job.input, job.id), job.id); }
+        try { promptId = await client.submit(isVideoInput(job.input) ? buildVideoWorkflow(job.input,job.id,inventory!,sourceName) : isKreaInput(job.input) ? buildKreaWorkflow(job.input, job.id) : buildWorkflow(job.input, job.id), job.id); }
         catch (error) {
           if (error instanceof EngineHttpError && error.status >= 400 && error.status < 500) ambiguous = false;
           throw error;
@@ -115,14 +132,14 @@ export class GenerationManager {
             this.update(job, { state: cancelled ? 'cancelled' : 'failed', error: cancelled ? null : 'ComfyUI 실행에 실패했습니다. 모델 호환성·VRAM·서버 로그를 확인하고 해상도를 낮춰 다시 시도하세요.' }, cancelled ? '취소 확인' : '엔진 실행 실패'); return;
           }
           if (history.status.completed && history.status.status_str === 'success') {
-            outputStarted = true; this.update(job, { state: 'postprocessing' }, 'PNG 결과를 검사하고 저장합니다.');
+            outputStarted = true; this.update(job, { state: 'postprocessing' }, '결과 미디어를 검사하고 저장합니다.');
             const outputs = z.object({ images: z.array(z.unknown()).length(1) }).parse(history.outputs['9']);
             if (isKreaInput(job.input) && job.input.enhancer === 'engine') {
               const text = z.object({ text: z.array(z.string().min(1).max(16000)).length(1) }).safeParse(history.outputs['20']);
               if (!text.success || !text.data.text[0].trim()) throw new Error('엔진이 확장한 프롬프트를 확인하지 못했습니다. ComfyUI 기록과 TextGenerate 출력을 확인하세요.');
               this.update(job, { effectivePrompt: text.data.text[0] });
             }
-            const artifact = await saveOutput(client, job, outputs.images[0], join(this.dataDir, 'outputs'));
+            const artifact = isVideoInput(job.input) ? await saveVideoOutput(client,job,outputs.images[0],join(this.dataDir,'outputs'),this.stopped.signal) : await saveOutput(client, job, outputs.images[0], join(this.dataDir, 'outputs'));
             this.update(job, { state: 'completed', progress: 100, artifacts: [artifact], error: null }, '결과 저장 완료'); return;
           }
         }
@@ -141,8 +158,8 @@ export class GenerationManager {
       }
       throw new Error('30분 추적 시간이 초과되었습니다. ComfyUI 상태를 확인한 뒤 추적을 재개하세요.');
     } catch (error) {
-      const state = this.stopped.signal.aborted ? 'interrupted' : ambiguous && !outputStarted ? 'unknown' : 'failed';
-      this.update(job, { state, error: this.stopped.signal.aborted ? '앱 종료로 추적이 중단되었습니다. 다음 실행에서 기존 작업을 다시 확인합니다.' : (error instanceof Error ? error.message : '작업 처리 실패') }, state === 'unknown' ? '결과 미확인 — 자동 재제출하지 않습니다.' : '작업 종료');
+      const state = this.stopped.signal.aborted ? 'interrupted' : job.cancelRequested && !job.promptId ? 'cancelled' : ambiguous && !outputStarted ? 'unknown' : 'failed';
+      this.update(job, { state, error: state==='cancelled' ? null : this.stopped.signal.aborted ? '앱 종료로 추적이 중단되었습니다. 다음 실행에서 기존 작업을 다시 확인합니다.' : (error instanceof Error ? error.message : '작업 처리 실패') }, state === 'unknown' ? '결과 미확인 — 자동 재제출하지 않습니다.' : '작업 종료');
     } finally { closeSocket(); }
   }
   async close() { this.stopped.abort(); await this.task; }

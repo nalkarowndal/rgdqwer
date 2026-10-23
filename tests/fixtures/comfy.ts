@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
 import { WebSocketServer } from 'ws';
 import { PNG } from 'pngjs';
-export async function simulatedComfy(options: { extraNodes?: Record<string, unknown>; width?: number; height?: number } = {}) {
+export async function simulatedComfy(options: { extraNodes?: Record<string, unknown>; width?: number; height?: number; outputExtension?: string } = {}) {
   const calls: { path: string; body: Record<string, unknown> }[] = [];
   let id = ''; let history: Record<string, unknown> = {}; let running = false;
   let releaseCancel = () => {};
@@ -13,10 +13,12 @@ export async function simulatedComfy(options: { extraNodes?: Record<string, unkn
   const server = createServer(async (req, res) => {
     const path = new URL(req.url!, 'http://localhost').pathname;
     let body: Record<string, unknown> = {};
-    if (req.method === 'POST') { const chunks = []; for await (const chunk of req) chunks.push(chunk); body = JSON.parse(Buffer.concat(chunks).toString() || '{}'); }
+    if (req.method === 'POST') { const chunks = []; for await (const chunk of req) chunks.push(chunk); const text=Buffer.concat(chunks).toString();
+      body = path==='/upload/image'?{name:text.match(/filename="([^"]+)"/)?.[1],overwrite:text.match(/name="overwrite"\r\n\r\n([^\r]+)/)?.[1]}:JSON.parse(text || '{}'); }
     calls.push({ path, body });
     res.setHeader('content-type', 'application/json');
     const send = (value: unknown) => res.end(JSON.stringify(value));
+    if (path === '/upload/image') return send({name:body.name,subfolder:'',type:'input'});
     if (path === '/system_stats') return send({ system: { os: 'nt', python_version: '3.12', ram_total: 16 * 1024 ** 3 }, devices: [] });
     if (path === '/object_info') return send(nodes);
     if (path === '/object_info/CheckpointLoaderSimple') return send({ CheckpointLoaderSimple: nodes.CheckpointLoaderSimple });
@@ -46,7 +48,7 @@ export async function simulatedComfy(options: { extraNodes?: Record<string, unkn
   function finish() {
     if (!running) return;
     progress(20); running = false;
-    history = { [id]: { status: { completed: true, status_str: 'success', messages: [] }, outputs: { ...(control.finalPrompt===null?{}:{'20':{text:[control.finalPrompt]}}), '9': { images: [{ filename: control.wrongOutput ? '../foreign.png' : `${id}_00001_.png`, subfolder: 'rgdqwer', type: 'output' }] } } } };
+    history = { [id]: { status: { completed: true, status_str: 'success', messages: [] }, outputs: { ...(control.finalPrompt===null?{}:{'20':{text:[control.finalPrompt]}}), '9': { images: [{ filename: control.wrongOutput ? '../foreign.png' : `${id}_00001_.${options.outputExtension??'png'}`, subfolder: 'rgdqwer', type: 'output' }] } } } };
   }
   await new Promise<void>((resolve, reject) => { server.once('error', reject); server.listen(0, '127.0.0.1', resolve); });
   return { url: `http://127.0.0.1:${(server.address() as { port: number }).port}`, calls, control, progress, finish, nodes,

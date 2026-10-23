@@ -67,3 +67,11 @@ result에는 positive,negative,style,unresolved,warnings,engineVersion,valid가 
 
 GET `/api/krea/status`는 인증된 로컬 ComfyUI의 diffusionModels/textEncoders/vaes/loras, 필수 issues 및 선택 기능별 enhancerIssues/rawIssues/loraIssues, engine 메모리 정보와 checkedAt을 반환한다. 연결 실패는 빈 목록과 구체적인 준비 안내다.
 POST `/api/jobs`는 기존 SD 계약 또는 엄격한 KreaInput을 받는다. profile=krea-turbo|krea-raw, checkpoint/textEncoder/vae, sourcePrompt/prompt, enhancer=none|app|engine, negative='', lora=null|{name,strength,trigger},width,height,seed,steps,cfg. 세부 범위는 src/krea.ts와 KREA_SYSTEM.md. 공유 GPU 잠금409, 형식400, 접수202. 실행 전 최신 모델/노드 검사 실패는 job.failed로 저장한다. 확장 사용 시 실제 확장+트리거 문장은 완료 Job.effectivePrompt에 저장한다.
+
+## M5 영상
+
+- GET `/api/video/status`: Comfy 모델/노드 inventory, SaveVideo dialect, CPU옵션, engine, tools.available/message.
+- POST `/api/media/image|video`: 인증된 application/octet-stream; PNG5MiB/MP4 32MiB. 201 UUID MediaInput. 검사 실패400, 검사중409.
+- GET `/api/media/:id` 및 `/file`: 메타데이터/인증원본. DELETE: 미참조만 삭제, 참조중409.
+- POST `/api/jobs`: `profile:wan22|video-tools`, `mode:t2v|i2v|v2v|convert|extract`; 나머지 계약은 src/video.ts. 영상도 단일공유잠금. 반환202; 잘못된입력400; 실행중409.
+- Artifact의 optional mediaType/frames/fps/duration 및 Job.kind=video. 기존PNG호환. GET artifacts는 image/png 또는 video/mp4를 반환한다.

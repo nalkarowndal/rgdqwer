@@ -33,6 +33,13 @@ export class ComfyClient {
     if (!response.ok) { await response.body?.cancel(); throw new EngineHttpError(response.status, `ComfyUI 요청 실패 (HTTP ${response.status}). 모델·노드·서버 로그를 확인하세요.`); }
     return response;
   }
+  async upload(bytes: Buffer, name: string, signal: AbortSignal) {
+    const form=new FormData();form.append('image',new Blob([new Uint8Array(bytes)]),name);form.append('type','input');form.append('overwrite','false');
+    const response=await fetch(new URL('/upload/image',this.base),{method:'POST',redirect:'error',signal:AbortSignal.any([this.signal,signal,AbortSignal.timeout(30000)]),body:form});
+    if(!response.ok){await response.body?.cancel();throw new Error('ComfyUI 원본 업로드 실패');}
+    const value=z.object({name:z.literal(name),subfolder:z.literal(''),type:z.literal('input')}).safeParse(JSON.parse((await boundedBytes(response,65536)).toString()));
+    if(!value.success)throw new Error('ComfyUI 업로드 파일 소유권을 확인하지 못했습니다.');
+  }
   async json(path: string, body?: unknown): Promise<unknown> {
     return JSON.parse((await boundedBytes(await this.request(path, body), 16 * 1024 ** 2)).toString());
   }

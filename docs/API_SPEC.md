@@ -62,3 +62,8 @@ result에는 positive,negative,style,unresolved,warnings,engineVersion,valid가 
 - Worker body7MiB, image5MiB/16×1024²픽셀/8192, PNG/JPEG/WebP 단일 프레임. auth/Host/Origin 검사 후 본문 읽기.
 - 400 입력, 401 인증, 409 분석 중, 413 크기, 422 이미지, 503 미준비, 502 연결/모델 실패/응답 이상. 원시 Worker 오류는 노출하지 않는다.
 - 모델 경로는 Worker 시작 시만 지정; 요청에서 임의 경로나 실행 옵션을 받지 않는다.
+
+## M4 Krea
+
+GET `/api/krea/status`는 인증된 로컬 ComfyUI의 diffusionModels/textEncoders/vaes/loras, 필수 issues 및 선택 기능별 enhancerIssues/rawIssues/loraIssues, engine 메모리 정보와 checkedAt을 반환한다. 연결 실패는 빈 목록과 구체적인 준비 안내다.
+POST `/api/jobs`는 기존 SD 계약 또는 엄격한 KreaInput을 받는다. profile=krea-turbo|krea-raw, checkpoint/textEncoder/vae, sourcePrompt/prompt, enhancer=none|app|engine, negative='', lora=null|{name,strength,trigger},width,height,seed,steps,cfg. 세부 범위는 src/krea.ts와 KREA_SYSTEM.md. 공유 GPU 잠금409, 형식400, 접수202. 실행 전 최신 모델/노드 검사 실패는 job.failed로 저장한다. 확장 사용 시 실제 확장+트리거 문장은 완료 Job.effectivePrompt에 저장한다.

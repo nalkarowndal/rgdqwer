@@ -60,3 +60,13 @@ it('rejects invalid RAW settings without creating or submitting a job',async()=>
   expect((await submit({...kreaInput,profile:'krea-raw'})).statusCode).toBe(400);
   expect((await app.inject({url:'/api/jobs',headers})).json()).toEqual([]);
 });
+
+it('persists the actual engine-expanded prompt including the LoRA trigger',async()=>{
+  const {submit,job,fixture}=await setup();
+  fixture.control.finalPrompt='A softly lit forest, monochrome ink wash style';
+  const response=await submit({...kreaInput,enhancer:'engine',lora:{name:'krea2_darkbrush.safetensors',strength:1,trigger:'monochrome ink wash style'}});
+  expect(response.statusCode).toBe(202);const id=response.json().id;
+  await expect.poll(async()=>(await job(id)).state).toBe('completed');
+  expect((await job(id)).effectivePrompt).toBe(fixture.control.finalPrompt);
+  expect(fixture.calls.find(c=>c.path==='/prompt')?.body).toMatchObject({prompt:{'20':{class_type:'PreviewAny',inputs:{source:['17',0]}}}});
+});

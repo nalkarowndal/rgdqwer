@@ -40,6 +40,7 @@ export interface Job {
   updatedAt: string;
   input: GenerationInput;
   workflowVersion: string;
+  effectivePrompt?: string;
   engineUrl: string;
   promptId: string | null;
   progress: number | null;

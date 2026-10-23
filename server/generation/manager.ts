@@ -117,6 +117,11 @@ export class GenerationManager {
           if (history.status.completed && history.status.status_str === 'success') {
             outputStarted = true; this.update(job, { state: 'postprocessing' }, 'PNG 결과를 검사하고 저장합니다.');
             const outputs = z.object({ images: z.array(z.unknown()).length(1) }).parse(history.outputs['9']);
+            if (isKreaInput(job.input) && job.input.enhancer === 'engine') {
+              const text = z.object({ text: z.array(z.string().min(1).max(16000)).length(1) }).safeParse(history.outputs['20']);
+              if (!text.success || !text.data.text[0].trim()) throw new Error('엔진이 확장한 프롬프트를 확인하지 못했습니다. ComfyUI 기록과 TextGenerate 출력을 확인하세요.');
+              this.update(job, { effectivePrompt: text.data.text[0] });
+            }
             const artifact = await saveOutput(client, job, outputs.images[0], join(this.dataDir, 'outputs'));
             this.update(job, { state: 'completed', progress: 100, artifacts: [artifact], error: null }, '결과 저장 완료'); return;
           }

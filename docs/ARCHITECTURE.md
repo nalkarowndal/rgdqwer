@@ -49,3 +49,7 @@ PromptEditor는 제어형 입력이고 App 부모의 페이지별 초안을 사�
 
 M3 AnalysisStudio는 페이지 이동에도 mounted 상태를 유지한다. 순수 analysis.ts에서 잠금/진행 중 수정값을 병합하고 M2 최종 문서로 변환한다.
 모델 폴더는 Worker CLI, 인증 파일은 Node 데이터 폴더에 속한다. 업로드와 분석 원문은 메모리에서만 유지한다.
+
+## M4 Krea
+
+src/krea.ts는 입력·프리셋·진단 계약, server/generation/krea.ts는 공식 노드 그래프 어댑터다. KreaStudio는 전용 편집/진단 화면이며 AnalysisStudio의 전달 대상을 공유한다. SD와 GenerationManager/JobCard/PNG/artifacts 수명주기를 공유하고 한 번에 한 작업만 추적한다. 모델/노드/라이선스와 실제 하드웨어 검증 범위는 KREA_SYSTEM.md에 명시한다.

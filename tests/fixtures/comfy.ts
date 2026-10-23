@@ -5,7 +5,7 @@ export async function simulatedComfy(options: { extraNodes?: Record<string, unkn
   const calls: { path: string; body: Record<string, unknown> }[] = [];
   let id = ''; let history: Record<string, unknown> = {}; let running = false;
   let releaseCancel = () => {};
-  const control = { autoFinish: true, corruptImage: false, externalBusy: false, rejectPrompt: false, cancelSupported: true, holdResponse: false, rejectHistory: false, wrongOutput: false, holdCancelResponse: false, outputBytes: null as Buffer | null };
+  const control = { finalPrompt: null as string | null, autoFinish: true, corruptImage: false, externalBusy: false, rejectPrompt: false, cancelSupported: true, holdResponse: false, rejectHistory: false, wrongOutput: false, holdCancelResponse: false, outputBytes: null as Buffer | null };
   const png = new PNG({ width: options.width ?? 512, height: options.height ?? 512 }); png.data.fill(255);
   const bytes = PNG.sync.write(png);
   const nodes: Record<string, unknown> = Object.fromEntries(['KSampler','CheckpointLoaderSimple','EmptyLatentImage','CLIPTextEncode','VAEDecode','SaveImage'].map(name => [name, { input: { required: name === 'CheckpointLoaderSimple' ? { ckpt_name: [['test.safetensors']] } : name === 'KSampler' ? { sampler_name: [['euler']], scheduler: [['normal']] } : {} } }]));
@@ -46,7 +46,7 @@ export async function simulatedComfy(options: { extraNodes?: Record<string, unkn
   function finish() {
     if (!running) return;
     progress(20); running = false;
-    history = { [id]: { status: { completed: true, status_str: 'success', messages: [] }, outputs: { '9': { images: [{ filename: control.wrongOutput ? '../foreign.png' : `${id}_00001_.png`, subfolder: 'rgdqwer', type: 'output' }] } } } };
+    history = { [id]: { status: { completed: true, status_str: 'success', messages: [] }, outputs: { ...(control.finalPrompt===null?{}:{'20':{text:[control.finalPrompt]}}), '9': { images: [{ filename: control.wrongOutput ? '../foreign.png' : `${id}_00001_.png`, subfolder: 'rgdqwer', type: 'output' }] } } } };
   }
   await new Promise<void>((resolve, reject) => { server.once('error', reject); server.listen(0, '127.0.0.1', resolve); });
   return { url: `http://127.0.0.1:${(server.address() as { port: number }).port}`, calls, control, progress, finish, nodes,

@@ -1,7 +1,7 @@
 # rgdqwer
 
 ComfyUI를 연결해 사용하는 Windows 로컬 AI 스튜디오입니다.
-**현재 M3 이미지 분석·프롬프트·이미지 생성 구현 버전입니다. 실제 모델/GPU 검증은 보류 중이며 영상·음성 생성은 아직 제공하지 않습니다.**
+**현재 M4 Krea 2·이미지 분석·프롬프트·이미지 생성 구현 버전입니다. 실제 모델/GPU 검증은 보류 중이며 영상·음성 생성은 아직 제공하지 않습니다.**
 
 ## 현재 사용할 수 있는 기능
 
@@ -85,6 +85,11 @@ Anima·Krea·LoRA는 현재 기본 그래프에서 지원하지 않습니다.
 미지원 한국어 구절은 원문 그대로 남기며, LLM이나 외부 번역 서비스를 사용하지 않습니다.
 미저장 초안은 새로고침 시 초기화됩니다. 자세한 동작은 [프롬프트 시스템](docs/PROMPT_SYSTEM.md)을 참고하세요.
 
+### Krea 2 생성
+
+Krea 2 스튜디오에서 RAW/Turbo 모델·인코더·VAE와 필수 노드를 진단하고 자연어 프롬프트, 로컬 확장, 스타일 LoRA, 화면 비율을 설정합니다. Image to Prompt 결과도 바로 전달할 수 있습니다.
+모델은 공식 이용 조건에 따라 직접 준비하세요. 설치·호환성 확인·8GB 제한·실기 게이트는 [Krea 안내](docs/KREA_SYSTEM.md)를 참고하세요.
+
 ### 웹 실행 / 개발
 
 ```powershell
@@ -119,5 +124,5 @@ Linux에서 이미 설치된 Chromium을 사용하려면
 
 ## 다음 단계
 
-M0–M3의 Windows 데스크톱·실제 모델/GPU 검증 게이트를 유지합니다. 다음 구현 단계는 M4 Krea 2입니다. [전체 로드맵](docs/DEVELOPMENT_PHASES.md), [구조](docs/ARCHITECTURE.md),
+M0–M4의 Windows 데스크톱·실제 모델/GPU 검증 게이트를 유지합니다. 다음 구현 단계는 M5 영상 스튜디오입니다. [전체 로드맵](docs/DEVELOPMENT_PHASES.md), [구조](docs/ARCHITECTURE.md),
 [요구사항 원문](docs/REQUIREMENTS.md), [보안](docs/SECURITY.md)을 참고하세요.

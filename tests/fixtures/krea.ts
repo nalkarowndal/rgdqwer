@@ -7,7 +7,7 @@ export function kreaNodes():Record<string,{input:{required:Record<string,unknown
     KSampler:{sampler_name:[['euler']],scheduler:[['normal','simple']]},
     LoraLoaderModelOnly:{lora_name:[['krea2_darkbrush.safetensors','custom.safetensors']]},
     TextGenerate:{sampling_mode:['COMFY_DYNAMICCOMBO_V3',{options:[{key:'on'},{key:'off'}]}]},
-    EmptyLatentImage:{},CLIPTextEncode:{},ConditioningZeroOut:{},VAEDecode:{},SaveImage:{},StringConcatenate:{},ModelSamplingFlux:{},
+    EmptyLatentImage:{},CLIPTextEncode:{},ConditioningZeroOut:{},VAEDecode:{},SaveImage:{},StringConcatenate:{},ModelSamplingFlux:{},PreviewAny:{},
   };
   return Object.fromEntries(Object.entries(entries).map(([name,required])=>[name,{input:{required}}]));
 }

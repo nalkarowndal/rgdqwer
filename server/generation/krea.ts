@@ -17,7 +17,7 @@ export function inspectKrea(raw: unknown): KreaInventory {
   for(const [node,key,value] of [['CLIPLoader','type','krea2'],['UNETLoader','weight_dtype','default'],['KSampler','sampler_name','euler'],['KSampler','scheduler','simple']])
     if(!options(node,key).includes(value)) issues.push(`${node}에서 ${key}=${value} 지원 필요`);
   return {diffusionModels:options('UNETLoader','unet_name'),textEncoders:options('CLIPLoader','clip_name'),vaes:options('VAELoader','vae_name'),loras:options('LoraLoaderModelOnly','lora_name'),
-    issues,enhancerIssues:missing(['TextGenerate']),rawIssues:missing(['ModelSamplingFlux']),loraIssues:missing(['LoraLoaderModelOnly','StringConcatenate'])};
+    issues,enhancerIssues:missing(['TextGenerate','PreviewAny']),rawIssues:missing(['ModelSamplingFlux']),loraIssues:missing(['LoraLoaderModelOnly','StringConcatenate'])};
 }
 export { kreaIssues } from '../../src/krea.js';
 export function buildKreaWorkflow(input: KreaInput,id: string): Workflow {
@@ -44,6 +44,7 @@ export function buildKreaWorkflow(input: KreaInput,id: string): Workflow {
     graph['17']={class_type:'StringConcatenate',inputs:{string_a:graph['6'].inputs.text,string_b:input.lora.trigger,delimiter:', '}};
     graph['6'].inputs.text=['17',0];
   }
+  if(input.enhancer==='engine') graph['20']={class_type:'PreviewAny',inputs:{source:graph['6'].inputs.text}};
   if(raw) {
     // Krea standalone's CFG is cond + cfg*(cond-uncond). Comfy uses uncond + cfg*(cond-uncond).
     // Official RAW schedule interpolates mu over sequence lengths 256..6400 (256..1280 pixels).

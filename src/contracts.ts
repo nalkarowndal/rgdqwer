@@ -1,3 +1,4 @@
+import type { KreaInput } from './krea.js';
 import type { PromptDocument } from './prompt.js';
 export interface Settings {
   comfyUrl: string;
@@ -37,8 +38,9 @@ export interface Job {
   state: 'preparing' | 'queued' | 'running' | 'cancelling' | 'postprocessing' | 'completed' | 'failed' | 'cancelled' | 'interrupted' | 'unknown';
   createdAt: string;
   updatedAt: string;
-  input: ImageInput;
+  input: GenerationInput;
   workflowVersion: string;
+  effectivePrompt?: string;
   engineUrl: string;
   promptId: string | null;
   progress: number | null;
@@ -54,3 +56,5 @@ export interface ImageInput {
   seed: number; steps: number; cfg: number;
 }
 export interface Artifact { id: string; fileName: string; width: number; height: number }
+
+export type GenerationInput = ImageInput | KreaInput;

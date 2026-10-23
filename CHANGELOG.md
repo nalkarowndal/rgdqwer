@@ -1,5 +1,13 @@
 # 변경 기록
 
+## 0.5.0 — M4 Krea 2
+
+- 선택형 RAW/Turbo 전용 화면과 실제 로컬 모델/필수 노드/메모리 진단.
+- 공식 Turbo API 그래프, CFG·shift를 변환한 RAW 어댑터, 단일 작업 큐·PNG 저장·취소·복구 공유.
+- 한국어 키워드 정리 / 공식 로컬 TextGenerate 확장 중 하나 선택, 실제 확장문 저장.
+- 공식9종 스타일·로컬 LoRA 강도/트리거, 해상도/시드, Image to Prompt 전달, 기록 재사용.
+- 실제 GPU·Windows 데스크톱·RAW/Turbo 품질과8GB성능은 검증 보류.
+
 ## 0.4.0 — M3 Image to Prompt
 
 - 로컬 Florence-2 캡션/OCR, WD14 ONNX 태그 CPU 어댑터와 선택형 패키지 잠금.

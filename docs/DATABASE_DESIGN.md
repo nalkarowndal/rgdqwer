@@ -34,3 +34,7 @@ value는 PromptRecord 전체 snapshot이며 문서 버전과 변환 엔진 버�
 프리셋 100개 상한은 새 저장을 거절한다. history는 새 저장과 같은 mutate에서 오래된 항목을 제거해100개를 유지한다.
 동일 시각에는 rowid로 삽입 순서를 유지한다. 최초 Job 저장에 원문 문서가 있으면 history를 함께 저장한다.
 쓰기 실패 시 Job와 history 모두 롤백한다. 화면 초안은 자동 저장하지 않는다.
+
+## M4 확장
+
+스키마 v3 유지. jobs.settings_json의 input은 SD ImageInput 또는 KreaInput union이다. Krea도 kind=image이며 workflowVersion=krea2-v1. 선택형 effectivePrompt는 엔진 확장 후 실제 문장이다. 기존 job은 새 필드 없이 읽힌다. Krea 원문/최종입력/모델3종/LoRA/확장방식은 job JSON에 보존하고 SD prompt_records에는 삽입하지 않는다.

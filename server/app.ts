@@ -1,3 +1,6 @@
+import { kreaInputSchema, isKreaInput } from '../src/krea.js';
+import { inspectKrea } from './generation/krea.js';
+import { ComfyClient } from './generation/client.js';
 import { registerAnalysisRoutes } from './analysis.js';
 import { promptRecordInputSchema } from '../src/prompt.js';
 import Fastify, { type FastifyError } from 'fastify';
@@ -48,7 +51,7 @@ export async function createApp(options: { dataDir: string; uiDir?: string; devO
     reply.code(status).send({ error: status === 500 ? '로컬 처리에 실패했습니다. 저장 경로와 디스크 공간을 확인하세요.' : '요청 형식을 확인하세요.' });
   });
   app.get('/api/session', async () => ({ token }));
-  app.get('/api/health', async () => ({ status: 'ok', app: 'rgdqwer', milestone: 'M3' }));
+  app.get('/api/health', async () => ({ status: 'ok', app: 'rgdqwer', milestone: 'M4' }));
   app.get('/api/settings', async () => store.getSettings());
   app.put('/api/settings', async (request, reply) => {
     const result = settingsSchema.safeParse(request.body);
@@ -56,7 +59,15 @@ export async function createApp(options: { dataDir: string; uiDir?: string; devO
     return store.saveSettings(result.data);
   });
   app.get('/api/engine/status', async () => probeComfy(store.getSettings().comfyUrl));
-  app.get('/api/worker/status', async () => probeWorker(store.getSettings().workerUrl));
+  app.get('/api/krea/status', async () => {
+    const base = store.getSettings().comfyUrl;
+    const client = new ComfyClient(base, AbortSignal.timeout(10000));
+    const [engine, inventory] = await Promise.all([probeComfy(base), client.json('/object_info').then(inspectKrea).catch(() => ({
+      diffusionModels: [], textEncoders: [], vaes: [], loras: [], issues: ['ComfyUI 노드 목록을 읽지 못했습니다. 서버 연결과 버전을 확인하세요.'], enhancerIssues: [], rawIssues: [], loraIssues: [],
+    }))]);
+    return { ...inventory, engine, checkedAt: new Date().toISOString() };
+  });
+  app.get('/api/worker/status' , async () => probeWorker(store.getSettings().workerUrl));
   app.get('/api/prompt-records', async () => store.listPromptRecords());
   app.post('/api/prompt-records', async (request, reply) => {
     const parsed = promptRecordInputSchema.safeParse(request.body);
@@ -70,7 +81,8 @@ export async function createApp(options: { dataDir: string; uiDir?: string; devO
   });
   app.get('/api/jobs', async () => store.listJobs());
   app.post('/api/jobs', async (request, reply) => {
-    const parsed = imageInputSchema.safeParse(request.body);
+    const krea = request.body && typeof request.body === 'object' && 'profile' in request.body && typeof request.body.profile === 'string' && isKreaInput({ profile: request.body.profile });
+    const parsed = (krea ? kreaInputSchema : imageInputSchema).safeParse(request.body);
     if (!parsed.success) return reply.code(400).send({ error: parsed.error.issues.map(i => i.message).join(' ') });
     return reply.code(202).send(generation.create(parsed.data));
   });

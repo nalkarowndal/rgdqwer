@@ -1,9 +1,10 @@
+import { isKreaInput } from './krea';
 import { useEffect, useState, type Dispatch, type SetStateAction, type FormEvent } from 'react';
 import { Download, Image as ImageIcon, RefreshCw, Square, WandSparkles } from 'lucide-react';
 import { PromptEditor } from './PromptEditor';
 import { compilePrompt, createPromptDocument, type PromptDocument } from './prompt';
 import { api, artifactBlob } from './api';
-import type { EngineStatus, ImageInput, Job } from './contracts';
+import type { EngineStatus, ImageInput, GenerationInput, Job } from './contracts';
 
 export type ImageDraft = Omit<ImageInput, 'seed' | 'prompt' | 'negative' | 'promptDocument'> & { seed: string; promptDocument: PromptDocument };
 export const initialDraft: ImageDraft = { profile: 'sd15', checkpoint: '', promptDocument: createPromptDocument(), width: 512, height: 512, seed: '', steps: 20, cfg: 7 };
@@ -12,7 +13,7 @@ export const isPending = (job: Job) => !['completed','failed','cancelled'].inclu
 
 export function ImageStudio({ engine, jobs, draft, setDraft, onChanged, reuse }: {
   engine?: EngineStatus; jobs: Job[]; draft: ImageDraft; setDraft: Dispatch<SetStateAction<ImageDraft>>;
-  onChanged: () => Promise<void>; reuse: (input: ImageInput) => void;
+  onChanged: () => Promise<void>; reuse: (input: GenerationInput) => void;
 }) {
   const [sending, setSending] = useState(false); const [error, setError] = useState('');
   useEffect(() => {
@@ -29,6 +30,7 @@ export function ImageStudio({ engine, jobs, draft, setDraft, onChanged, reuse }:
   }
   const ready = engine?.state === 'connected' && engine.checkpoints.includes(draft.checkpoint);
   const pending = jobs.some(isPending);
+  const latest = jobs.find(job => !isKreaInput(job.input));
   const maximum = draft.profile === 'sd15' ? 768 : 1024;
   return <><div className="page-heading"><div><p className="eyebrow">TEXT TO IMAGE</p><h1>이미지 스튜디오</h1><p className="subtitle">내 ComfyUI의 체크포인트로 이미지를 생성하고 설정을 함께 보관합니다.</p></div><span className="milestone-tag">M2 · 배치 1</span></div>
     <div className="image-layout"><form className="panel settings-panel image-form" onSubmit={event => void submit(event)}>
@@ -56,14 +58,14 @@ export function ImageStudio({ engine, jobs, draft, setDraft, onChanged, reuse }:
       {!ready && <p className="field-help">설정에서 ComfyUI를 연결하고 설치된 체크포인트를 선택하세요.</p>}
       {pending && <p className="field-help">기존 작업의 실행 또는 상태 확인이 끝난 뒤 새로 생성할 수 있습니다.</p>}
     </form><section className="image-result" aria-label="현재 작업">
-      {jobs[0] ? <JobCard key={jobs[0].id} job={jobs[0]} onChanged={onChanged} reuse={reuse} /> : <div className="panel empty-state"><ImageIcon size={42} /><h2>첫 이미지를 만들어 보세요</h2><p>생성 결과와 진행 상태가 여기에 표시됩니다.</p></div>}
+      {latest ? <JobCard key={latest.id} job={latest} onChanged={onChanged} reuse={reuse} /> : <div className="panel empty-state"><ImageIcon size={42} /><h2>첫 이미지를 만들어 보세요</h2><p>생성 결과와 진행 상태가 여기에 표시됩니다.</p></div>}
     </section></div></>;
 }
-export function JobHistory({ jobs, onChanged, reuse }: { jobs: Job[]; onChanged: () => Promise<void>; reuse: (input: ImageInput) => void }) {
+export function JobHistory({ jobs, onChanged, reuse }: { jobs: Job[]; onChanged: () => Promise<void>; reuse: (input: GenerationInput) => void }) {
   return <><div className="page-heading"><div><p className="eyebrow">YOUR CREATIONS</p><h1>작업 기록 / 라이브러리</h1><p className="subtitle">최근 20개 작업 · 생성 설정과 저장된 PNG를 다시 사용할 수 있습니다.</p></div></div>
     {jobs.length ? <div className="history-grid">{jobs.slice(0,20).map(job => <JobCard key={job.id} job={job} onChanged={onChanged} reuse={reuse} />)}</div> : <div className="panel empty-state"><h2>저장된 작업이 없습니다</h2><p>이미지 스튜디오에서 첫 생성을 시작하세요.</p></div>}</>;
 }
-function JobCard({ job, onChanged, reuse }: { job: Job; onChanged: () => Promise<void>; reuse: (input: ImageInput) => void }) {
+export function JobCard({ job, onChanged, reuse }: { job: Job; onChanged: () => Promise<void>; reuse: (input: GenerationInput) => void }) {
   const [image, setImage] = useState(''); const [imageError, setImageError] = useState('');
   const [error, setError] = useState(''); const [busy, setBusy] = useState(false);
   const artifact = job.artifacts[0]; const artifactId = artifact?.id;
@@ -83,13 +85,13 @@ function JobCard({ job, onChanged, reuse }: { job: Job; onChanged: () => Promise
   return <article className="panel job-card"><div className="job-heading"><h2>{labels[job.state]}</h2><time>{new Date(job.createdAt).toLocaleString('ko-KR')}</time></div>
     {image ? <img src={image} alt="생성 결과" className="generated-image" /> : <div className="result-placeholder"><ImageIcon size={34} /><span>{job.state === 'completed' ? '결과 불러오는 중' : labels[job.state]}</span></div>}
     {job.progress !== null && <div className="sampler-progress"><label htmlFor={`progress-${job.id}`}>샘플러 진행률 {job.progress}%</label><progress id={`progress-${job.id}`} value={job.progress} max={100} /><small>전체 소요 시간의 비율이 아닙니다. 샘플링 후 디코딩·저장이 진행됩니다.</small></div>}
-    <p className="job-prompt">{job.input.prompt}</p><p className="field-help">{job.input.profile} · {job.input.width} × {job.input.height} · 시드 {job.input.seed}</p>
+    {isKreaInput(job.input) && job.input.enhancer === 'engine' && <p className="field-help">{job.effectivePrompt ? '아래는 엔진 확장 후 실제 생성 프롬프트입니다.' : '아래는 엔진 확장 전 입력입니다. 생성 완료 후 확장 결과를 표시합니다.'}</p>}<p className="job-prompt">{job.effectivePrompt ?? job.input.prompt}</p><p className="field-help">{job.input.profile} · {job.input.width} × {job.input.height} · 시드 {job.input.seed}</p>
     {(error || job.error || imageError) && <div className="notice error" role="alert">{error || job.error || imageError}</div>}
     <div className="form-actions">
       {image && <a className="primary-button" href={image} download={artifact.fileName}><Download size={15} />PNG 다운로드</a>}
       <button className="secondary-button" onClick={() => reuse(job.input)}>설정 재사용</button>
       {['preparing','queued','running'].includes(job.state) && <button className="secondary-button" disabled={busy} onClick={() => void action('cancel')}><Square size={13} />작업 취소</button>}
       {['unknown','interrupted'].includes(job.state) && <button className="secondary-button" disabled={busy} onClick={() => void action('resume')}><RefreshCw size={14} />상태 추적 재개</button>}
-    </div><details className="job-log"><summary>생성 설정 및 작업 로그</summary><dl><dt>체크포인트</dt><dd>{job.input.checkpoint}</dd><dt>Negative</dt><dd>{job.input.negative || '없음'}</dd><dt>스텝 / CFG</dt><dd>{job.input.steps} / {job.input.cfg}</dd><dt>엔진 작업 ID</dt><dd>{job.promptId ?? '제출 전'}</dd></dl><pre>{job.log.join('\n')}</pre></details>
+    </div><details className="job-log"><summary>생성 설정 및 작업 로그</summary><dl><dt>체크포인트</dt><dd>{job.input.checkpoint}</dd><dt>Negative</dt><dd>{job.input.negative || '없음'}</dd><dt>스텝 / CFG</dt><dd>{job.input.steps} / {job.input.cfg}</dd>{isKreaInput(job.input) && <><dt>텍스트 인코더 / VAE</dt><dd>{job.input.textEncoder} / {job.input.vae}</dd><dt>확장 방식 / 원문</dt><dd>{job.input.enhancer} / {job.input.sourcePrompt}</dd><dt>LoRA</dt><dd>{job.input.lora ? `${job.input.lora.name} · ${job.input.lora.strength} · ${job.input.lora.trigger}` : '없음'}</dd></>}<dt>엔진 작업 ID</dt><dd>{job.promptId ?? '제출 전'}</dd></dl><pre>{job.log.join('\n')}</pre></details>
   </article>;
 }

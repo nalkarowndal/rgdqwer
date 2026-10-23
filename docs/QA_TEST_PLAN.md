@@ -3,6 +3,33 @@
 검증일: 2026-10-21 (Asia/Seoul). 작업 환경: Linux, Node 24.19.0, Python 3.12.14.
 모델/GPU 검증 결과와 애플리케이션 검증 결과를 구분한다.
 
+## M4 실행 기록 — 2026-10-23
+
+| 검사 | 결과 | 범위 |
+|---|---|---|
+| 타입 / lint / build | 통과 | v0.5.0 |
+| Vitest | 82개 통과 | 기존69 + Krea 계약/그래프7 + HTTP/lifecycle6 |
+| Python | 14개 통과 | 기존 Worker 회귀 |
+| Playwright | 8개 통과 | 기존6 + Krea 설정/스타일/생성/재사용/390px + 분석 전달 |
+| 실제 Node↔Python HTTP smoke | 통과 | 인증/디코딩/미설치503 회귀, inferenceVerified=false |
+| Linux Electron smoke | 통과 | 제품 sandbox/contextIsolation=true,nodeIntegration=false, 테스트 전용 Linux sandbox override |
+| npm audit | 0건 | moderate 이상 포함 |
+| Windows / Linux CI | 양쪽 통과 | 코드24515638,82JS/14Python/8E2E 및 실제 Worker HTTP smoke |
+| 실제 Krea RAW/Turbo / Qwen3VL 확장 / LoRA | 미검증 | 로컬 가중치와 GPU 없음 |
+| Windows 데스크톱 / RTX2060SUPER8GB | 미검증 | CI와 사용자의 실기 구분 |
+
+Krea 신규 계약/경로의 RED→GREEN, 확장문 저장 누락 회귀 RED→GREEN을 기록했다.
+브라우저 초기 실패: Krea 미구현 화면, 잘못된 분석 캡션 label을 실제 label로 수정, 기존8GB 안내 유지 후 전체8개 통과.
+새Job 생성 시 모델 목록을 재검사하고 SD와 한 작업 잠금을 공유하며 Krea 설정/PNG/확장문을 저장한다.
+캡처: [Krea 화면](qa/m4-krea.png), [390px 화면](qa/m4-krea-mobile.png). 목록·GPU 없음·흰PNG는 모의fixture로 실제 추론 증거가 아니다.
+
+[CI #39904204443](https://github.com/nalkarowndal/rgdqwer/actions/runs/39904204443)는 코드 커밋 `245156383da5f3f42ca4fcf13e1731609aabc1c0`에서 양쪽 OS 모두 성공했다. 이후 커밋은 검증 문서만 갱신했다.
+
+독립 리뷰: Critical/Important 없음, RAW에서 사용하지 않는 ConditioningZeroOut까지 요구하는 경미한 과잉 검사1건 유예. [상세 리뷰·결정](superpowers/reviews/2026-10-23-m4-review.md).
+
+남은 실기 게이트: 공식 모델 RAW/Turbo 각각 생성/저장/취소/재시작, 한국어 확장 품질, LoRA9종 및2K,
+8GB에서 RAM/VRAM/시간/실패 원인 기록. RAW 어댑터와 CFG/shift 근거는 [Krea 시스템](KREA_SYSTEM.md).
+
 ## M3 실행 기록 — 2026-10-22
 
 | 검사 | 결과 | 범위 |

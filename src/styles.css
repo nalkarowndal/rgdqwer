@@ -38,3 +38,8 @@
 @media (max-width: 600px) { .analysis-source, .analysis-editor { padding: 16px; } .analysis-fields { grid-template-columns: 1fr; } }
 .analysis-layout textarea, .analysis-layout select { border: 1px solid #d9e3dc; border-radius: 8px; background: #fbfcfb; padding: 10px 12px; color: #263e3b; font: inherit; font-size: 13px; }
 .analysis-layout textarea:focus, .analysis-layout select:focus { outline: 2px solid #a0cbb4; outline-offset: 1px; }
+
+.krea-memory { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 16px; font-size: 13px; }
+.krea-memory dt { color: var(--muted); }
+.krea-memory dd { margin: 0; overflow-wrap: anywhere; }
+.image-result .field-help { overflow-wrap: anywhere; }

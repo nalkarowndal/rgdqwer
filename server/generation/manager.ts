@@ -1,8 +1,10 @@
+import { isKreaInput } from '../../src/krea.js';
+import { buildKreaWorkflow, inspectKrea, kreaIssues } from './krea.js';
 import { randomUUID } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
 import { join } from 'node:path';
 import { z } from 'zod';
-import type { ImageInput, Job } from '../../src/contracts.js';
+import type { GenerationInput, Job } from '../../src/contracts.js';
 import type { openStore } from '../store.js';
 import { buildWorkflow } from './workflow.js';
 import { ComfyClient, EngineHttpError } from './client.js';
@@ -24,11 +26,11 @@ export class GenerationManager {
     if (message) job.log = [...job.log, `${job.updatedAt} ${message}`].slice(-50);
     this.store.putJob(job);
   }
-  create(input: ImageInput): Job {
+  create(input: GenerationInput): Job {
     if (this.active || this.stopped.signal.aborted || this.store.listJobs().some(job => !terminal.has(job.state))) throw new GenerationError(409, '기존 작업의 실행 또는 상태 확인이 끝난 뒤 생성하세요. GPU 작업은 한 번에 하나만 실행합니다.');
     const now = new Date().toISOString();
     const job: Job = { id: randomUUID(), kind: 'image', state: 'preparing', input, engineUrl: this.store.getSettings().comfyUrl,
-      workflowVersion: 'sd-base-v1', createdAt: now, updatedAt: now, promptId: null, progress: null, error: null, artifacts: [], log: [], cancelRequested: false };
+      workflowVersion: isKreaInput(input) ? 'krea2-v1' : 'sd-base-v1', createdAt: now, updatedAt: now, promptId: null, progress: null, error: null, artifacts: [], log: [], cancelRequested: false };
     this.store.putJob(job); this.launch(job, false); return job;
   }
   recover() {
@@ -74,7 +76,13 @@ export class GenerationManager {
     const client = new ComfyClient(job.engineUrl, this.stopped.signal);
     let closeSocket = () => {}; let ambiguous = resumed; let outputStarted = false;
     try {
-      if (!resumed) await client.preflight(job.input.checkpoint);
+      if (!resumed) {
+        if (isKreaInput(job.input)) {
+          const issues = kreaIssues(job.input, inspectKrea(await client.json('/object_info')));
+          if (issues.length) throw new Error(issues.join(' · '));
+          if ((await client.queue()).length) throw new Error('ComfyUI에 다른 작업이 있습니다. 작업이 끝난 뒤 다시 시도하세요.');
+        } else await client.preflight(job.input.checkpoint);
+      }
       if (job.cancelRequested && !job.promptId) { this.update(job, { state: 'cancelled' }, '제출 전에 취소했습니다.'); return; }
       closeSocket = await client.watch(job.id, (id, value) => {
         if (id !== job.promptId || this.stopped.signal.aborted || !['queued','running'].includes(job.state)) return;
@@ -85,7 +93,7 @@ export class GenerationManager {
         if (job.cancelRequested) { this.update(job, { state: 'cancelled' }, '제출 전에 취소했습니다.'); return; }
         this.update(job, { state: 'queued', promptId: job.id }, 'ComfyUI에 생성 요청을 제출합니다.'); ambiguous = true;
         let promptId: string;
-        try { promptId = await client.submit(buildWorkflow(job.input, job.id), job.id); }
+        try { promptId = await client.submit(isKreaInput(job.input) ? buildKreaWorkflow(job.input, job.id) : buildWorkflow(job.input, job.id), job.id); }
         catch (error) {
           if (error instanceof EngineHttpError && error.status >= 400 && error.status < 500) ambiguous = false;
           throw error;
@@ -109,6 +117,11 @@ export class GenerationManager {
           if (history.status.completed && history.status.status_str === 'success') {
             outputStarted = true; this.update(job, { state: 'postprocessing' }, 'PNG 결과를 검사하고 저장합니다.');
             const outputs = z.object({ images: z.array(z.unknown()).length(1) }).parse(history.outputs['9']);
+            if (isKreaInput(job.input) && job.input.enhancer === 'engine') {
+              const text = z.object({ text: z.array(z.string().min(1).max(16000)).length(1) }).safeParse(history.outputs['20']);
+              if (!text.success || !text.data.text[0].trim()) throw new Error('엔진이 확장한 프롬프트를 확인하지 못했습니다. ComfyUI 기록과 TextGenerate 출력을 확인하세요.');
+              this.update(job, { effectivePrompt: text.data.text[0] });
+            }
             const artifact = await saveOutput(client, job, outputs.images[0], join(this.dataDir, 'outputs'));
             this.update(job, { state: 'completed', progress: 100, artifacts: [artifact], error: null }, '결과 저장 완료'); return;
           }

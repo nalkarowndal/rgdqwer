@@ -1,3 +1,4 @@
+import { isKreaInput } from '../src/krea.js';
 import { randomUUID } from 'node:crypto';
 import { compilePrompt, promptRecordInputSchema, type PromptRecord, type PromptRecordInput } from '../src/prompt.js';
 import initSqlJs from 'sql.js';
@@ -80,7 +81,7 @@ export async function openStore(dataDir: string) {
     putJob(job: Job) {
       mutate(() => {
         const isNew = !db.exec('SELECT id FROM jobs WHERE id=?', [job.id]).length;
-        if (isNew && job.input.promptDocument) insertPromptRecord({ kind: 'history', name: job.input.prompt.slice(0,80).trim() || '이미지 생성', profile: job.input.profile, document: job.input.promptDocument }, job.id);
+        if (isNew && !isKreaInput(job.input) && job.input.promptDocument) insertPromptRecord({ kind: 'history', name: job.input.prompt.slice(0,80).trim() || '이미지 생성', profile: job.input.profile, document: job.input.promptDocument }, job.id);
         db.run(`INSERT INTO jobs(id,kind,state,settings_json,created_at,error) VALUES(?,?,?,?,?,?)
           ON CONFLICT(id) DO UPDATE SET state=excluded.state,settings_json=excluded.settings_json,error=excluded.error`,
         [job.id, job.kind, job.state, JSON.stringify(job), job.createdAt, job.error]);

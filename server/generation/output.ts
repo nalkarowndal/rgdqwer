@@ -1,3 +1,4 @@
+import { isVoiceInput } from '../../src/voice.js';
 import { PNG } from 'pngjs';
 import { mkdir, rename, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';

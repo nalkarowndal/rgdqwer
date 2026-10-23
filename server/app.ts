@@ -1,3 +1,5 @@
+import { voiceInputSchema } from '../src/voice.js';
+import { voiceStatus } from './voice/engine.js';
 import { registerVoiceRoutes } from './voice/routes.js';
 import { isVideoInput,videoInputSchema } from '../src/video.js';
 import { inspectVideo } from './generation/video.js';
@@ -72,6 +74,7 @@ export async function createApp(options: { dataDir: string; uiDir?: string; devO
     }))]);
     return { ...inventory, engine, checkedAt: new Date().toISOString() };
   });
+  app.get('/api/voice/status',async()=>voiceStatus());
   app.get('/api/video/status',async()=>{
     const base=store.getSettings().comfyUrl;const client=new ComfyClient(base,AbortSignal.timeout(10000));
     const [engine,inventory,tools]=await Promise.all([probeComfy(base),client.json('/object_info').then(inspectVideo).catch(()=>({...inspectVideo({}),issues:['ComfyUI 연결과 Wan 노드 설치를 확인하세요.']})),mediaToolsStatus()]);
@@ -93,7 +96,8 @@ export async function createApp(options: { dataDir: string; uiDir?: string; devO
   app.post('/api/jobs', async (request, reply) => {
     const krea = request.body && typeof request.body === 'object' && 'profile' in request.body && typeof request.body.profile === 'string' && isKreaInput({ profile: request.body.profile });
     const video = request.body && typeof request.body === 'object' && 'profile' in request.body && typeof request.body.profile === 'string' && isVideoInput({profile:request.body.profile});
-    const parsed = (video ? videoInputSchema : krea ? kreaInputSchema : imageInputSchema).safeParse(request.body);
+    const voice = request.body && typeof request.body === 'object' && 'profile' in request.body && request.body.profile==='voice';
+    const parsed = (voice ? voiceInputSchema : video ? videoInputSchema : krea ? kreaInputSchema : imageInputSchema).safeParse(request.body);
     if (!parsed.success) return reply.code(400).send({ error: parsed.error.issues.map(i => i.message).join(' ') });
     return reply.code(202).send(generation.create(parsed.data));
   });
@@ -105,7 +109,7 @@ export async function createApp(options: { dataDir: string; uiDir?: string; devO
   app.post<{ Params: { id: string } }>('/api/jobs/:id/resume', async request => generation.resume(request.params.id));
   app.get<{ Params: { id: string } }>('/api/artifacts/:id', async (request, reply) => {
     const artifact = store.getArtifact(request.params.id);
-    if (!artifact || !/^[a-f0-9-]+\.(png|mp4)$/.test(artifact.fileName)) return reply.code(404).send({ error: '결과 파일을 찾을 수 없습니다.' });
+    if (!artifact || !/^[a-f0-9-]+\.(png|mp4|wav|mp3)$/.test(artifact.fileName)) return reply.code(404).send({ error: '결과 파일을 찾을 수 없습니다.' });
     const path = join(options.dataDir, 'outputs', artifact.fileName);
     try { await access(path); } catch { return reply.code(404).send({ error: '결과 파일이 이동되거나 삭제되었습니다.' }); }
     return reply.type(artifact.mediaType ?? 'image/png').header('Content-Disposition', `inline; filename="${artifact.fileName}"`).send(createReadStream(path));

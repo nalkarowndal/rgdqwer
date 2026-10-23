@@ -1,3 +1,4 @@
+import type { VoiceInput,VoiceProfile } from './voice.js';
 import type { VideoInput } from './video.js';
 import type { KreaInput } from './krea.js';
 import type { PromptDocument } from './prompt.js';
@@ -35,7 +36,8 @@ export interface WorkerStatus {
 }
 export interface Job {
   id: string;
-  kind: 'image' | 'video';
+  kind: 'image' | 'video' | 'audio';
+  voiceProfile?: VoiceProfile;
   state: 'preparing' | 'queued' | 'running' | 'cancelling' | 'postprocessing' | 'completed' | 'failed' | 'cancelled' | 'interrupted' | 'unknown';
   createdAt: string;
   updatedAt: string;
@@ -56,6 +58,6 @@ export interface ImageInput {
   prompt: string; negative: string; width: number; height: number;
   seed: number; steps: number; cfg: number;
 }
-export interface Artifact { id: string; fileName: string; width: number; height: number; mediaType?: 'image/png' | 'video/mp4'; frames?: number; fps?: number; duration?: number; presentationDuration?: number; hasAudio?: boolean }
+export interface Artifact { id: string; fileName: string; width?: number; height?: number; mediaType?: 'image/png' | 'video/mp4' | 'audio/wav' | 'audio/mpeg'; frames?: number; fps?: number; duration?: number; presentationDuration?: number; hasAudio?: boolean }
 
-export type GenerationInput = ImageInput | KreaInput | VideoInput;
+export type GenerationInput = ImageInput | KreaInput | VideoInput | VoiceInput;

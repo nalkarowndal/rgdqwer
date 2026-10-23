@@ -1,3 +1,4 @@
+import { rvcModels } from './engine.js';
 import type { FastifyInstance } from 'fastify';
 import { randomUUID } from 'node:crypto';
 import { mkdir,writeFile,rm,rename,access } from 'node:fs/promises';
@@ -29,7 +30,9 @@ export async function registerVoiceRoutes(app:FastifyInstance,dataDir:string,sto
   const parsed=voiceProfileSchema.safeParse(request.body);if(!parsed.success)return reply.code(400).send({error:'프로필의 참고 음성·엔진·언어·사용 허가를 확인하세요.'});
   const p=parsed.data;if(p.referenceId){const source=store.getAudio(p.referenceId);if(!source||source.duration<3||source.duration>30)return reply.code(400).send({error:'참고 음성은 3–30초여야 합니다.'});}
   if(store.listVoiceProfiles().length>=100)return reply.code(409).send({error:'프로필은 최대 100개입니다.'});
-  const profile={...p,id:randomUUID(),consentedAt:new Date().toISOString()};store.putVoiceProfile(profile);return reply.code(201).send(profile);
+  let rvcModelPath:string|undefined;
+  if(p.engines.includes('rvc')){try{const model=rvcModels().find(m=>m.id===p.rvcModel);if(!model)throw new Error();await access(model.path);if(model.index)await access(model.index);rvcModelPath=model.path;}catch{return reply.code(400).send({error:'등록된 로컬 RVC 모델·인덱스를 확인하세요.'});}}
+  const profile={...p,rvcModelPath,id:randomUUID(),consentedAt:new Date().toISOString()};store.putVoiceProfile(profile);return reply.code(201).send(profile);
  });
  app.delete<{Params:{id:string}}>('/api/voice/profiles/:id',async(request,reply)=>{
   if(!store.getVoiceProfile(request.params.id))return reply.code(404).send({error:'프로필이 없습니다.'});store.deleteVoiceProfile(request.params.id);return {deleted:true};

@@ -1,3 +1,5 @@
+import { isVoiceInput } from '../../src/voice.js';
+import { resolveVoiceProfile,runVoiceJob } from '../voice/engine.js';
 import { isVideoInput, videoIssues, type VideoInventory } from '../../src/video.js';
 import { buildVideoWorkflow, inspectVideo } from './video.js';
 import { localVideoArtifacts,prepareVideoSource,saveVideoOutput } from './video-output.js';
@@ -32,9 +34,11 @@ export class GenerationManager {
   }
   create(input: GenerationInput): Job {
     if (this.active || this.stopped.signal.aborted || this.store.listJobs().some(job => !terminal.has(job.state))) throw new GenerationError(409, '기존 작업의 실행 또는 상태 확인이 끝난 뒤 생성하세요. GPU 작업은 한 번에 하나만 실행합니다.');
+    let voiceProfile;
+    if(isVoiceInput(input)){try{voiceProfile=resolveVoiceProfile(input,this.store);}catch(error){throw new GenerationError(400,error instanceof Error?error.message: '음성 프로필 확인 실패');}}
     const now = new Date().toISOString();
-    const job: Job = { id: randomUUID(), kind: isVideoInput(input) ? 'video' : 'image', state: 'preparing', input, engineUrl: this.store.getSettings().comfyUrl,
-      workflowVersion: isVideoInput(input) ? (input.profile==='wan22'?'wan22-v1':'ffmpeg-v1') : isKreaInput(input) ? 'krea2-v1' : 'sd-base-v1', createdAt: now, updatedAt: now, promptId: null, progress: null, error: null, artifacts: [], log: [], cancelRequested: false };
+    const job: Job = { id: randomUUID(), voiceProfile, kind: isVoiceInput(input)?'audio':isVideoInput(input) ? 'video' : 'image', state: 'preparing', input, engineUrl: this.store.getSettings().comfyUrl,
+      workflowVersion: isVoiceInput(input)?'voice-v1':isVideoInput(input) ? (input.profile==='wan22'?'wan22-v1':'ffmpeg-v1') : isKreaInput(input) ? 'krea2-v1' : 'sd-base-v1', createdAt: now, updatedAt: now, promptId: null, progress: null, error: null, artifacts: [], log: [], cancelRequested: false };
     this.store.putJob(job); this.launch(job, false); return job;
   }
   recover() {
@@ -83,6 +87,14 @@ export class GenerationManager {
     let inventory:VideoInventory|undefined;let sourceName:string|undefined;
     let closeSocket = () => {}; let ambiguous = resumed; let outputStarted = false;
     try {
+      if(isVoiceInput(job.input)) {
+        let queued:string[]=[];
+        try{queued=await client.queue();}catch{localSignal.throwIfAborted();}
+        if(queued.length)throw new Error('ComfyUI에 다른 작업이 있습니다. 종료 후 음성을 생성하세요.');
+        localSignal.throwIfAborted();this.update(job,{state:'running'},'독립 음성 엔진을 실행합니다.');
+        const artifacts=await runVoiceJob(job,this.store,this.dataDir,localSignal);
+        this.update(job,{state:'completed',progress:100,artifacts,error:null},'WAV·MP3 음성 검증 및 저장 완료');return;
+      }
       if(isVideoInput(job.input)&&job.input.profile==='video-tools') {
         this.update(job,{state:'running'},'FFmpeg 로컬 처리를 시작합니다.');
         const artifacts=await localVideoArtifacts(job,this.store.getMedia(job.input.sourceId!),this.dataDir,localSignal);

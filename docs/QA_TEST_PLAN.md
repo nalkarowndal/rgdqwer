@@ -15,7 +15,7 @@
 | Node/Python HTTP smoke | 통과 | 실제 로컬서버, 세션인증, PNG디코드, 모델없음503 |
 | Electron Linux smoke | 통과 | sandbox/contextIsolation true, nodeIntegration false; 테스트전용Linux sandbox override |
 | npm audit production | 0건 | 실제 모델/FFmpeg 외부 설치파일은 별도 |
-| Windows/Linux CI | 초기 커밋 양쪽 통과 | 482dd1a, run39945655662. 리뷰 수정 후 Ubuntu FFmpeg6의 오류프레임누락을 추가 발견, 호환수정 확인 중 |
+| Windows/Linux CI | 최종 코드 양쪽 통과 | cb102f7, [run39990976111](https://github.com/nalkarowndal/rgdqwer/actions/runs/39990976111), 100JS/14Python/10E2E 및 Worker HTTP smoke |
 | 실제 Wan/Krea/SD GPU 추론 | 미검증 | Comfy/모델/GPU가 없는 환경; 모의 엔진은 그래프/상태검증만 |
 
 영상 검증물은 **합성 테스트 패턴**이며 AI 영상으로 표시하지 않는다. M5의 실제 변환/MP4재생 경로를 검증했다. Wan AI V2V는 실험적이며 품질/시간적일관성/8GB VRAM은 별도실기게이트. 화면: `docs/qa/m5-video.png`, `m5-video-mobile.png`.

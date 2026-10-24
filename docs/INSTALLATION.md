@@ -64,4 +64,4 @@ Pop-Location
 | 앱 시작 실패 | 오류 창 내용 기록, 데이터 백업 후 새 절대 경로 프로필로 진단; 원래 DB를 임의 삭제하지 않기 |
 | 생성 상태 불명 | ComfyUI 큐/기록 확인 후 추적 재개; 자동 재제출하지 않음 |
 
-패키지 내 `resources\THIRD_PARTY_NOTICES.txt`, `dependencies.json` 및 Electron의 `LICENSE`/`LICENSES.chromium.html`에 제3자 고지가 있습니다. 앱의 오픈소스 라이선스 부여를 뜻하지 않습니다. [릴리스 검증 목록](RELEASE_CHECKLIST.md)에 실기 검증과 남은 제한을 기록합니다.
+패키지 내 `resources\THIRD_PARTY_NOTICES.txt`, `dependencies.json` 및 Electron의 `LICENSE.electron.txt`/`LICENSES.chromium.html`에 제3자 고지가 있습니다. 앱의 오픈소스 라이선스 부여를 뜻하지 않습니다. [릴리스 검증 목록](RELEASE_CHECKLIST.md)에 실기 검증과 남은 제한을 기록합니다.

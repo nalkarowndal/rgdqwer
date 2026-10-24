@@ -45,7 +45,7 @@ RVC 환경의 `Lib\site-packages\rvc_python\base_model`에 신뢰하는 출처�
 
 `index`는 선택, `version`은 v1/v2입니다. 모델 업로드나 임의 Python 코드를 UI에서 실행하지 않습니다. 화자/RMVPE 체크포인트는 weights-only로 읽습니다. Fairseq HuBERT 메타데이터는 pickle 로딩이 필요하므로 운영자가 신뢰한 `base_model/hubert_base.pt` 한 파일만 일반 로딩을 허용합니다. 출처가 불명확한 모델을 이 환경에 설치하지 마세요. 모델 카탈로그는 앱 시작/상태 확인/작업 실행 시 검증합니다.
 
-RVC 원본 API는 리샘플된 데이터를 기존 샘플레이트로 기록하는 문제가 있어, 어댑터에서 원래 모델 샘플레이트로 출력한 뒤 Node의 FFmpeg로 24kHz에 맞춥니다. RVC 피치는 -12~12반음, Chatterbox는 피치 컨트롤을 지원하지 않습니다.
+RVC 원본 API는 리샘플된 데이터를 기존 샘플레이트로 기록하는 문제가 있어, 어댑터에서 원래 모델 샘플레이트로 출력한 뒤 Node의 FFmpeg로 24kHz에 맞춥니다. RVC 피치는 -12~12반음, Chatterbox는 피치 컨트롤을 지원하지 않습니다. 저장한 시드는 두 어댑터 모두 Torch RNG에 적용하지만 GPU·라이브러리·모델이 달라지면 비트 단위 동일성을 보장하지 않습니다.
 
 환경 변수를 설정한 터미널에서 `npm run build`, `npm start`를 실행하고 **음성 엔진 상태와 설치 안내 → 음성 상태 새로 확인**을 선택합니다.
 

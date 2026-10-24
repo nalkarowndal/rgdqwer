@@ -123,6 +123,9 @@ def run_request(req, output):
 
 
 def main():
+    # Node decodes subprocess pipes as UTF-8, independent of Windows locale.
+    sys.stdout.reconfigure(encoding='utf-8', errors='backslashreplace')
+    sys.stderr.reconfigure(encoding='utf-8', errors='backslashreplace')
     try:
         if len(sys.argv) == 2 and sys.argv[1] == 'status':
             print(json.dumps(status(), ensure_ascii=False))

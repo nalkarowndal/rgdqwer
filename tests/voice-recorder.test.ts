@@ -25,3 +25,9 @@ it('a stale stop event cannot stop a newer microphone stream',async()=>{
  const firstStop=vi.fn(),secondStop=vi.fn();let call=0;vi.stubGlobal('MediaRecorder',Recorder);vi.stubGlobal('navigator',{mediaDevices:{getUserMedia:async()=>({getTracks:()=>[{stop:call++===0?firstStop:secondStop}]})}});
  const recorder=new VoiceRecorder();await recorder.start(vi.fn(),vi.fn(),vi.fn());const old=instances[0];await recorder.start(vi.fn(),vi.fn(),vi.fn());old.onstop?.();expect(secondStop).not.toHaveBeenCalled();recorder.dispose();
 });
+it('a stale permission rejection cannot release a newer microphone stream',async()=>{
+ const {stream,stop}=fake();let rejectOld!:(reason:Error)=>void;let calls=0;
+ vi.stubGlobal('navigator',{mediaDevices:{getUserMedia:()=>++calls===1?new Promise((_resolve,reject)=>{rejectOld=reject;}):Promise.resolve(stream)}});
+ const recorder=new VoiceRecorder();const old=recorder.start(vi.fn(),vi.fn(),vi.fn());await recorder.start(vi.fn(),vi.fn(),vi.fn());rejectOld(new Error('permission denied'));await old;
+ expect(stop).not.toHaveBeenCalled();recorder.dispose();
+});

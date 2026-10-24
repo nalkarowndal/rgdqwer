@@ -48,6 +48,7 @@ def rvc(req, model, root, output):
     import rvc_python.modules.vc.modules as modules
     if req['device'] == 'cuda' and not torch.cuda.is_available():
         raise ValueError('CUDA를 사용할 수 없습니다.')
+    torch.manual_seed(req['seed'])
     # Upstream constructor otherwise downloads missing assets via requests.
     def local_assets_only(_directory):
         for name in ('hubert_base.pt', 'rmvpe.pt'):

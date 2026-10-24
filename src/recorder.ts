@@ -13,7 +13,7 @@ export class VoiceRecorder {
    recorder.onerror=()=>{if(this.generation!==generation)return;failed=true;this.stop();if(this.generation===generation)onError('마이크 녹음에 실패했습니다.');};
    recorder.onstop=()=>{if(this.generation!==generation)return;this.release();onRecording(false);if(!failed&&chunks.length)onBlob(new Blob(chunks,{type:recorder.mimeType}));};
    recorder.start(1000);onRecording(true);this.timer=setTimeout(()=>this.stop(),60000);
-  }catch(error){this.release();if(this.generation===generation){onRecording(false);onError(error instanceof Error?error.message:'마이크 권한을 확인하세요.');}}
+  }catch(error){if(this.generation!==generation)return;this.release();onRecording(false);onError(error instanceof Error?error.message:'마이크 권한을 확인하세요.');}
  }
  private release(){if(this.timer)clearTimeout(this.timer);this.timer=undefined;this.stream?.getTracks().forEach(t=>t.stop());this.stream=undefined;}
  stop(){this.release();if(this.recorder?.state==='recording')this.recorder.stop();}

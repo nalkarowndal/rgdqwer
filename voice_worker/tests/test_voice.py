@@ -95,6 +95,7 @@ def test_rvc_adapter_uses_native_sample_rate_and_local_models(tmp_path, monkeypa
         return {'config': [],'weight':{}}
     torch.load=torch_load
     torch.cuda=types.SimpleNamespace(is_available=lambda:False)
+    torch.manual_seed=lambda seed: observed.update(seed=seed)
     scipy=types.ModuleType('scipy');scipy.__path__=[]
     scipy.signal=types.ModuleType('scipy.signal')
     scipy.io=types.ModuleType('scipy.io');scipy.io.__path__=[]
@@ -113,7 +114,8 @@ def test_rvc_adapter_uses_native_sample_rate_and_local_models(tmp_path, monkeypa
         monkeypatch.setitem(sys.modules,name,module)
     from voice_worker.adapters import rvc
     out=tmp_path/'rvc.wav'
-    rvc({'device':'cpu','source':'source.wav','pitch':-3},{'path':str(tmp_path/'speaker.pth'),'version':'v2'},root,str(out))
+    rvc({'device':'cpu','source':'source.wav','pitch':-3,'seed':37},{'path':str(tmp_path/'speaker.pth'),'version':'v2'},root,str(out))
+    assert observed.get('seed')==37
     assert observed['f0up_key']==-3
     assert observed['resample_sr']==0
     assert observed['index_rate']==0
@@ -130,3 +132,15 @@ def test_rvc_adapter_uses_native_sample_rate_and_local_models(tmp_path, monkeypa
     (root/'base_model'/'rmvpe.pt').unlink()
     with pytest.raises(ValueError):
         infer.download_rvc_models(str(root))
+
+
+def test_cli_emits_utf8_status_even_under_non_utf8_windows_style_stdio():
+    import os
+    import subprocess
+    import sys
+    import json
+    result=subprocess.run([sys.executable,str(Path(__file__).resolve().parents[1]/'runner.py'),'status'],capture_output=True,env={**os.environ,'PYTHONIOENCODING':'ascii'},timeout=10)
+    assert result.returncode==0, result.stderr.decode('utf-8',errors='replace')
+    data=json.loads(result.stdout.decode('utf-8'))
+    assert len(data['engines'])==3
+    assert all(isinstance(e['message'],str) for e in data['engines'])

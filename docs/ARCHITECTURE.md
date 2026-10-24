@@ -57,3 +57,7 @@ src/krea.ts는 입력·프리셋·진단 계약, server/generation/krea.ts는 �
 ## M5 영상
 
 server/video는 제한된 FFmpeg/ffprobe subprocess·입력 검증·업로드 API를 담당한다. generation/video는 native Wan 그래프, video-output은 원본준비와 MP4/PNG출력검증을 담당하며 기존 GenerationManager의 단일잠금·취소·복구를 공유한다. VideoStudio 초안은 App에 보존되고 JobCard는 인증된 blob MP4/PNG를 표시한다. 파일은 서버UUID로보관하며 SQLite v4 media_inputs가 원본메타데이터를 유지한다. FFmpeg는 PATH의외부프로그램이며 Worker와별도로실행한다.
+
+## M6 음성
+
+Node가 기존 GenerationManager 잠금 아래 개별 Python 음성 프로세스를 소유한다. Chatterbox(Python 3.11)와 RVC(Python 3.10)는 NumPy/Torch 충돌을 피하기 위해 각각 독립 환경을 사용한다. `/api/voice`는 프로필과 PCM 오디오를 관리하고, SQLite v5에 `voice_profiles`/`audio_sources`를 추가한다. `audio/`는 입력, `voice-work/`는 작업 임시 파일, `outputs/`는 검증된 WAV/MP3를 저장한다. 엔진은 로컬 파일만 사용한다. 상세 설정과 실제 추론 미검증 조건은 [음성 시스템](VOICE_SYSTEM.md)을 참조한다.

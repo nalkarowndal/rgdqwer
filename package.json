@@ -1,8 +1,8 @@
 {
   "name": "rgdqwer",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "private": true,
-  "description": "ComfyUI 기반 Windows 로컬 AI 스튜디오",
+  "description": "ComfyUI \uae30\ubc18 Windows \ub85c\uceec AI \uc2a4\ud29c\ub514\uc624",
   "type": "module",
   "main": "dist/desktop/main.js",
   "engines": {

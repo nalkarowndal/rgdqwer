@@ -1,3 +1,4 @@
+import { isVoiceInput } from '../../src/voice.js';
 import { PNG } from 'pngjs';
 import { mkdir, rename, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -34,6 +35,7 @@ export function validatePng(bytes: Buffer, width: number, height: number) {
 }
 
 export async function saveOutput(client: ComfyClient, job: Job, raw: unknown, directory: string): Promise<Artifact> {
+  if(isVoiceInput(job.input))throw new Error('이미지 작업이 아닙니다.');
   const value = z.object({ filename: z.string(), subfolder: z.literal('rgdqwer'), type: z.literal('output') }).parse(raw);
   if (!value.filename.startsWith(`${job.id}_`) || !value.filename.endsWith('.png') || /[\\/]/.test(value.filename)) throw new Error('작업에 속하지 않는 결과 파일입니다.');
   const params = new URLSearchParams(value);

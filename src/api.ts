@@ -36,3 +36,13 @@ export async function sourceBlob(id:string):Promise<Blob> {
  const response=await fetch(`/api/media/${encodeURIComponent(id)}/file`,{headers:{Authorization:`Bearer ${await token()}`},signal:AbortSignal.timeout(60000)});
  if(!response.ok)throw new Error('원본 파일을 읽지 못했습니다. 다시 업로드하세요.');return response.blob();
 }
+export async function uploadAudio(file:File) {
+ const extension=file.name.split('.').pop()?.toLowerCase();const format=extension==='wav'?'wav':extension==='mp3'?'mp3':extension==='webm'?'webm':undefined;
+ if(!format||file.size>16*1024**2)throw new Error('WAV·MP3·WebM 파일을 선택하세요. 최대 16MiB입니다.');
+ const response=await fetch(`/api/voice/audio/${format}`,{method:'POST',headers:{Authorization:`Bearer ${await token()}`,'Content-Type':'application/octet-stream'},body:file,signal:AbortSignal.timeout(180000)});
+ const result=await response.json();if(!response.ok)throw new ApiError(result.error??'음성 업로드 실패');return result as import('./voice').AudioSource;
+}
+export async function audioSourceBlob(id:string):Promise<Blob>{
+ const response=await fetch(`/api/voice/audio/${encodeURIComponent(id)}/file`,{headers:{Authorization:`Bearer ${await token()}`},signal:AbortSignal.timeout(60000)});
+ if(!response.ok)throw new Error('원본 음성이 없거나 이동되었습니다.');return response.blob();
+}

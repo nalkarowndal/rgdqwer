@@ -45,3 +45,11 @@
 .image-result .field-help { overflow-wrap: anywhere; }
 .source-preview { width:100%; max-height:240px; object-fit:contain; border-radius:12px; background:#0b111b; }
 video.generated-image { width:100%; max-height:560px; background:#0b111b; }
+
+.audio-preview { margin: 12px 0; padding: 12px; border: 1px solid #e2e7e5; border-radius: 12px; background: #f8faf9; }
+.audio-preview audio { display: block; width: 100%; min-width: 0; margin: 8px 0; }
+.audio-preview a { color: #246b50; font-size: 13px; font-weight: 600; }
+.check-row { display: flex !important; align-items: flex-start; gap: 8px; margin: 10px 0 !important; font-size: 13px; }
+.check-row input[type="checkbox"] { width: 16px; min-width: 16px; height: 16px; margin: 2px 0; }
+.image-form fieldset { border: 1px solid #e2e7e5; border-radius: 10px; margin: 12px 0; padding: 10px; min-width: 0; }
+.image-form details label { display: block; margin-top: 12px; }

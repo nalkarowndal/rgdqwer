@@ -4,6 +4,9 @@ import {importModelSchema,downloadModelSchema,nodeInstallSchema} from '../../src
 import {ModelManager} from './manager.js';
 export async function registerModelRoutes(app:FastifyInstance,models:ModelManager){
  app.addHook('preClose',async()=>{await models.close();});
+ app.get('/api/models/diagnostics',async()=>models.diagnostics());
+ app.get('/api/models/paths',async()=>({config:models.pathsConfig()}));
+ app.post('/api/models/free',async()=>models.freeMemory());
  app.get('/api/models',async()=>models.inventory());
  app.post('/api/models/import',async(request,reply)=>{const input=importModelSchema.safeParse(request.body);if(!input.success)return reply.code(400).send({error:'파일·메타데이터·사용 권한 확인을 완료하세요.'});return reply.code(202).send(models.startImport(input.data));});
  app.post('/api/models/download',async(request,reply)=>{const input=downloadModelSchema.safeParse(request.body);if(!input.success)return reply.code(400).send({error:'다운로드 주소·크기·SHA256·권한을 확인하세요.'});return reply.code(202).send(models.startDownload(input.data));});

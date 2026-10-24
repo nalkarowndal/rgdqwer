@@ -4,17 +4,20 @@ import {rm} from 'node:fs/promises';
 import {modelFolders,importModelSchema,downloadModelSchema,nodeInstallSchema,type DownloadModelInput,type NodeInstallInput,type ImportModelInput,type ModelTask,type InstalledAsset} from '../../src/models.js';
 import type {openStore} from '../store.js';
 import {GenerationManager,GenerationError} from '../generation/manager.js';
-import {ComfyClient,EngineHttpError} from '../generation/client.js';
+import {ComfyClient} from '../generation/client.js';
 import {noSymlinks,importFile,hashFile,scanModels} from './files.js';
 import {downloadAsset} from './download.js';
+import {diagnoseAssets,exportPaths} from './diagnostics.js';
 import {stagePack,activatePack,removePack} from './nodes.js';
 export type ModelStore=Awaited<ReturnType<typeof openStore>>;
 export class ModelManager {
  private abort?:AbortController;private task?:Promise<void>;private active?:ModelTask;private stopped=false;
  constructor(readonly store:ModelStore,readonly dataDir:string,readonly generation:GenerationManager){}
  root(){return this.store.getModelRoot()??resolve(this.dataDir,'models');}
- async ready(){await noSymlinks(this.root(),true);for(const task of this.store.listModelTasks())if(task.state==='running'){if(task.root){await noSymlinks(task.root);await rm(join(task.root,`.install-${task.id}.tmp`),{force:true});}this.store.putModelTask({...task,state:'failed',error:'앱 종료로 중단되었습니다. 자동 재시작하지 않습니다.',updatedAt:new Date().toISOString()});}}
- async engineIdle(signal:AbortSignal){try{const queue=await new ComfyClient(this.store.getSettings().comfyUrl,signal).queue();if(queue.length)throw new GenerationError(409,'ComfyUI에 다른 작업이 있습니다.');}catch(error){if(error instanceof GenerationError||error instanceof EngineHttpError)throw error;signal.throwIfAborted();/* Unreachable standalone Comfy does not block local maintenance. */}}
+ async ready(){await noSymlinks(this.root(),true);await noSymlinks(join(this.dataDir,'custom_nodes'),true);for(const task of this.store.listModelTasks())if(task.state==='running'){
+  let cleanup='';try{if(task.operation==='stage-node'){const path=join(this.dataDir,'node-staging',task.id);await noSymlinks(path);await rm(path,{recursive:true,force:true});}else if(task.root){await noSymlinks(task.root);await rm(join(task.root,`.install-${task.id}.tmp`),{force:true});}}catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')cleanup=' 임시 파일 정리는 경로 권한을 확인한 뒤 수동으로 진행하세요.';}
+  this.store.putModelTask({...task,state:'failed',error:'앱 종료로 중단되었습니다. 자동 재시작하지 않습니다.'+cleanup,updatedAt:new Date().toISOString()});}}
+ async engineIdle(signal:AbortSignal){try{const queue=await new ComfyClient(this.store.getSettings().comfyUrl,signal).queue();if(queue.length)throw new GenerationError(409,'ComfyUI에 다른 작업이 있습니다.');}catch(error){signal.throwIfAborted();const cause=error instanceof TypeError?error.cause:undefined;if(cause&&typeof cause==='object'&&'code' in cause&&cause.code==='ECONNREFUSED')return;throw error;}}
  private update(task:ModelTask,patch:Partial<ModelTask>){Object.assign(task,patch,{updatedAt:new Date().toISOString()});this.store.putModelTask(task);}
  start(operation:ModelTask['operation'],name:string,total:number|null,work:(signal:AbortSignal,progress:(bytes:number)=>void,taskId:string)=>Promise<string|undefined>):ModelTask {
   if(this.stopped||this.active)throw new GenerationError(409,'다른 설치 작업이 진행 중입니다.');const release=this.generation.acquireMaintenance();const now=new Date().toISOString();const task:ModelTask={id:randomUUID(),root:this.root(),operation,name,total,received:0,state:'running',error:null,createdAt:now,updatedAt:now};
@@ -38,6 +41,9 @@ export class ModelManager {
  cancel(id:string){if(this.active?.id!==id)throw new GenerationError(409,'실행 중인 설치 작업이 아닙니다.');this.abort?.abort();return {requested:true};}
  async setRoot(root:string){const release=this.generation.acquireMaintenance();try{await this.engineIdle(AbortSignal.timeout(10000));const canonical=await noSymlinks(root,true);this.store.setModelRoot(canonical);return {root:canonical};}finally{release();}}
  async inventory(){const assets=this.store.listAssets();return {root:this.root(),assets,tasks:this.store.listModelTasks(),nodes:this.store.listNodePacks(),...await scanModels([this.root(),...assets.map(a=>a.root)],new Set(assets.map(a=>resolve(a.root,a.relativePath))))};}
+ async diagnostics(){return diagnoseAssets(this.store);}
+ pathsConfig(){return exportPaths(this.root(),this.store.listAssets(),join(this.dataDir,'custom_nodes'));}
+ async freeMemory(){const release=this.generation.acquireMaintenance();try{const signal=AbortSignal.timeout(10000);await this.engineIdle(signal);const response=await new ComfyClient(this.store.getSettings().comfyUrl,signal).request('/free',{unload_models:true,free_memory:true});await response.body?.cancel();return {requested:true,message:'비동기 메모리 해제 요청을 접수했습니다. 실제 여유 VRAM은 상태 새로고침으로 확인하세요.'};}finally{release();}}
  async remove(id:string,confirmation:{confirmed:boolean;acknowledgedReferences:boolean}){if(!confirmation.confirmed)throw new GenerationError(400,'삭제를 명시적으로 확인하세요.');const release=this.generation.acquireMaintenance();try{
   const asset=this.store.listAssets().find(a=>a.id===id);if(!asset)throw new GenerationError(404,'관리하는 모델이 없습니다.');const dependents=this.store.listAssets().filter(a=>a.requiredAssets.includes(id));if(dependents.length)throw new GenerationError(409,'다른 모델의 필수 의존성입니다.');if(this.store.modelReferences(asset)&&!confirmation.acknowledgedReferences)throw new GenerationError(409,'과거 작업이 참조합니다. 삭제 후 재생성이 불가능할 수 있음을 확인하세요.');
   await this.engineIdle(AbortSignal.timeout(10000));const path=join(asset.root,asset.relativePath);const hash=await hashFile(path);if(hash.sha256!==asset.sha256||hash.bytes!==asset.bytes)throw new GenerationError(409,'설치 후 변경된 파일은 삭제하지 않습니다.');await rm(path);this.store.deleteAsset(id);return {deleted:true};

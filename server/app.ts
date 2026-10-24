@@ -1,3 +1,4 @@
+import {registerLibrary} from './library.js';
 import { ModelManager } from './models/manager.js';
 import { registerModelRoutes } from './models/routes.js';
 import { voiceInputSchema } from '../src/voice.js';
@@ -96,6 +97,7 @@ export async function createApp(options: { dataDir: string; uiDir?: string; devO
     if (!store.deletePromptRecord(request.params.id)) return reply.code(404).send({ error: '프롬프트 기록을 찾을 수 없습니다.' });
     return { deleted: true };
   });
+  await registerLibrary(app,store);
   app.get('/api/jobs', async () => store.listJobs());
   app.post('/api/jobs', async (request, reply) => {
     const krea = request.body && typeof request.body === 'object' && 'profile' in request.body && typeof request.body.profile === 'string' && isKreaInput({ profile: request.body.profile });

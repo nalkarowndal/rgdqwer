@@ -1,4 +1,4 @@
-import type { InstalledAsset, ModelTask, NodePack } from '../src/models.js';
+import type { InstalledAsset, ModelTask, NodePack, LibraryPage } from '../src/models.js';
 import { isVoiceInput } from '../src/voice.js';
 import type { AudioSource, VoiceProfile } from '../src/voice.js';
 import { isVideoInput, type MediaInput } from '../src/video.js';
@@ -63,6 +63,14 @@ export async function openStore(dataDir: string) {
     return record;
   }
   return {
+    library(options:{offset:number;limit:number;query:string;kind:'all'|'image'|'video'|'audio';favorite:boolean}):LibraryPage {
+      const where="WHERE (?='all' OR j.kind=?) AND (?=0 OR m.favorite=1) AND (?='' OR instr(lower(j.settings_json||' '||coalesce(m.title,'')),lower(?))>0)";
+      const params=[options.kind,options.kind,options.favorite?1:0,options.query,options.query];
+      const total=Number(db.exec(`SELECT count(*) FROM jobs j LEFT JOIN library_marks m ON j.id=m.id ${where}`,params)[0].values[0][0]);
+      const rows=db.exec(`SELECT j.settings_json,coalesce(m.favorite,0),coalesce(m.title,'') FROM jobs j LEFT JOIN library_marks m ON j.id=m.id ${where} ORDER BY j.created_at DESC,j.rowid DESC LIMIT ? OFFSET ?`,[...params,options.limit,options.offset])[0]?.values??[];
+      return {items:rows.map(row=>({job:JSON.parse(String(row[0])) as Job,favorite:row[1]===1,title:String(row[2])})),total,offset:options.offset,limit:options.limit};
+    },
+    markLibrary(id:string,value:{favorite:boolean;title:string}){if(!db.exec('SELECT id FROM jobs WHERE id=?',[id]).length)return false;mutate(()=>db.run('INSERT INTO library_marks VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET favorite=excluded.favorite,title=excluded.title',[id,value.favorite?1:0,value.title]));return true;},
     listAssets():InstalledAsset[]{return (db.exec('SELECT value FROM model_assets ORDER BY rowid DESC')[0]?.values??[]).map(row=>JSON.parse(String(row[0])));},
     putAsset(asset:InstalledAsset){mutate(()=>db.run('INSERT INTO model_assets VALUES(?,?)',[asset.id,JSON.stringify(asset)]));},
     deleteAsset(id:string){mutate(()=>db.run('DELETE FROM model_assets WHERE id=?',[id]));},

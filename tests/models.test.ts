@@ -38,3 +38,9 @@ it('recovers interrupted installs and removes only their recorded partial files'
  store.putModelTask({id,operation:'import',name:'interrupted',root,state:'running',received:7,total:20,error:null,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()});
  await models.ready();expect(store.getModelTask(id)?.state).toBe('failed');expect(await readdir(root)).toEqual(['.unrelated.tmp']);
 });
+it('recovers missing old roots without blocking application startup',async()=>{
+ const {dir,models,store}=await setup();store.putModelTask({id:'11111111-1111-4111-8111-111111111111',operation:'import',name:'interrupted',root:join(dir,'removed-root'),state:'running',received:1,total:10,error:null,createdAt:'',updatedAt:''});await models.ready();expect(store.listModelTasks()[0].state).toBe('failed');
+});
+it('refuses maintenance when a reachable engine returns a malformed queue',async()=>{
+ const {createServer}=await import('node:http');const server=createServer((_req,res)=>res.end('{}'));await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve));cleanup.push(async()=>{server.closeAllConnections();await new Promise<void>(resolve=>server.close(()=>resolve()));});const {models,store}=await setup();store.saveSettings({...store.getSettings(),comfyUrl:`http://127.0.0.1:${(server.address() as {port:number}).port}`});await expect(models.engineIdle(new AbortController().signal)).rejects.toThrow();
+});

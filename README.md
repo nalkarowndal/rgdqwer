@@ -1,7 +1,7 @@
 # rgdqwer
 
 ComfyUI를 연결해 사용하는 Windows 로컬 AI 스튜디오입니다.
-**현재 M7 모델 관리·라이브러리·음성·영상·Krea 2·이미지 분석·프롬프트·이미지 생성 구현 버전입니다. FFmpeg 실제 변환·재생을 검증했으며, Wan/Krea/SD 실제 모델·GPU 실행은 실기 검증 전입니다. 음성 엔진 연동의 실제 모델 추론도 검증 전입니다.**
+**현재 v0.9.0 / M8 설치 패키징·안정성 QA와 모델 관리·라이브러리·음성·영상·Krea 2·이미지 분석·프롬프트·이미지 생성 구현 버전입니다. FFmpeg 실제 변환·재생을 검증했으며, Wan/Krea/SD 실제 모델·GPU 실행은 실기 검증 전입니다. 음성 엔진 연동의 실제 모델 추론도 검증 전입니다.**
 
 ## 현재 사용할 수 있는 기능
 
@@ -18,7 +18,11 @@ ComfyUI를 연결해 사용하는 Windows 로컬 AI 스튜디오입니다.
 - 세션 인증, loopback 제한, 연결 시간 초과 및 오류 안내
 - API·Worker·브라우저 테스트와 Windows/Linux CI 설정
 
-## 빠른 시작 (Windows PowerShell)
+## Windows 설치본
+
+현재 사용자용 x64 NSIS 설치본을 CI 검증 아티팩트로 만듭니다. 서명되지 않은 검증용이며 자동 업데이트·공개 릴리스는 없습니다. [설치·별도 엔진 준비·백업/제거 안내](docs/INSTALLATION.md), [실기 검증 목록](docs/RELEASE_CHECKLIST.md)을 확인하세요. 설치본 실행에 Node.js 개발 환경은 필요하지 않습니다.
+
+## 소스에서 빠른 시작 (Windows PowerShell)
 
 Node.js **24 LTS**와 Python **3.12**를 권장합니다. Node 22.12+도 허용하지만 이 작업에서
 실행 검증한 Node는 24.19.0입니다. GPU용 PyTorch와 모델은 앱 의존성에 포함되지 않습니다.
@@ -124,7 +128,7 @@ Linux에서 이미 설치된 Chromium을 사용하려면
 
 ## 다음 단계
 
-M0–M7의 Windows 데스크톱·실제 모델/GPU 검증 게이트를 유지합니다. 다음 단계는 M8 장시간 QA·Windows 설치 패키징입니다. [전체 로드맵](docs/DEVELOPMENT_PHASES.md), [구조](docs/ARCHITECTURE.md),
+M8 설치 패키징과 반복 작업 QA를 구현했습니다. M0–M8의 깨끗한 Windows 클라이언트·실제 모델/GPU·수시간 안정성·서명 검증 게이트를 유지합니다. [전체 로드맵](docs/DEVELOPMENT_PHASES.md), [구조](docs/ARCHITECTURE.md),
 [요구사항 원문](docs/REQUIREMENTS.md), [보안](docs/SECURITY.md)을 참고하세요.
 
 ## 영상 스튜디오 (M5)

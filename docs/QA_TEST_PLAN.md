@@ -254,3 +254,15 @@ M6 리뷰 수정 후: 마이크 권한 지연 실패 경합·비UTF8 CLI·RVC �
 M7 리뷰 수정 후 — 2026-10-25 (KST): 루트 Git 기록 보호, 삭제/비활성화의 내구성 있는 복구 의도, 사용 불가 모델 경로에서도 앱 시작, 다른 페이지에서 선택한 비교 작업 갱신을 RED→GREEN으로 수정했다. 최종 로컬 타입/lint/build, JS136, Python22(변경 없음), 브라우저15 통과. Linux Electron smoke 재실행 통과. 실제 DB 닫기/재열기 후 삭제 기록 복구도 확인했다. [리뷰·등급 판단·검토 제외 항목 기록](superpowers/reviews/2026-10-25-m7-review.md).
 
 M7 최종 코드 `09cebcdedccb0b0e69ac2a96772d34ca70ee89b8`의 [Windows/Ubuntu CI](https://github.com/nalkarowndal/rgdqwer/actions/runs/40108216342)가 모두 성공했다. 두 플랫폼에서 타입/lint/build, JS136, Python22, 브라우저15, Python HTTP smoke를 통과했다. 이후 검증 기록 커밋은 문서만 변경한다. [초안 PR #7](https://github.com/nalkarowndal/rgdqwer/pull/7), base `codex/m6-voice-studio`; 병합하지 않았다.
+
+## M8 실행 기록 — 2026-10-25 (KST)
+
+v0.9.0의 per-user Windows x64 NSIS 패키징, 외부 Python 소스 경로, ASAR/리소스 검사, 설치본 실행·재시작 검사와 반복 작업 QA를 추가했다. 서명·공개 릴리스·병합은 하지 않는다.
+
+로컬 Linux: 타입/lint/build, JS144, Python22, 브라우저16 통과. 10개 화면의 키보드 진입과 1440/760px 레이아웃 검사, 기존 390px 및 음성·영상·모델 UI 검사를 포함한다. Python HTTP 인증/이미지 디코드/모델 부재 503 smoke 통과. 실제 Linux unpacked Electron을 ASAR에서 실행하고, 격리된 userData 경로·보안 설정·설정/가져온 모델 파일의 재시작 보존·외부 Python status 호출을 확인했다. Linux headless 실행의 `--no-sandbox`는 테스트 전용이며 제품의 sandbox 설정은 true다.
+
+패키지 검사: ASAR5727 entries, 설치된 production dependency82개 고지, 외부 Python/WASM을 확인했다. 모델·토큰·DB·개발 의존성은 포함하지 않는다. Python 실행기·ComfyUI·FFmpeg·Git·모델은 별도 설치다.
+
+초기 반복 검사: 21.384초/20회, 재시작1·취소2, 마지막 엔진 WebSocket0, 임시 데이터 삭제 성공. 최종 확장 검사: 180.007초/100회, 재시작5·취소10, 생성 중 유지보수409 확인. 준비 후 최대 heap 증가 2.39MiB, RSS 증가 22.22MiB로 진단 기준 이내였고 최종 엔진 연결0·임시 데이터 삭제 성공. [전체 측정 JSON](qa/m8-soak-linux.json)을 보존한다. 엔진은 명시적 테스트 대역이고 파일/HTTP/SQLite는 실제 구현이다. Electron 렌더러·GPU·실제 모델의 장시간 안정성으로 간주하지 않는다.
+
+Windows 설치/재설치/제거 및 보존 검사는 CI에서 실제 NSIS와 설치된 exe로 수행하며 실행 URL·결과를 최종 기록에 추가한다. [설치 안내](INSTALLATION.md), [실기 수락 조건](RELEASE_CHECKLIST.md) 참조. 깨끗한 Windows10/11 일반 계정·실제 모델/GPU·음질/마이크·8GB 수시간 실행·서명 게이트가 남아 있으므로 M8 전체 수락 판정은 보류한다.

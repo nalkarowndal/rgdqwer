@@ -33,6 +33,8 @@ jobs:
       - run: node scripts/smoke-analysis.mjs
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+      - name: Short simulated-engine lifecycle soak
+        run: npm run soak -- --duration-ms 20000 --cycles 20 --report test-results/m8-soak-ci.json
       - name: Build unsigned Windows installer
         if: runner.os == 'Windows'
         run: npm run dist:win

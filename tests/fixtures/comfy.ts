@@ -53,6 +53,7 @@ export async function simulatedComfy(options: { extraNodes?: Record<string, unkn
   }
   await new Promise<void>((resolve, reject) => { server.once('error', reject); server.listen(0, '127.0.0.1', resolve); });
   return { url: `http://127.0.0.1:${(server.address() as { port: number }).port}`, calls, control, progress, finish, nodes,
+    connections: () => ws.clients.size,
     releaseCancel: () => releaseCancel(),
     forget: () => { running = false; history = {}; },
     close: async () => { for (const client of ws.clients) client.terminate(); ws.close(); server.closeAllConnections(); await new Promise<void>(resolve => server.close(() => resolve())); } };

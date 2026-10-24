@@ -18,6 +18,7 @@ export async function simulatedComfy(options: { extraNodes?: Record<string, unkn
     calls.push({ path, body });
     res.setHeader('content-type', 'application/json');
     const send = (value: unknown) => res.end(JSON.stringify(value));
+    if (path === '/free') return res.end();
     if (path === '/upload/image') return send({name:body.name,subfolder:'',type:'input'});
     if (path === '/system_stats') return send({ system: { os: 'nt', python_version: '3.12', ram_total: 16 * 1024 ** 3 }, devices: [] });
     if (path === '/object_info') return send(nodes);

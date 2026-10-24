@@ -61,3 +61,7 @@ server/video는 제한된 FFmpeg/ffprobe subprocess·입력 검증·업로드 AP
 ## M6 음성
 
 Node가 기존 GenerationManager 잠금 아래 개별 Python 음성 프로세스를 소유한다. Chatterbox(Python 3.11)와 RVC(Python 3.10)는 NumPy/Torch 충돌을 피하기 위해 각각 독립 환경을 사용한다. `/api/voice`는 프로필과 PCM 오디오를 관리하고, SQLite v5에 `voice_profiles`/`audio_sources`를 추가한다. `audio/`는 입력, `voice-work/`는 작업 임시 파일, `outputs/`는 검증된 WAV/MP3를 저장한다. 엔진은 로컬 파일만 사용한다. 상세 설정과 실제 추론 미검증 조건은 [음성 시스템](VOICE_SYSTEM.md)을 참조한다.
+
+## M7 models / library
+
+`server/models`는 명시적으로 등록한 모델의 소유권·해시·작업 기록, 공개 HTTPS 다운로드, Git 노드 검토·활성화를 담당한다. DB v6은 기존 테이블을 유지하며 model_assets/model_tasks/model_config/node_packs/library_marks/model_removals를 추가한다. model_removals는 파일 삭제 전 의도를 저장하고 삭제 후 메타데이터 확정 실패를 재시작/재요청으로 복구한다. GenerationManager의 공유 maintenance 잠금으로 앱 내부 생성·모델 변경·VRAM 요청을 직렬화한다. 외부 Comfy 클라이언트와는 분산 잠금을 제공하지 않는다. `server/library.ts`는 전체 저장 작업에 대한 SQL 필터·페이지·즐겨찾기를 노출하고 기존 JobCard와 재사용 계약을 유지한다. `/free` 응답은 요청 접수이며 GPU 해제 완료 측정과 구분한다.

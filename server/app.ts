@@ -1,3 +1,6 @@
+import {registerLibrary} from './library.js';
+import { ModelManager } from './models/manager.js';
+import { registerModelRoutes } from './models/routes.js';
 import { voiceInputSchema } from '../src/voice.js';
 import { voiceStatus } from './voice/engine.js';
 import { registerVoiceRoutes } from './voice/routes.js';
@@ -28,6 +31,8 @@ export async function createApp(options: { dataDir: string; uiDir?: string; devO
   const token = randomBytes(32).toString('hex');
   const generation = new GenerationManager(store, options.dataDir);
   generation.recover();
+  const models=new ModelManager(store,options.dataDir,generation);
+  await models.ready();
   app.addHook('onClose', async () => { await generation.close(); store.close(); });
   app.addHook('onRequest', async (request, reply) => {
     reply.header('Cache-Control', 'no-store').header('X-Content-Type-Options', 'nosniff');
@@ -58,7 +63,7 @@ export async function createApp(options: { dataDir: string; uiDir?: string; devO
     reply.code(status).send({ error: status === 500 ? '로컬 처리에 실패했습니다. 저장 경로와 디스크 공간을 확인하세요.' : '요청 형식을 확인하세요.' });
   });
   app.get('/api/session', async () => ({ token }));
-  app.get('/api/health', async () => ({ status: 'ok', app: 'rgdqwer', milestone: 'M6' }));
+  app.get('/api/health', async () => ({ status: 'ok', app: 'rgdqwer', milestone: 'M7' }));
   app.get('/api/settings', async () => store.getSettings());
   app.put('/api/settings', async (request, reply) => {
     const result = settingsSchema.safeParse(request.body);
@@ -92,6 +97,7 @@ export async function createApp(options: { dataDir: string; uiDir?: string; devO
     if (!store.deletePromptRecord(request.params.id)) return reply.code(404).send({ error: '프롬프트 기록을 찾을 수 없습니다.' });
     return { deleted: true };
   });
+  await registerLibrary(app,store);
   app.get('/api/jobs', async () => store.listJobs());
   app.post('/api/jobs', async (request, reply) => {
     const krea = request.body && typeof request.body === 'object' && 'profile' in request.body && typeof request.body.profile === 'string' && isKreaInput({ profile: request.body.profile });
@@ -114,6 +120,7 @@ export async function createApp(options: { dataDir: string; uiDir?: string; devO
     try { await access(path); } catch { return reply.code(404).send({ error: '결과 파일이 이동되거나 삭제되었습니다.' }); }
     return reply.type(artifact.mediaType ?? 'image/png').header('Content-Disposition', `inline; filename="${artifact.fileName}"`).send(createReadStream(path));
   });
+  await registerModelRoutes(app,models);
   await registerMediaRoutes(app, options.dataDir, store);
   await registerVoiceRoutes(app, options.dataDir, store);
   await registerAnalysisRoutes(app, options.dataDir, () => store.getSettings().workerUrl);

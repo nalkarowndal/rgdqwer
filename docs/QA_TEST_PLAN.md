@@ -242,3 +242,15 @@ headless 디스플레이 크기 때문에 Electron 캡처는 좁은 레이아웃
 M6 리뷰 수정 후: 마이크 권한 지연 실패 경합·비UTF8 CLI·RVC 시드 누락을 RED→GREEN으로 수정했습니다. 최종 로컬 타입/lint/build, JS112, Python22, 브라우저13 통과. [리뷰 및 판단 기록](superpowers/reviews/2026-10-24-m6-review.md).
 
 최종 코드 `b87d0ec`의 [Windows/Linux CI 40048032479](https://github.com/nalkarowndal/rgdqwer/actions/runs/40048032479)가 모두 성공했습니다. 각 OS에서 JS112, Python22, 브라우저13, 타입/lint/build와 실제 Python HTTP smoke를 확인했습니다. 이후 커밋은 검증 문서만 갱신합니다.
+
+## M7 실행 기록 — 2026-10-24
+
+리뷰 전 코드: 타입/lint/build, JS131, Python22, 브라우저14 통과. 실제 파일 복사·SHA256·삭제 보호·소스 보존·루트 변경·중단 복구·디스크 오류·심볼릭 링크 거부, 공개 주소/리디렉션/크기/해시/취소, 로컬 Git 고정 checkout·정적 소스 검토·노드 활성화/변경 보호·Python 캐시를 검증했다. DB v5 이행, 105개 작업의 검색/페이지/즐겨찾기 저장과 인증된 M7 경로도 확인했다.
+
+브라우저에서 권한 확인→실제 로컬 가져오기→모의 ComfyUI 생성→검색/즐겨찾기/비교→경로 YAML 생성→비동기 /free→참조 확인 후 삭제를 통과했다. desktop/mobile 스크린샷은 test-results/models-*.png다. 기존 음성 fixture는 새 /api/library 응답 계약을 사용한다. Linux Electron(테스트 전용 sandbox override), 실제 Python HTTP 인증/디코드/미설치 모델503 smoke 통과.
+
+실서비스 대용량 다운로드, 실제 ComfyUI 확장 패키지/의존성 설치, Windows 데스크톱·실제 모델/GPU·VRAM 해제 실측·8GB 장시간 안정성은 검증 전이다. 모의 엔진/스트림을 실제 추론이나 실서비스 다운로드로 주장하지 않는다. M7 실기 통과 판정은 보류한다.
+
+M7 리뷰 수정 후 — 2026-10-25 (KST): 루트 Git 기록 보호, 삭제/비활성화의 내구성 있는 복구 의도, 사용 불가 모델 경로에서도 앱 시작, 다른 페이지에서 선택한 비교 작업 갱신을 RED→GREEN으로 수정했다. 최종 로컬 타입/lint/build, JS136, Python22(변경 없음), 브라우저15 통과. Linux Electron smoke 재실행 통과. 실제 DB 닫기/재열기 후 삭제 기록 복구도 확인했다. [리뷰·등급 판단·검토 제외 항목 기록](superpowers/reviews/2026-10-25-m7-review.md).
+
+M7 최종 코드 `09cebcdedccb0b0e69ac2a96772d34ca70ee89b8`의 [Windows/Ubuntu CI](https://github.com/nalkarowndal/rgdqwer/actions/runs/40108216342)가 모두 성공했다. 두 플랫폼에서 타입/lint/build, JS136, Python22, 브라우저15, Python HTTP smoke를 통과했다. 이후 검증 기록 커밋은 문서만 변경한다. [초안 PR #7](https://github.com/nalkarowndal/rgdqwer/pull/7), base `codex/m6-voice-studio`; 병합하지 않았다.

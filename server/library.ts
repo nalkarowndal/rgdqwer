@@ -1,0 +1,5 @@
+import type {FastifyInstance} from 'fastify';import {z} from 'zod';import type {ModelStore} from './models/manager.js';
+export async function registerLibrary(app:FastifyInstance,store:ModelStore){
+ app.get('/api/library',async(request,reply)=>{const input=z.object({offset:z.coerce.number().int().min(0).max(1000000).default(0),limit:z.coerce.number().int().min(1).max(50).default(20),query:z.string().max(200).default(''),kind:z.enum(['all','image','video','audio']).default('all'),favorite:z.enum(['true','false']).default('false').transform(s=>s==='true')}).strict().safeParse(request.query);if(!input.success)return reply.code(400).send({error:'검색 필터와 페이지를 확인하세요.'});return store.library(input.data);});
+ app.put<{Params:{id:string}}>('/api/library/:id',async(request,reply)=>{const input=z.object({favorite:z.boolean(),title:z.string().trim().max(120)}).strict().safeParse(request.body);if(!input.success)return reply.code(400).send({error:'제목·즐겨찾기 설정을 확인하세요.'});if(!store.markLibrary(request.params.id,input.data))return reply.code(404).send({error:'작업이 없습니다.'});return {saved:true};});
+}

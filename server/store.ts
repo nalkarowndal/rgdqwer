@@ -1,3 +1,4 @@
+import type { InstalledAsset, ModelTask, NodePack } from '../src/models.js';
 import { isVoiceInput } from '../src/voice.js';
 import type { AudioSource, VoiceProfile } from '../src/voice.js';
 import { isVideoInput, type MediaInput } from '../src/video.js';
@@ -18,6 +19,11 @@ export async function openStore(dataDir: string) {
   let db = new SQL.Database(existsSync(file) ? readFileSync(file) : undefined);
   db.run(`
     PRAGMA foreign_keys = ON;
+    CREATE TABLE IF NOT EXISTS model_assets (id TEXT PRIMARY KEY,value TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS model_tasks (id TEXT PRIMARY KEY,value TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS model_config (id INTEGER PRIMARY KEY CHECK(id=1),value TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS node_packs (id TEXT PRIMARY KEY,value TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS library_marks (id TEXT PRIMARY KEY,favorite INTEGER NOT NULL DEFAULT 0,title TEXT NOT NULL DEFAULT '');
     CREATE TABLE IF NOT EXISTS voice_profiles (id TEXT PRIMARY KEY, value TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS audio_sources (id TEXT PRIMARY KEY, value TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS media_inputs (id TEXT PRIMARY KEY, value TEXT NOT NULL);
@@ -42,8 +48,8 @@ export async function openStore(dataDir: string) {
     catch (error) { db.close(); db = new SQL.Database(snapshot); db.run('PRAGMA foreign_keys = ON'); throw error; }
   };
   const version = Number(db.exec('PRAGMA user_version')[0].values[0][0]);
-  if (version > 5) { db.close(); throw new Error('더 새로운 데이터베이스입니다. 최신 앱을 사용하세요.'); }
-  if (version < 5) mutate(() => db.run('PRAGMA user_version = 5'));
+  if (version > 6) { db.close(); throw new Error('더 새로운 데이터베이스입니다. 최신 앱을 사용하세요.'); }
+  if (version < 6) mutate(() => db.run('PRAGMA user_version = 6'));
   if (!db.exec('SELECT value FROM settings WHERE id=1').length) {
     db.run('INSERT INTO settings VALUES(1, ?)', [JSON.stringify(defaults)]);
     persist();
@@ -57,6 +63,21 @@ export async function openStore(dataDir: string) {
     return record;
   }
   return {
+    listAssets():InstalledAsset[]{return (db.exec('SELECT value FROM model_assets ORDER BY rowid DESC')[0]?.values??[]).map(row=>JSON.parse(String(row[0])));},
+    putAsset(asset:InstalledAsset){mutate(()=>db.run('INSERT INTO model_assets VALUES(?,?)',[asset.id,JSON.stringify(asset)]));},
+    deleteAsset(id:string){mutate(()=>db.run('DELETE FROM model_assets WHERE id=?',[id]));},
+    listModelTasks():ModelTask[]{return (db.exec('SELECT value FROM model_tasks ORDER BY rowid DESC LIMIT 20')[0]?.values??[]).map(row=>JSON.parse(String(row[0])));},
+    getModelTask(id:string):ModelTask|undefined {const row=db.exec('SELECT value FROM model_tasks WHERE id=?',[id])[0]?.values[0];return row?JSON.parse(String(row[0])):undefined;},
+    putModelTask(task:ModelTask){mutate(()=>db.run('INSERT INTO model_tasks VALUES(?,?) ON CONFLICT(id) DO UPDATE SET value=excluded.value',[task.id,JSON.stringify(task)]));},
+    getModelRoot():string|undefined {const row=db.exec('SELECT value FROM model_config WHERE id=1')[0]?.values[0];return row?String(row[0]):undefined;},
+    setModelRoot(root:string){mutate(()=>db.run('INSERT INTO model_config VALUES(1,?) ON CONFLICT(id) DO UPDATE SET value=excluded.value',[root]));},
+    listNodePacks():NodePack[]{return (db.exec('SELECT value FROM node_packs ORDER BY rowid DESC')[0]?.values??[]).map(row=>JSON.parse(String(row[0])));},
+    putNodePack(pack:NodePack){mutate(()=>db.run('INSERT INTO node_packs VALUES(?,?) ON CONFLICT(id) DO UPDATE SET value=excluded.value',[pack.id,JSON.stringify(pack)]));},
+    deleteNodePack(id:string){mutate(()=>db.run('DELETE FROM node_packs WHERE id=?',[id]));},
+    modelReferences(asset:InstalledAsset):number {
+      const names=[asset.fileName,asset.relativePath.replaceAll('\\','/'),asset.id];
+      return (db.exec('SELECT settings_json FROM jobs')[0]?.values??[]).filter(row=>{const job=JSON.parse(String(row[0]));const values=JSON.stringify(job.input);return names.some(name=>values.includes(name));}).length;
+    },
     listVoiceProfiles(): VoiceProfile[] {return (db.exec('SELECT value FROM voice_profiles ORDER BY rowid DESC')[0]?.values??[]).map(row=>JSON.parse(String(row[0])) as VoiceProfile);},
     getVoiceProfile(id:string):VoiceProfile|undefined {const row=db.exec('SELECT value FROM voice_profiles WHERE id=?',[id])[0]?.values[0];return row?JSON.parse(String(row[0])):undefined;},
     putVoiceProfile(value:VoiceProfile){mutate(()=>db.run('INSERT INTO voice_profiles VALUES(?,?) ON CONFLICT(id) DO UPDATE SET value=excluded.value',[value.id,JSON.stringify(value)]));},

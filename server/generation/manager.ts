@@ -21,6 +21,7 @@ const historySchema = z.object({ status: z.object({ completed: z.boolean(), stat
 type Store = Awaited<ReturnType<typeof openStore>>;
 export class GenerationManager {
   private active?: Job;
+  private maintenance=false;
   private localAbort=new AbortController();
   private task?: Promise<void>;
   private stopped = new AbortController();
@@ -32,8 +33,12 @@ export class GenerationManager {
     if (message) job.log = [...job.log, `${job.updatedAt} ${message}`].slice(-50);
     this.store.putJob(job);
   }
+  acquireMaintenance():()=>void {
+    if(this.maintenance||this.active||this.stopped.signal.aborted||this.store.listJobs().some(job=>!terminal.has(job.state)))throw new GenerationError(409,'생성 또는 유지보수 작업이 끝난 뒤 실행하세요.');
+    this.maintenance=true;let released=false;return()=>{if(!released){released=true;this.maintenance=false;}};
+  }
   create(input: GenerationInput): Job {
-    if (this.active || this.stopped.signal.aborted || this.store.listJobs().some(job => !terminal.has(job.state))) throw new GenerationError(409, '기존 작업의 실행 또는 상태 확인이 끝난 뒤 생성하세요. GPU 작업은 한 번에 하나만 실행합니다.');
+    if (this.maintenance || this.active || this.stopped.signal.aborted || this.store.listJobs().some(job => !terminal.has(job.state))) throw new GenerationError(409, '기존 작업의 실행 또는 상태 확인이 끝난 뒤 생성하세요. GPU 작업은 한 번에 하나만 실행합니다.');
     let voiceProfile;
     if(isVoiceInput(input)){try{voiceProfile=resolveVoiceProfile(input,this.store);}catch(error){throw new GenerationError(400,error instanceof Error?error.message: '음성 프로필 확인 실패');}}
     const now = new Date().toISOString();

@@ -1,3 +1,5 @@
+import { ModelManager } from './models/manager.js';
+import { registerModelRoutes } from './models/routes.js';
 import { voiceInputSchema } from '../src/voice.js';
 import { voiceStatus } from './voice/engine.js';
 import { registerVoiceRoutes } from './voice/routes.js';
@@ -28,6 +30,8 @@ export async function createApp(options: { dataDir: string; uiDir?: string; devO
   const token = randomBytes(32).toString('hex');
   const generation = new GenerationManager(store, options.dataDir);
   generation.recover();
+  const models=new ModelManager(store,options.dataDir,generation);
+  await models.ready();
   app.addHook('onClose', async () => { await generation.close(); store.close(); });
   app.addHook('onRequest', async (request, reply) => {
     reply.header('Cache-Control', 'no-store').header('X-Content-Type-Options', 'nosniff');
@@ -114,6 +118,7 @@ export async function createApp(options: { dataDir: string; uiDir?: string; devO
     try { await access(path); } catch { return reply.code(404).send({ error: '결과 파일이 이동되거나 삭제되었습니다.' }); }
     return reply.type(artifact.mediaType ?? 'image/png').header('Content-Disposition', `inline; filename="${artifact.fileName}"`).send(createReadStream(path));
   });
+  await registerModelRoutes(app,models);
   await registerMediaRoutes(app, options.dataDir, store);
   await registerVoiceRoutes(app, options.dataDir, store);
   await registerAnalysisRoutes(app, options.dataDir, () => store.getSettings().workerUrl);

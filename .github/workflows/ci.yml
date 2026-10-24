@@ -33,6 +33,23 @@ jobs:
       - run: node scripts/smoke-analysis.mjs
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+      - name: Build unsigned Windows installer
+        if: runner.os == 'Windows'
+        run: npm run dist:win
+      - name: Verify install, upgrade and retained data after uninstall
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./scripts/verify-installer.ps1
+      - uses: actions/upload-artifact@v4
+        if: success() && runner.os == 'Windows'
+        with:
+          name: rgdqwer-windows-x64-unsigned
+          retention-days: 14
+          path: |
+            release/*-unsigned-setup.exe
+            release/*-unsigned-setup.exe.blockmap
+            release/SHA256SUMS.txt
+            docs/INSTALLATION.md
       - uses: actions/upload-artifact@v4
         if: always()
         with:

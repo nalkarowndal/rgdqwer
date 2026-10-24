@@ -19,3 +19,5 @@ export const nodeInstallSchema=z.object({name:z.string().min(1).max(80),reposito
 export type NodeInstallInput=z.infer<typeof nodeInstallSchema>;
 export interface LibraryEntry {job:import('./contracts.js').Job;favorite:boolean;title:string}
 export interface LibraryPage {items:LibraryEntry[];total:number;offset:number;limit:number}
+
+export type ModelRemoval={id:string;kind:'asset';asset:InstalledAsset}|{id:string;kind:'node';pack:NodePack;action:'deactivate'|'remove'};

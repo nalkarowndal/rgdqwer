@@ -64,4 +64,4 @@ Node가 기존 GenerationManager 잠금 아래 개별 Python 음성 프로세스
 
 ## M7 models / library
 
-`server/models`는 명시적으로 등록한 모델의 소유권·해시·작업 기록, 공개 HTTPS 다운로드, Git 노드 검토·활성화를 담당한다. DB v6은 기존 테이블을 유지하며 model_assets/model_tasks/model_config/node_packs/library_marks를 추가한다. GenerationManager의 공유 maintenance 잠금으로 앱 내부 생성·모델 변경·VRAM 요청을 직렬화한다. 외부 Comfy 클라이언트와는 분산 잠금을 제공하지 않는다. `server/library.ts`는 전체 저장 작업에 대한 SQL 필터·페이지·즐겨찾기를 노출하고 기존 JobCard와 재사용 계약을 유지한다. `/free` 응답은 요청 접수이며 GPU 해제 완료 측정과 구분한다.
+`server/models`는 명시적으로 등록한 모델의 소유권·해시·작업 기록, 공개 HTTPS 다운로드, Git 노드 검토·활성화를 담당한다. DB v6은 기존 테이블을 유지하며 model_assets/model_tasks/model_config/node_packs/library_marks/model_removals를 추가한다. model_removals는 파일 삭제 전 의도를 저장하고 삭제 후 메타데이터 확정 실패를 재시작/재요청으로 복구한다. GenerationManager의 공유 maintenance 잠금으로 앱 내부 생성·모델 변경·VRAM 요청을 직렬화한다. 외부 Comfy 클라이언트와는 분산 잠금을 제공하지 않는다. `server/library.ts`는 전체 저장 작업에 대한 SQL 필터·페이지·즐겨찾기를 노출하고 기존 JobCard와 재사용 계약을 유지한다. `/free` 응답은 요청 접수이며 GPU 해제 완료 측정과 구분한다.

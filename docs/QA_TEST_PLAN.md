@@ -250,3 +250,5 @@ M6 리뷰 수정 후: 마이크 권한 지연 실패 경합·비UTF8 CLI·RVC �
 브라우저에서 권한 확인→실제 로컬 가져오기→모의 ComfyUI 생성→검색/즐겨찾기/비교→경로 YAML 생성→비동기 /free→참조 확인 후 삭제를 통과했다. desktop/mobile 스크린샷은 test-results/models-*.png다. 기존 음성 fixture는 새 /api/library 응답 계약을 사용한다. Linux Electron(테스트 전용 sandbox override), 실제 Python HTTP 인증/디코드/미설치 모델503 smoke 통과.
 
 실서비스 대용량 다운로드, 실제 ComfyUI 확장 패키지/의존성 설치, Windows 데스크톱·실제 모델/GPU·VRAM 해제 실측·8GB 장시간 안정성은 검증 전이다. 모의 엔진/스트림을 실제 추론이나 실서비스 다운로드로 주장하지 않는다. M7 실기 통과 판정은 보류한다.
+
+M7 리뷰 수정 후 — 2026-10-25 (KST): 루트 Git 기록 보호, 삭제/비활성화의 내구성 있는 복구 의도, 사용 불가 모델 경로에서도 앱 시작, 다른 페이지에서 선택한 비교 작업 갱신을 RED→GREEN으로 수정했다. 최종 로컬 타입/lint/build, JS136, Python22(변경 없음), 브라우저15 통과. Linux Electron smoke 재실행 통과. 실제 DB 닫기/재열기 후 삭제 기록 복구도 확인했다. [리뷰·등급 판단·검토 제외 항목 기록](superpowers/reviews/2026-10-25-m7-review.md).

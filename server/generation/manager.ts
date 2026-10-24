@@ -38,6 +38,7 @@ export class GenerationManager {
     this.maintenance=true;let released=false;return()=>{if(!released){released=true;this.maintenance=false;}};
   }
   create(input: GenerationInput): Job {
+    if (this.store.listModelRemovals().length) throw new GenerationError(409,'미완료 모델 삭제·노드 비활성화를 모델 관리자에서 복구하세요.');
     if (this.maintenance || this.active || this.stopped.signal.aborted || this.store.listJobs().some(job => !terminal.has(job.state))) throw new GenerationError(409, '기존 작업의 실행 또는 상태 확인이 끝난 뒤 생성하세요. GPU 작업은 한 번에 하나만 실행합니다.');
     let voiceProfile;
     if(isVoiceInput(input)){try{voiceProfile=resolveVoiceProfile(input,this.store);}catch(error){throw new GenerationError(400,error instanceof Error?error.message: '음성 프로필 확인 실패');}}

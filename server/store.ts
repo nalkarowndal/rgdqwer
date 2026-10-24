@@ -1,4 +1,4 @@
-import type { InstalledAsset, ModelTask, NodePack, LibraryPage } from '../src/models.js';
+import type { InstalledAsset, ModelTask, NodePack, LibraryPage, ModelRemoval } from '../src/models.js';
 import { isVoiceInput } from '../src/voice.js';
 import type { AudioSource, VoiceProfile } from '../src/voice.js';
 import { isVideoInput, type MediaInput } from '../src/video.js';
@@ -19,6 +19,7 @@ export async function openStore(dataDir: string) {
   let db = new SQL.Database(existsSync(file) ? readFileSync(file) : undefined);
   db.run(`
     PRAGMA foreign_keys = ON;
+    CREATE TABLE IF NOT EXISTS model_removals (id TEXT PRIMARY KEY,value TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS model_assets (id TEXT PRIMARY KEY,value TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS model_tasks (id TEXT PRIMARY KEY,value TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS model_config (id INTEGER PRIMARY KEY CHECK(id=1),value TEXT NOT NULL);
@@ -71,6 +72,14 @@ export async function openStore(dataDir: string) {
       return {items:rows.map(row=>({job:JSON.parse(String(row[0])) as Job,favorite:row[1]===1,title:String(row[2])})),total,offset:options.offset,limit:options.limit};
     },
     markLibrary(id:string,value:{favorite:boolean;title:string}){if(!db.exec('SELECT id FROM jobs WHERE id=?',[id]).length)return false;mutate(()=>db.run('INSERT INTO library_marks VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET favorite=excluded.favorite,title=excluded.title',[id,value.favorite?1:0,value.title]));return true;},
+    listModelRemovals():ModelRemoval[]{return (db.exec('SELECT value FROM model_removals ORDER BY rowid')[0]?.values??[]).map(row=>JSON.parse(String(row[0])));},
+    putModelRemoval(value:ModelRemoval){mutate(()=>db.run('INSERT INTO model_removals VALUES(?,?)',[value.id,JSON.stringify(value)]));},
+    finishModelRemoval(value:ModelRemoval){mutate(()=>{
+      if(value.kind==='asset')db.run('DELETE FROM model_assets WHERE id=?',[value.asset.id]);
+      else if(value.action==='remove')db.run('DELETE FROM node_packs WHERE id=?',[value.pack.id]);
+      else {const next={...value.pack};delete next.activePath;db.run('UPDATE node_packs SET value=? WHERE id=?',[JSON.stringify(next),next.id]);}
+      db.run('DELETE FROM model_removals WHERE id=?',[value.id]);
+    });},
     listAssets():InstalledAsset[]{return (db.exec('SELECT value FROM model_assets ORDER BY rowid DESC')[0]?.values??[]).map(row=>JSON.parse(String(row[0])));},
     putAsset(asset:InstalledAsset){mutate(()=>db.run('INSERT INTO model_assets VALUES(?,?)',[asset.id,JSON.stringify(asset)]));},
     deleteAsset(id:string){mutate(()=>db.run('DELETE FROM model_assets WHERE id=?',[id]));},

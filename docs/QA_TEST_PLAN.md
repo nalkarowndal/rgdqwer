@@ -240,3 +240,5 @@ headless 디스플레이 크기 때문에 Electron 캡처는 좁은 레이아웃
 - 음성 모델/GPU 없음: 실제 TTS/ChatterboxVC/RVC, 다국어 품질, 8GB 최고 VRAM, Windows 마이크 검증 보류. `scripts/smoke-voice.mjs`로 실제 모델을 검증해야 M6 통과를 선언할 수 있다.
 
 M6 리뷰 수정 후: 마이크 권한 지연 실패 경합·비UTF8 CLI·RVC 시드 누락을 RED→GREEN으로 수정했습니다. 최종 로컬 타입/lint/build, JS112, Python22, 브라우저13 통과. [리뷰 및 판단 기록](superpowers/reviews/2026-10-24-m6-review.md).
+
+최종 코드 `b87d0ec`의 [Windows/Linux CI 40048032479](https://github.com/nalkarowndal/rgdqwer/actions/runs/40048032479)가 모두 성공했습니다. 각 OS에서 JS112, Python22, 브라우저13, 타입/lint/build와 실제 Python HTTP smoke를 확인했습니다. 이후 커밋은 검증 문서만 갱신합니다.

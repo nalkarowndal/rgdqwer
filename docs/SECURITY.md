@@ -7,7 +7,7 @@
 - Electron sandbox/contextIsolation=true, nodeIntegration=false, webSecurity=true.
 - 새 창·외부 탐색·권한 요청 거부. renderer에 파일 시스템/프로세스 실행 API 미노출.
 - 생산 UI CSP 적용. 외부 폰트/CDN/분석·원격 AI API 호출 없음.
-- JSON 스키마 검증, 본문 크기 제한, redirect 금지, 요청 시간 제한.
+- JSON 스키마 검증, 본문 크기 제한, 엔진 redirect 금지 (모델 다운로드는 매 hop 공개 HTTPS 정책 재검사), 요청 시간 제한.
 - 생성/취소/결과 API에도 동일 인증 적용. 결과 파일은 작업별 접두사와 PNG 청크 구조·전체 CRC·크기를 검증.
 - 전역 interrupt 대신 작업별 원자적 취소만 호출. 엔진 응답 유실 시 자동 재제출 금지.
 - GPU 진단은 고정 인자 배열로 nvidia-smi 실행. shell=True 사용 안 함.
@@ -29,3 +29,7 @@ Worker Host/Origin/본문 크기를 JSON 파싱 전에 검사한다. 모델 실�
 
 Windows 배포 전에 서명/업데이트 출처·최소 권한·백신 검사·장시간 실행을 검증한다.
 실험을 위한 Linux 테스트 플래그를 제품의 보안 기본값으로 반영하지 않는다.
+
+## M7 모델 관리 경계
+
+인증된 모델 API는 명시적 권한 확인 후 절대 경로의 지원 확장자 모델을 관리 폴더로 복사한다. 결과나 임의 원본 파일 내용을 renderer에 반환하지 않는다. 다운로드는 정확한 크기/해시와 공개 HTTPS DNS 검증을 요구하며 프록시 환경은 수동 가져오기를 안내한다. 노드 소스는 고정 GitHub 커밋으로 준비하고 별도 확인 후 활성화한다. 소스 검토 과정에서 Python이나 pip를 실행하지 않는다. 관리 루트·노드 폴더의 같은 사용자 공격에 대한 격리는 제공하지 않는다. 자세한 제한은 [모델 관리자](MODEL_MANAGER.md)를 참고한다.

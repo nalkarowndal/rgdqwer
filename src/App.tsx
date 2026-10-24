@@ -1,3 +1,5 @@
+import {ModelManager} from './ModelManager';
+import {LibraryStudio} from './LibraryStudio';
 import { VoiceStudio,defaultVoiceInput } from './VoiceStudio';
 import { isVoiceInput } from './voice';
 import { VideoStudio, initialVideoDraft } from './VideoStudio';
@@ -7,7 +9,7 @@ import { isKreaInput } from './krea';
 import { AnalysisStudio } from './AnalysisStudio';
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import {
-  ArrowRight, AudioLines, Box, Check, ChevronRight, CircleHelp, Cpu, Database,
+  ArrowRight, AudioLines, Box, Check, ChevronRight, CircleHelp, Cpu,
   Film, FolderClock, Home, Image, Layers, LoaderCircle, Plug, RefreshCw,
   ScanLine, Settings as SettingsIcon, ShieldCheck, SlidersHorizontal, Sparkles, WandSparkles,
   type LucideIcon,
@@ -15,7 +17,7 @@ import {
 import { api } from './api';
 import { PromptStudio, type PromptDraft } from './PromptStudio';
 import { compilePrompt, createPromptDocument, documentFromRaw } from './prompt';
-import { ImageStudio, JobHistory, initialDraft } from './ImageStudio';
+import { ImageStudio, initialDraft } from './ImageStudio';
 import type { GenerationInput } from './contracts';
 import type { EngineStatus, Job, Settings, WorkerStatus } from './contracts';
 
@@ -109,7 +111,7 @@ export default function App() {
       <div className="sidebar-bottom">
         <div className="local-note"><ShieldCheck size={17} /><span>로컬에서, 나만의 작업</span></div>
         <p>모델과 파일을 내 컴퓨터에서 관리합니다.</p>
-        <div className="version">v0.7.0 <span>M6 · 음성</span></div>
+        <div className="version">v0.8.0 <span>M7 · 모델 관리</span></div>
       </div>
     </aside>
     <div className="workspace">
@@ -128,7 +130,7 @@ export default function App() {
           <div className="page-heading"><div><p className="eyebrow">YOUR LOCAL CREATIVE SPACE</p>
             <h1>당신의 아이디어,<br className="mobile-break" /> 당신의 컴퓨터에서.</h1>
             <p className="subtitle">이미지부터 영상, 목소리까지. 나만의 AI 작업 공간을 준비하세요.</p>
-          </div><span className="milestone-tag">M6 VOICE STUDIO</span></div>
+          </div><span className="milestone-tag">M7 MODEL WORKSPACE</span></div>
           <section className="onboarding">
             <div className="onboarding-copy"><span className="hero-label"><Plug size={14} /> 처음 시작하시나요?</span>
               <h2>ComfyUI를 연결하고<br />창작할 준비를 시작하세요.</h2>
@@ -171,9 +173,8 @@ export default function App() {
           : page === 'krea' ? <KreaStudio draft={kreaDraft} setDraft={setKreaDraft} jobs={jobs} onChanged={refreshJobs} reuse={reuse} />
           : page === 'prompt' ? <PromptStudio draft={promptDraft} setDraft={setPromptDraft} send={() => sendPrompt()} />
           : page === 'caption' ? null
-          : page === 'library' ? <JobHistory jobs={jobs} onChanged={refreshJobs} reuse={reuse} />
-          : page === 'models' ? <><PageTitle title={current.title} text="현재 연결한 ComfyUI의 SD 체크포인트를 읽기 전용으로 확인합니다." />
-            <ModelList engine={engine} /><div className="notice"><CircleHelp size={18} />다운로드·설치·삭제와 LoRA 관리는 M7에서 제공됩니다. 자동 설치는 실행하지 않습니다.</div></>
+          : page === 'library' ? <LibraryStudio reuse={reuse}/>
+          : page === 'models' ? <ModelManager engine={engine} refreshEngine={refresh} select={asset=>{const profile=asset.family.toLowerCase()==='sd15'?'sd15':'sdxl';setImageDraft(value=>({...value,profile,checkpoint:asset.relativePath.replaceAll('\\','/').split('/').slice(1).join('/'),width:profile==='sd15'?512:1024,height:profile==='sd15'?512:1024}));void refresh();setPage('image');}}/>
           : <><PageTitle title={current.title} text={current.description ?? ''} />
             <div className="panel feature-detail"><span className="phase-chip">{current.phase} 개발 예정</span><current.icon size={42} />
               <h2>다음 창작 도구를 준비하고 있습니다.</h2>
@@ -199,13 +200,6 @@ function PageTitle({ title, text }: { title: string; text: string }) {
 }
 function StatusCard({ icon: Icon, label, value, detail, tone }: { icon: LucideIcon; label: string; value: string; detail: string; tone?: string }) {
   return <div className="status-card"><div className="status-label"><Icon size={16} />{label}</div><strong className={tone}>{value}</strong><p title={detail}>{detail}</p></div>;
-}
-function ModelList({ engine }: { engine?: EngineStatus }) {
-  return <section className="panel model-list"><h2><Box size={19} /> 연결된 체크포인트</h2>
-    {engine?.state !== 'connected' ? <p>ComfyUI를 연결하면 설치된 모델 목록이 표시됩니다.</p>
-      : engine.checkpoints.length ? <ul>{engine.checkpoints.map(model => <li key={model}><Database size={16} />{model}<span>발견됨 · 호환성 검증 전</span></li>)}</ul>
-        : <p>SD 체크포인트를 찾지 못했습니다. ComfyUI 모델 폴더를 확인하세요.</p>}
-  </section>;
 }
 function SettingsPanel({ settings, onSaved, engine, busy, refresh }: {
   settings?: Settings; onSaved: (settings: Settings) => void; engine?: EngineStatus; busy: boolean; refresh: () => Promise<void>;

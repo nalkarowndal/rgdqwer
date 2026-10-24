@@ -9,3 +9,6 @@ it('pages and searches every persisted job, saves favorites and titles across re
  expect(store.library({offset:0,limit:20,query:'%',kind:'all',favorite:false}).total).toBe(0);
  }finally{store.close();await rm(dir,{recursive:true,force:true});}
 });
+it('migrates a v5 database while preserving settings, jobs and favorites defaults',async()=>{
+ const {readFile,writeFile}=await import('node:fs/promises');const {default:initSql}=await import('sql.js');const dir=await mkdtemp(join(tmpdir(),'migration-'));let store=await openStore(dir);store.saveSettings({...store.getSettings(),modelPath:'D:\\legacy'});store.close();const SQL=await initSql();const db=new SQL.Database(await readFile(join(dir,'studio.sqlite')));db.run('DROP TABLE model_assets; DROP TABLE model_tasks; DROP TABLE model_config; DROP TABLE node_packs; DROP TABLE library_marks; PRAGMA user_version=5');await writeFile(join(dir,'studio.sqlite'),db.export());db.close();store=await openStore(dir);try{expect(store.getSettings().modelPath).toBe('D:\\legacy');expect(store.listAssets()).toEqual([]);expect(store.library({offset:0,limit:20,query:'',kind:'all',favorite:false}).items).toEqual([]);}finally{store.close();await rm(dir,{recursive:true,force:true});}
+});

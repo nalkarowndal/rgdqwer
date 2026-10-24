@@ -18,7 +18,7 @@ export async function storeStream(source:Readable,root:string,relativePath:strin
  if(!Number.isSafeInteger(total)||total<=0||total>MAX_MODEL_BYTES)throw new Error('모델 크기는 1B–64GiB여야 합니다.');
  const destination=inside(root,join(root,relativePath));await noSymlinks(root,true);await noSymlinks(dirname(destination),true);await ensureSpace(root,total);
  const temporary=join(root,`.install-${temporaryId}.tmp`);let committed=false;const hash=createHash('sha256');let received=0;
- try{const counter=new Transform({transform(chunk:Buffer,_encoding,callback){received+=chunk.length;if(received>total){callback(new Error('선언한 파일 크기를 초과했습니다.'));return;}hash.update(chunk);onProgress(received);callback(null,chunk);}});
+ try{const counter=new Transform({transform(chunk:Buffer,_encoding,callback){received+=chunk.length;if(received>total){callback(new Error('선언한 파일 크기를 초과했습니다.'));return;}hash.update(chunk);try{onProgress(received);callback(null,chunk);}catch(error){callback(error as Error);}}});
   await pipeline(source,counter,createWriteStream(temporary,{flags:'wx',mode:0o600}),{signal});
   if(received!==total)throw new Error('파일 크기가 일치하지 않습니다.');const sha256=hash.digest('hex');if(expectedHash&&sha256!==expectedHash)throw new Error('SHA256이 일치하지 않습니다.');
   signal.throwIfAborted();await noSymlinks(dirname(destination));await link(temporary,destination);committed=true;return {sha256,bytes:received,destination};

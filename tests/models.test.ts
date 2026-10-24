@@ -44,3 +44,7 @@ it('recovers missing old roots without blocking application startup',async()=>{
 it('refuses maintenance when a reachable engine returns a malformed queue',async()=>{
  const {createServer}=await import('node:http');const server=createServer((_req,res)=>res.end('{}'));await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve));cleanup.push(async()=>{server.closeAllConnections();await new Promise<void>(resolve=>server.close(()=>resolve()));});const {models,store}=await setup();store.saveSettings({...store.getSettings(),comfyUrl:`http://127.0.0.1:${(server.address() as {port:number}).port}`});await expect(models.engineIdle(new AbortController().signal)).rejects.toThrow();
 });
+it('handles a persistent task-store failure without an unhandled rejection and releases maintenance',async()=>{
+ const {dir,models,store,generation}=await setup();const source=join(dir,'source.safetensors');await writeFile(source,'failure fixture');const original=store.putModelTask;let writes=0;store.putModelTask=task=>{if(++writes>1)throw new Error('disk full');original(task);};const task=models.startImport({manifest:modelFixture(),sourcePath:source,confirmed:true});
+ await expect.poll(async()=>(await models.inventory()).tasks.find(t=>t.id===task.id)?.state).toBe('failed');await models.close();const release=generation.acquireMaintenance();release();expect(store.listAssets()).toEqual([]);store.putModelTask=original;
+});

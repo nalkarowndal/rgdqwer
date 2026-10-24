@@ -17,3 +17,7 @@ it('checks out a pinned local Git fixture without running repository code or hoo
  await gitCommand(dir,['-c','user.name=Fixture','-c','user.email=fixture@example.com','commit','-m','fixture'],signal);const commit=await gitCommand(dir,['rev-parse','HEAD'],signal);
  await writeFile(join(dir,'__init__.py'),'changed');await gitCommand(dir,['checkout','--force','--detach',commit],signal);expect(await readFile(join(dir,'__init__.py'),'utf8')).toContain('never run');expect((await inspectTree(dir)).files).toBe(1);
 });
+it('allows ordinary Python bytecode caches after activation but rejects nested Git metadata',async()=>{
+ const dir=await mkdtemp(join(tmpdir(),'node-cache-'));dirs.push(dir);const root=join(dir,'staged');await mkdir(root);await writeFile(join(root,'__init__.py'),'pass');const info=await inspectTree(root);const pack={...info,id:'cache-fixture',name:'Fixture',repository:'https://github.com/test/test',commit:'a'.repeat(40),root,installedAt:''};const active=await activatePack(pack,dir,true);await mkdir(join(active.activePath!,'__pycache__'));await writeFile(join(active.activePath!,'__pycache__','__init__.cpython-312.pyc'),'cache');await expect(removePack(active,false)).resolves.toMatchObject({id:pack.id});
+ await mkdir(join(root,'nested','.git'),{recursive:true});await expect(inspectTree(root)).rejects.toThrow(/Git/);
+});

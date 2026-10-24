@@ -22,3 +22,8 @@ it('commits only exact hash and size, refuses overwrite, rejects private redirec
  const controller=new AbortController();controller.abort();await expect(downloadAsset('https://example.com/x',dir,'bad.pt',7,hash,controller.signal,()=>{},'abort',response)).rejects.toThrow();
  expect(await readdir(dir)).toEqual(['good.pt']);
 });
+it('pins the chosen DNS result for both Node single and multi-address lookup contracts',async()=>{
+ const {pinnedLookup}=await import('../server/models/network.js');const lookup=pinnedLookup({address:'8.8.8.8',family:4});
+ const single=await new Promise(resolve=>lookup('example.com',{all:false},(_error,address,family)=>resolve({address,family})));expect(single).toEqual({address:'8.8.8.8',family:4});
+ const multiple=await new Promise(resolve=>lookup('example.com',{all:true},(_error,address)=>resolve(address)));expect(multiple).toEqual([{address:'8.8.8.8',family:4}]);
+});

@@ -32,6 +32,7 @@ test('voice result players, comparison and exact reuse with explicitly simulated
   const profile={id:'11111111-1111-4111-8111-111111111111',name:'SIMULATED voice',referenceId:'22222222-2222-4222-8222-222222222222',languages:['ko'],engines:['chatterbox-tts'],permission:'TEST ONLY',authorized:true,consentedAt:new Date().toISOString(),defaults:{exaggeration:0.5,cfg:0.5,temperature:0.8,pitch:0}};
   const input={profile:'voice',engine:'chatterbox-tts',voiceProfileId:profile.id,prompt:'시뮬레이션 결과 재생 테스트',language:'ko',seed:17,authorized:true,...profile.defaults};
   const jobs=[0,1].map(i=>({id:`job-${i}`,kind:'audio',state:'completed',input:{...input,seed:17+i},voiceProfile:profile,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),workflowVersion:'voice-v1',engineUrl:'',promptId:null,progress:100,error:null,log:[],cancelRequested:false,artifacts:[{id:`artifact-${i}`,fileName:`fixture-${i}.wav`,mediaType:'audio/wav',duration:1}]}));
+  await page.route('**/api/library?*',route=>route.fulfill({json:{items:jobs.map(job=>({job,title:'',favorite:false})),total:jobs.length,offset:0,limit:20}}));
   await page.route('**/api/jobs',route=>route.fulfill({json:jobs}));await page.route('**/api/voice/profiles',route=>route.fulfill({json:[profile]}));
   await page.route('**/api/artifacts/*',route=>route.fulfill({contentType:'audio/wav',body:bytes}));
   await page.goto('/');await page.getByRole('button',{name:'AI 음성 스튜디오',exact:true}).click();

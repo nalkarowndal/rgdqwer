@@ -1,11 +1,13 @@
 import {randomUUID} from 'node:crypto';
 import {join,resolve} from 'node:path';
 import {rm} from 'node:fs/promises';
-import {modelFolders,importModelSchema,type ImportModelInput,type ModelTask,type InstalledAsset} from '../../src/models.js';
+import {modelFolders,importModelSchema,downloadModelSchema,nodeInstallSchema,type DownloadModelInput,type NodeInstallInput,type ImportModelInput,type ModelTask,type InstalledAsset} from '../../src/models.js';
 import type {openStore} from '../store.js';
 import {GenerationManager,GenerationError} from '../generation/manager.js';
 import {ComfyClient,EngineHttpError} from '../generation/client.js';
 import {noSymlinks,importFile,hashFile,scanModels} from './files.js';
+import {downloadAsset} from './download.js';
+import {stagePack,activatePack,removePack} from './nodes.js';
 export type ModelStore=Awaited<ReturnType<typeof openStore>>;
 export class ModelManager {
  private abort?:AbortController;private task?:Promise<void>;private active?:ModelTask;private stopped=false;
@@ -26,6 +28,13 @@ export class ModelManager {
   const saved=await importFile(input.sourcePath,root,path,signal,progress,taskId);const asset:InstalledAsset={...input.manifest,id,root,relativePath:path,sha256:saved.sha256,bytes:saved.bytes,method:'import',installedAt:new Date().toISOString()};
   try{this.store.putAsset(asset);}catch(error){await rm(saved.destination,{force:true});throw error;}return id;
  });}
+ startDownload(raw:DownloadModelInput){const input=downloadModelSchema.parse(raw),root=this.root();return this.start('download',input.manifest.name,input.bytes,async(signal,progress,taskId)=>{
+  const id=randomUUID(),path=join(modelFolders[input.manifest.kind],input.manifest.bundle,input.manifest.bundle?input.manifest.fileName:`${id}-${input.manifest.fileName}`);
+  const saved=await downloadAsset(input.manifest.sourceUrl,root,path,input.bytes,input.sha256,signal,progress,taskId);
+  try{this.store.putAsset({...input.manifest,id,root,relativePath:path,sha256:saved.sha256,bytes:saved.bytes,method:'download',installedAt:new Date().toISOString()});}catch(error){await rm(saved.destination,{force:true});throw error;}return id;
+ });}
+ startNode(raw:NodeInstallInput){const input=nodeInstallSchema.parse(raw);return this.start('stage-node',input.name,null,async(signal,_progress,taskId)=>{const pack=await stagePack(input,this.dataDir,taskId,signal);try{this.store.putNodePack(pack);}catch(error){await rm(pack.root,{recursive:true,force:true});throw error;}return pack.id;});}
+ async changeNode(id:string,action:'activate'|'deactivate'|'remove',acknowledged:boolean){if(!acknowledged)throw new GenerationError(400,'노드 코드 실행·의존성과 재시작을 확인하세요.');const release=this.generation.acquireMaintenance();try{await this.engineIdle(AbortSignal.timeout(10000));const pack=this.store.listNodePacks().find(n=>n.id===id);if(!pack)throw new GenerationError(404,'노드가 없습니다.');if(action==='activate'){const active=await activatePack(pack,this.dataDir,true);try{this.store.putNodePack(active);}catch(error){await removePack(active,false);throw error;}return active;}const next=await removePack(pack,action==='remove');if(action==='remove')this.store.deleteNodePack(id);else this.store.putNodePack(next);return {restartRequired:true};}finally{release();}}
  cancel(id:string){if(this.active?.id!==id)throw new GenerationError(409,'실행 중인 설치 작업이 아닙니다.');this.abort?.abort();return {requested:true};}
  async setRoot(root:string){const release=this.generation.acquireMaintenance();try{await this.engineIdle(AbortSignal.timeout(10000));const canonical=await noSymlinks(root,true);this.store.setModelRoot(canonical);return {root:canonical};}finally{release();}}
  async inventory(){const assets=this.store.listAssets();return {root:this.root(),assets,tasks:this.store.listModelTasks(),nodes:this.store.listNodePacks(),...await scanModels([this.root(),...assets.map(a=>a.root)],new Set(assets.map(a=>resolve(a.root,a.relativePath))))};}

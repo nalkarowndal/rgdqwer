@@ -1,7 +1,7 @@
 import { existsSync,readFileSync,statSync } from 'node:fs';
 import { mkdir,mkdtemp,writeFile,rename,rm,access } from 'node:fs/promises';
-import { dirname,isAbsolute,join,resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { isAbsolute,join,resolve } from 'node:path';
+import {voiceRunnerPath} from '../resources.js';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { isVoiceInput,type VoiceInput,type VoiceProfile,type VoiceStatus,voiceEngineSchema } from '../../src/voice.js';
@@ -17,7 +17,7 @@ export function rvcModels(){
  if(new Set(rows.map(m=>m.id)).size!==rows.length)throw new Error('중복 RVC 모델 ID');
  return rows;
 }
-const runner=()=>[resolve(dirname(fileURLToPath(import.meta.url)),'../../voice_worker/runner.py'),resolve(dirname(fileURLToPath(import.meta.url)),'../../../voice_worker/runner.py')].find(existsSync)!;
+const runner=voiceRunnerPath;
 const python=(engine:string)=>engine==='rvc'?process.env.STUDIO_RVC_PYTHON:process.env.STUDIO_CHATTERBOX_PYTHON;
 const statusSchema=z.object({engines:z.array(z.object({id:voiceEngineSchema,available:z.boolean(),message:z.string().max(2000)})).max(3)});
 export async function voiceStatus():Promise<VoiceStatus>{

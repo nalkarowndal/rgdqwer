@@ -1,3 +1,4 @@
+import {configureResources} from '../server/resources.js';
 import { allowAudioPermission } from './permissions.js';
 import { app, BrowserWindow, dialog, session } from 'electron';
 import { resolve } from 'node:path';
@@ -11,6 +12,7 @@ if (!app.requestSingleInstanceLock()) {
 } else {
   app.on('second-instance', () => { if (window?.isMinimized()) window.restore(); window?.focus(); });
   void app.whenReady().then(async () => {
+    configureResources(app.isPackaged?process.resourcesPath:undefined);
     server = await createApp({ dataDir: resolve(app.getPath('userData'), 'studio'), uiDir: resolve(app.getAppPath(), 'dist/ui') });
     const address = await server.listen({ host: '127.0.0.1', port: 0 });
     session.defaultSession.setPermissionRequestHandler((contents, permission, callback, details) => callback(allowAudioPermission({permission,origin:details.requestingUrl,appOrigin:address,sameContents:!!window&&contents===window.webContents,mainFrame:details.isMainFrame,mediaTypes:'mediaTypes' in details ? details.mediaTypes??[]:[]})));

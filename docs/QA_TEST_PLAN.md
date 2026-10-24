@@ -252,3 +252,5 @@ M6 리뷰 수정 후: 마이크 권한 지연 실패 경합·비UTF8 CLI·RVC �
 실서비스 대용량 다운로드, 실제 ComfyUI 확장 패키지/의존성 설치, Windows 데스크톱·실제 모델/GPU·VRAM 해제 실측·8GB 장시간 안정성은 검증 전이다. 모의 엔진/스트림을 실제 추론이나 실서비스 다운로드로 주장하지 않는다. M7 실기 통과 판정은 보류한다.
 
 M7 리뷰 수정 후 — 2026-10-25 (KST): 루트 Git 기록 보호, 삭제/비활성화의 내구성 있는 복구 의도, 사용 불가 모델 경로에서도 앱 시작, 다른 페이지에서 선택한 비교 작업 갱신을 RED→GREEN으로 수정했다. 최종 로컬 타입/lint/build, JS136, Python22(변경 없음), 브라우저15 통과. Linux Electron smoke 재실행 통과. 실제 DB 닫기/재열기 후 삭제 기록 복구도 확인했다. [리뷰·등급 판단·검토 제외 항목 기록](superpowers/reviews/2026-10-25-m7-review.md).
+
+M7 최종 코드 `09cebcdedccb0b0e69ac2a96772d34ca70ee89b8`의 [Windows/Ubuntu CI](https://github.com/nalkarowndal/rgdqwer/actions/runs/40108216342)가 모두 성공했다. 두 플랫폼에서 타입/lint/build, JS136, Python22, 브라우저15, Python HTTP smoke를 통과했다. 이후 검증 기록 커밋은 문서만 변경한다. [초안 PR #7](https://github.com/nalkarowndal/rgdqwer/pull/7), base `codex/m6-voice-studio`; 병합하지 않았다.

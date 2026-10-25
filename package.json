@@ -23,7 +23,8 @@
     "check": "npm run typecheck && npm run lint && npm test",
     "prepare:release": "tsx scripts/prepare-release.ts",
     "pack:dir": "npm run build && npm run prepare:release && electron-builder --dir --publish never",
-    "dist:win": "npm run build && npm run prepare:release && electron-builder --win nsis --x64 --publish never",
+    "dist:win": "npm run build && npm run prepare:release && electron-builder --win nsis zip --x64 --publish never",
+    "dist:win:standalone": "npm run build && npm run prepare:release && electron-builder --win zip --x64 --publish never && tsx scripts/release-checksums.ts release standalone",
     "soak": "node --expose-gc --import tsx scripts/soak.ts",
     "smoke:packaged": "tsx scripts/smoke-packaged.ts"
   },

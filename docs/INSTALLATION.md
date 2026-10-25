@@ -1,6 +1,34 @@
-# Windows 설치와 복구 — v0.9.0
+# Windows 실행·설치와 복구 — v0.9.0
 
 이 설치본은 **서명되지 않은 M8 검증용 Windows x64 빌드**입니다. 의도한 대상은 Windows 10/11 x64입니다. 호스팅 Windows CI와 실제 사용자 PC 검증은 다르며, 깨끗한 Windows 클라이언트·GPU·실제 모델 검증은 아직 필요합니다. 자동 업데이트와 공개 릴리스는 제공하지 않습니다.
+
+## 설치 없이 실행 (ZIP)
+
+`rgdqwer-windows-x64-standalone-unsigned` Actions 아티팩트는 **설치 없이 바로 실행하는 스튜디오**입니다. 성공한 Windows 검사의 아티팩트를 내려받고 바깥쪽 GitHub 아티팩트 압축을 풀면 아래 두 파일이 나옵니다. 아티팩트 보존 기간은 14일이며 GitHub 로그인/저장소 접근 권한이 필요합니다.
+
+- `rgdqwer-0.9.0-windows-x64-unsigned-standalone.zip`
+- `SHA256SUMS-standalone.txt`
+
+1. PowerShell `Get-FileHash .\rgdqwer-0.9.0-windows-x64-unsigned-standalone.zip -Algorithm SHA256` 값과 체크섬 목록을 비교합니다.
+2. 안쪽 `*-standalone.zip`을 원하는 **새 폴더에 모두 압축 해제**합니다.
+3. 그 폴더의 **`rgdqwer.exe`를 더블클릭**합니다. Setup 실행이나 Node.js 설치는 필요하지 않습니다. `START_HERE.txt`도 함께 제공됩니다.
+
+```text
+스튜디오 폴더/
+  rgdqwer.exe          ← 실행 파일
+  START_HERE.txt       ← 사용 안내
+  resources/          ← 앱·Python 소스·문서
+  locales/
+  *.dll 및 기타 Electron 실행 파일
+  LICENSE.electron.txt
+  LICENSES.chromium.html
+```
+
+**exe만 따로 옮기지 마세요.** `resources`, DLL 등을 포함한 전체 폴더가 필요합니다. 압축파일 내부에서 실행하지 말고 먼저 전체를 풉니다. 서명되지 않은 빌드라 SmartScreen 경고가 나타날 수 있으며 조직의 실행 정책을 따라야 합니다.
+
+설정·기록·가져온 모델은 `%APPDATA%\rgdqwer\studio`에 저장됩니다. 같은 계정의 설치형과 데이터를 공유하고, 동시에 실행하면 기존 창이 열립니다. 앱 폴더를 옮겨도 이 데이터는 유지됩니다. USB에 앱을 복사하는 것만으로 데이터·외부 모델·엔진까지 이동하지는 않습니다. 새 버전은 앱을 완전히 종료한 뒤 **별도 새 폴더**에 풀어 실행합니다. 사용하지 않는 앱 폴더를 삭제해도 AppData의 기록은 남습니다.
+
+AI 기능별 외부 준비는 아래 설치형과 같습니다. 아래 Worker 실행 예제의 `$resources`를 압축을 푼 폴더의 `resources` 절대 경로로 바꾸세요. 백업/복원 방법도 동일합니다.
 
 ## 설치
 

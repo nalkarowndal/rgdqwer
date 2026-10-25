@@ -51,6 +51,7 @@ test('displays actual adapter responses from an explicitly simulated local engin
     await expect(page.getByText('SIMULATED GPU')).toBeVisible();
     await expect(page.getByText('8.0 GB', { exact: true })).toBeVisible();
     await page.getByRole('button', { name: '모델·확장 관리자', exact: true }).click();
+    await page.getByRole('button', { name: '설치 목록', exact: true }).click();
     await expect(page.getByText('SIMULATED.safetensors')).toBeVisible();
     cpuMode = true;
     await page.getByRole('button', { name: '홈 / 대시보드', exact: true }).click();

@@ -26,7 +26,7 @@ Linux에서는 `.venv/bin/python`을 사용한다. `--port` 기본값은 8189이
 
 ## 로컬 모델
 
-모델은 사용자가 라이선스/용량/출처를 확인하고 별도로 준비한다. 자동 다운로드 기능은 M7 범위다.
+모델·확장 관리자의 기능별 다운로드에서 Florence-2/WD14를 선택해 받을 수 있다. 라이선스/용량/출처를 확인하고 Worker 모델 경로를 받은 폴더에 맞춘다.
 
 - **Florence-2:** [native 변환 Florence-2-base](https://huggingface.co/florence-community/Florence-2-base)를 기준으로 한다.
   config.json, preprocessor_config.json, tokenizer_config.json, tokenizer 파일들과 safetensors 가중치가 필요하다.

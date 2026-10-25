@@ -1,0 +1,57 @@
+{
+  "runUrl": "https://github.com/nalkarowndal/rgdqwer/actions/runs/40191758197",
+  "testedCommit": "1aec20f31c285f0603c865ec61d494767639f999",
+  "qaArtifactSha256": "e9e95676242ca75cf5c67bc6c1e75bcfca181a04285542f8ef48f2f414ad398c",
+  "standaloneArtifactId": 12598890339,
+  "standaloneArtifactSha256": "1411862c22c35124a550b5b817a027842d9fc1afa072cae3d9d70f44ef6efebc",
+  "installerArtifactId": 12598094125,
+  "ubuntu": "success",
+  "windows": "success",
+  "tests": {
+    "javascript": 161,
+    "python": 22,
+    "browser": 18,
+    "simulatedLifecycleCycles": 20
+  },
+  "standalone-win32.json": {
+    "archive": "rgdqwer-0.9.0-windows-x64-unsigned-standalone.zip",
+    "realInferenceVerified": false,
+    "isolatedQaProfile": true,
+    "relocated": true,
+    "settingsAndModelRetained": true,
+    "unicodeAndSpacePaths": true,
+    "archiveSha256": "7b54be8bb94c0446d190201bd26c37fc9f64509d3ef89d4b108a17b7aa4bd411",
+    "extracted": true,
+    "signed": false
+  },
+  "m8-installer-win32.json": {
+    "isolatedDataRetained": true,
+    "uninstalled": true,
+    "unicodeAndSpacePaths": true,
+    "upgraded": true,
+    "installed": true,
+    "defaultProfileSentinelRetained": true,
+    "signed": false,
+    "realInferenceVerified": false
+  },
+  "relocatedApp": {
+    "packaged": true,
+    "security": {
+      "sandbox": true,
+      "contextIsolation": true,
+      "nodeIntegration": false,
+      "webSecurity": true
+    },
+    "payload": {
+      "packaged": true,
+      "version": "0.9.0",
+      "entries": 5476,
+      "pythonOutsideAsar": true,
+      "dependencyNotices": 82
+    },
+    "profileIsolated": true,
+    "settingsPersisted": true,
+    "modelPersisted": true,
+    "inferenceVerified": false
+  }
+}

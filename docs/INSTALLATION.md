@@ -4,7 +4,7 @@
 
 ## 설치 없이 실행 (ZIP)
 
-**[Windows 실행형 ZIP 다운로드](https://github.com/nalkarowndal/rgdqwer/actions/runs/40170610776/artifacts/12590301455)** · [검증 CI #49](https://github.com/nalkarowndal/rgdqwer/actions/runs/40170610776) · 검증 커밋 `e92c501`.
+**[Windows 실행형 ZIP 다운로드](https://github.com/nalkarowndal/rgdqwer/actions/runs/40191758197/artifacts/12598890339)** · [검증 CI #57](https://github.com/nalkarowndal/rgdqwer/actions/runs/40191758197) · 검증 커밋 `1aec20f`.
 
 `rgdqwer-windows-x64-standalone-unsigned` Actions 아티팩트는 **설치 없이 바로 실행하는 스튜디오**입니다. 성공한 Windows 검사의 아티팩트를 내려받고 바깥쪽 GitHub 아티팩트 압축을 풀면 아래 두 파일이 나옵니다. 아티팩트 보존 기간은 14일이며 GitHub 로그인/저장소 접근 권한이 필요합니다.
 
@@ -34,7 +34,7 @@ AI 기능별 외부 준비는 아래 설치형과 같습니다. 아래 Worker �
 
 ## 설치
 
-검증된 빌드: [CI #49](https://github.com/nalkarowndal/rgdqwer/actions/runs/40170610776), 검증 커밋 `e92c501`. [Windows x64 설치본 받기](https://github.com/nalkarowndal/rgdqwer/actions/runs/40170610776/artifacts/12590665658)에서 설치 exe와 체크섬을 함께 받습니다. GitHub 로그인 및 저장소 접근 권한이 필요하며 아티팩트는 보존 기간 후 만료됩니다.
+검증된 빌드: [CI #57](https://github.com/nalkarowndal/rgdqwer/actions/runs/40191758197), 검증 커밋 `1aec20f`. [Windows x64 설치본 받기](https://github.com/nalkarowndal/rgdqwer/actions/runs/40191758197/artifacts/12598094125)에서 설치 exe와 체크섬을 함께 받습니다. GitHub 로그인 및 저장소 접근 권한이 필요하며 아티팩트는 보존 기간 후 만료됩니다.
 
 1. 해당 PR의 **Studio validation** Actions 실행에서 Windows 검사가 성공했는지 확인합니다. 로그인 후 `rgdqwer-windows-x64-unsigned` 아티팩트를 내려받아 압축을 풉니다. 아티팩트 보존 기간은 14일입니다.
 2. `rgdqwer-0.9.0-windows-x64-unsigned-setup.exe`와 `SHA256SUMS.txt`를 함께 확인합니다. PowerShell `Get-FileHash .\rgdqwer-0.9.0-windows-x64-unsigned-setup.exe -Algorithm SHA256`의 값이 목록과 같아야 합니다. 체크섬은 파일 일치 검사이며 게시자 서명을 대신하지 않습니다.
@@ -53,7 +53,7 @@ AI 기능별 외부 준비는 아래 설치형과 같습니다. 아래 Worker �
 | 음성 | Chatterbox용 Python 3.11 / RVC용 Python 3.10 별도 환경, 로컬 모델·카탈로그; 아래 음성 안내 참조 |
 | 확장 소스 가져오기 | Git; 노드 의존성 설치·코드 검토는 수동 |
 
-모델은 제공자의 조건을 확인하고 별도로 준비합니다. 모델 관리자에서 로컬 파일을 가져오거나 확인된 원격 다운로드 정보를 입력합니다. [모델 관리자](MODEL_MANAGER.md), [이미지](IMAGE_SYSTEM.md), [Krea](KREA_SYSTEM.md), [영상](VIDEO_SYSTEM.md)을 참고하세요. VRAM 표시나 저VRAM 선호 설정이 8GB에서의 실행 성공을 보증하지 않습니다.
+**모델·확장 관리자 → 기능별 다운로드**에서 기능을 선택하고 제공자의 조건을 확인한 뒤 필요한 모델을 앱 안에서 받을 수 있습니다. 공통 파일은 한 번만 받고 완료된 파일은 재시도 시 재사용합니다. [기능별 모델 다운로드](FEATURE_MODEL_DOWNLOADS.md)를 참고하세요. 로컬 파일 가져오기와 수동 URL 다운로드도 제공합니다. [모델 관리자](MODEL_MANAGER.md), [이미지](IMAGE_SYSTEM.md), [Krea](KREA_SYSTEM.md), [영상](VIDEO_SYSTEM.md)을 참고하세요. VRAM 표시나 저VRAM 선호 설정이 8GB에서의 실행 성공을 보증하지 않습니다.
 
 ### 설치본에서 이미지 분석 Worker 실행
 

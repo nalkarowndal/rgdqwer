@@ -14,7 +14,7 @@ $env:STUDIO_CHATTERBOX_DIR = 'D:\AI\models\chatterbox'
 $env:STUDIO_VOICE_DEVICE = 'cpu' # CUDA 호환 Torch/드라이버를 준비한 뒤 'cuda'
 ```
 
-모델은 공식 [ResembleAI/chatterbox](https://huggingface.co/ResembleAI/chatterbox)의 이용 조건을 확인하고 위 폴더에 직접 준비합니다. 앱은 모델을 다운로드하지 않습니다.
+모델은 공식 [ResembleAI/chatterbox](https://huggingface.co/ResembleAI/chatterbox)의 이용 조건을 확인하고 위 폴더에 직접 준비합니다. 모델·확장 관리자의 기능별 다운로드에서 Multilingual v2/VC 기본 파일을 받을 수 있습니다. 다운로드 후 아래 실행 환경의 모델 경로를 지정하세요.
 
 | 기능 | 필수 파일 |
 |---|---|

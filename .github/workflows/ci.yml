@@ -28,6 +28,10 @@ jobs:
       - run: npm ci
       - run: npm run check
       - run: npm run build
+      - name: Verify public model catalog metadata (no weight downloads)
+        if: runner.os == 'Windows'
+        timeout-minutes: 5
+        run: node --import tsx scripts/verify-model-catalog.ts
       - run: python -m pip install -r worker/requirements-lock.txt
       - run: python -m pytest worker/tests voice_worker/tests -q
       - run: node scripts/smoke-analysis.mjs

@@ -18,6 +18,10 @@ ComfyUI를 연결해 사용하는 Windows 로컬 AI 스튜디오입니다.
 - 세션 인증, loopback 제한, 연결 시간 초과 및 오류 안내
 - API·Worker·브라우저 테스트와 Windows/Linux CI 설정
 
+## 앱에서 모델 받기
+
+**모델·확장 관리자 → 기능별 다운로드**에서 SDXL, Krea 2, Wan 영상, Florence/WD14 분석, Chatterbox 음성 기능을 선택하고 **선택 모델 다운로드**를 누르세요. 필요한 파일·공통 인코더를 함께 받고 진행률·취소·재시도를 지원합니다. [모델 다운로드와 엔진 연결 안내](docs/FEATURE_MODEL_DOWNLOADS.md)
+
 ## Windows 실행 파일 다운로드
 
 **[설치 없이 실행하는 Windows ZIP 받기](https://github.com/nalkarowndal/rgdqwer/actions/runs/40170610776/artifacts/12590301455)** — GitHub 아티팩트를 받은 뒤 안쪽 `*-standalone.zip`을 새 폴더에 모두 풀고 **`rgdqwer.exe`를 더블클릭**하세요. DLL·`resources` 등 전체 폴더가 필요하며 Node.js 개발 환경은 필요하지 않습니다. 같은 Windows 계정의 설정/기록은 `%APPDATA%\rgdqwer\studio`에 저장됩니다.

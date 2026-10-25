@@ -27,9 +27,9 @@
 **Files:** electron-builder.json, package.json, scripts/package-checks.ts, scripts/release-checksums.ts, tests/package-smoke.test.ts, scripts/verify-standalone.ps1, .github/workflows/ci.yml, docs/START_HERE.txt, docs/INSTALLATION.md, docs/RELEASE_CHECKLIST.md.
 **Interfaces:** Existing smoke accepts absolute --executable/--profile, seed|verify, --report. Add `releaseArtifactFiles(files: string[], kind: 'installer'|'standalone'): string[]`; checksum CLI accepts kind as third argument (after directory), defaults to installer, standalone writes SHA256SUMS-standalone.txt.
 
-- [ ] Add tests for standalone and installer selection, unrelated files ignored, missing/ambiguous primary rejected, blockmap only for selected installer; run targeted Vitest and observe RED.
-- [ ] Implement selection/manifest CLI, ZIP target and package commands. Expected targeted tests GREEN, typecheck/lint pass.
-- [ ] Add Windows CI-only actual ZIP extraction, seed, move and verify script; use unique Korean/space paths and explicit reports, validate SHA256 against selected ZIP. Upload independent standalone artifact after both lifecycle checks pass. Add quick-start and update documentation.
-- [ ] Run `npm run check` and `npm run build`. Expected all pass; commit implementation.
-- [ ] One fresh whole-branch review, resolve Important/Critical in one test-backed pass and record rulings.
+- [x] Add tests for standalone and installer selection, unrelated files ignored, missing/ambiguous primary rejected, blockmap only for selected installer; run targeted Vitest and observe RED.
+- [x] Implement selection/manifest CLI, ZIP target and package commands. Expected targeted tests GREEN, typecheck/lint pass.
+- [x] Add Windows CI-only actual ZIP extraction, seed, move and verify script; use unique Korean/space paths and explicit reports, validate SHA256 against selected ZIP. Upload independent standalone artifact after both lifecycle checks pass. Add quick-start and update documentation.
+- [x] Run `npm run check` and `npm run build`. Expected all pass; commit implementation.
+- [x] One fresh whole-branch review, resolve Important/Critical in one test-backed pass and record rulings.
 - [ ] Push branch/open attached draft PR based on codex/m8-package-hardening; inspect Windows/Ubuntu CI and actual standalone artifact/reports. Expected ZIP extraction+relocation successful, existing checks green. Save review/evidence and download link, keep manual device gates explicit.

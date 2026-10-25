@@ -16,7 +16,8 @@
     "dist/server/**/*",
     "dist/src/**/*",
     "dist/ui/**/*",
-    "package.json"
+    "package.json",
+    "!node_modules/*/**/{test,tests,__tests__,spec,fixtures,bench,benchmark,benchmarks}{,/**/*}"
   ],
   "extraResources": [
     {

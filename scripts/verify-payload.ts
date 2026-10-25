@@ -3,6 +3,8 @@ import {access,readFile,readdir,lstat,writeFile} from 'node:fs/promises';import 
 export function validateArchiveEntries(entries:string[]){
  const paths=entries.map(p=>p.replaceAll('\\','/').replace(/^\/?/,'/'));const required=['/package.json','/dist/desktop/main.js','/dist/server/app.js','/dist/ui/index.html','/node_modules/sql.js/dist/sql-wasm.wasm'];
  for(const path of required)if(!paths.includes(path))throw new Error(`missing packaged runtime: ${path}`);
+ // Match complete nonruntime directory names, never runtime filenames such as test.js.
+ for(const path of paths)if(/^\/node_modules\/.+\/(test|tests|__tests__|spec|fixtures|bench|benchmark|benchmarks)(\/|$)/.test(path))throw new Error(`forbidden dependency payload: ${path}`);
  for(const path of paths)if(/^\/(src|tests|e2e|scripts|worker|voice_worker|models|\.data|\.git|\.superpowers|\.venv)(\/|$)/.test(path)||/(^|\/)\.env(?:\.|\/|$)/.test(path)||/(^|\/)(worker\.token|studio\.sqlite)(\/|$)/.test(path)||/^\/node_modules\/(electron-builder|vitest|@playwright|typescript|tsx)(\/|$)/.test(path))throw new Error(`forbidden packaged entry: ${path}`);
 }
 export async function verifyPayload(resources:string){

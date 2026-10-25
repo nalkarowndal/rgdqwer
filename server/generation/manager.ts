@@ -44,7 +44,7 @@ export class GenerationManager {
     if(isVoiceInput(input)){try{voiceProfile=resolveVoiceProfile(input,this.store);}catch(error){throw new GenerationError(400,error instanceof Error?error.message: '음성 프로필 확인 실패');}}
     const now = new Date().toISOString();
     const job: Job = { id: randomUUID(), voiceProfile, kind: isVoiceInput(input)?'audio':isVideoInput(input) ? 'video' : 'image', state: 'preparing', input, engineUrl: this.store.getSettings().comfyUrl,
-      workflowVersion: isVoiceInput(input)?'voice-v1':isVideoInput(input) ? (input.profile==='wan22'?'wan22-v1':'ffmpeg-v1') : isKreaInput(input) ? 'krea2-v1' : 'sd-base-v1', createdAt: now, updatedAt: now, promptId: null, progress: null, error: null, artifacts: [], log: [], cancelRequested: false };
+      workflowVersion: isVoiceInput(input)?'voice-v1':isVideoInput(input) ? (input.profile==='wan22'?'wan22-v1':'ffmpeg-v1') : isKreaInput(input) ? 'krea2-v1' : input.profile==='anima'?'anima-base-v1':'sd-lora-v2', createdAt: now, updatedAt: now, promptId: null, progress: null, error: null, artifacts: [], log: [], cancelRequested: false };
     this.store.putJob(job); this.launch(job, false); return job;
   }
   recover() {
@@ -116,7 +116,7 @@ export class GenerationManager {
           const issues = kreaIssues(job.input, inspectKrea(await client.json('/object_info')));
           if (issues.length) throw new Error(issues.join(' · '));
           if ((await client.queue()).length) throw new Error('ComfyUI에 다른 작업이 있습니다. 작업이 끝난 뒤 다시 시도하세요.');
-        } else await client.preflight(job.input.checkpoint);
+        } else await client.preflight(job.input);
       }
       if (job.cancelRequested && !job.promptId) { this.update(job, { state: 'cancelled' }, '제출 전에 취소했습니다.'); return; }
       closeSocket = await client.watch(job.id, (id, value) => {

@@ -1,3 +1,4 @@
+import {inspectImage} from './generation/image.js';
 import {registerLibrary} from './library.js';
 import { ModelManager } from './models/manager.js';
 import { registerModelRoutes } from './models/routes.js';
@@ -78,6 +79,10 @@ export async function createApp(options: { dataDir: string; uiDir?: string; devO
       diffusionModels: [], textEncoders: [], vaes: [], loras: [], issues: ['ComfyUI 노드 목록을 읽지 못했습니다. 서버 연결과 버전을 확인하세요.'], enhancerIssues: [], rawIssues: [], loraIssues: [],
     }))]);
     return { ...inventory, engine, checkedAt: new Date().toISOString() };
+  });
+  app.get('/api/image/status',async()=>{
+    const client=new ComfyClient(store.getSettings().comfyUrl,AbortSignal.timeout(10000));
+    return client.json('/object_info').then(inspectImage).catch(()=>({...inspectImage({}),issues:['ComfyUI 연결과 노드 목록을 확인하세요.'],animaIssues:['ComfyUI 연결과 Anima 지원 버전을 확인하세요.']}));
   });
   app.get('/api/voice/status',async()=>voiceStatus());
   app.get('/api/video/status',async()=>{

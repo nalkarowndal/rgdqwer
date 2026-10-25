@@ -20,9 +20,9 @@ Old requests/jobs without new fields remain valid. Maximum4 LoRAs, strength -2..
 ### Task1: Validated graph and inventory
 Files: src/contracts.ts, src/image.ts, src/prompt.ts, server/generation/workflow.ts, image.ts, client.ts, manager.ts, server/app.ts; tests/image.test.ts and image-api.test.ts, fixtures/image.ts.
 Interfaces: ImageInventory, inspectImage(raw), imageIssues(input,inventory); GET /api/image/status; preflight(input:ImageInput).
-- [ ] RED tests for active/off LoRA graph and malformed settings, Anima graph and inventory checks.
-- [ ] Implement optional persisted settings, Anima profile, conditional graph, authoritative preflight and authenticated status.
-- [ ] Run focused and full check; commit.
+- [x] RED tests for active/off LoRA graph and malformed settings, Anima graph and inventory checks.
+- [x] Implement optional persisted settings, Anima profile, conditional graph, authoritative preflight and authenticated status.
+- [x] Run focused and full check; commit.
 
 ### Task2: UI and catalog
 Files: src/ImageStudio.tsx, src/ImageLoras.tsx, App.tsx, model-catalog.ts, CSS; e2e/image-lora-anima.spec.ts; docs.

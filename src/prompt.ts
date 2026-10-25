@@ -14,11 +14,12 @@ export const promptDocumentSchema = z.object({ version: z.literal(1), mode: z.en
   negative: z.string().max(8000), suggestNegative: z.boolean(), editedPositive: z.string().max(8000).nullable(), editedNegative: z.string().max(8000).nullable(),
 }).strict();
 export type PromptDocument = z.infer<typeof promptDocumentSchema>;
-export const profileSchema = z.enum(['sd15','sdxl','illustrious']);
+export const profileSchema = z.enum(['sd15','sdxl','illustrious','anima']);
 export type PromptProfile = z.infer<typeof profileSchema>;
 export const profiles: Record<PromptProfile, { label: string; style: 'tags' | 'natural'; negative: string }> = {
   sd15: { label: 'SD 1.5', style: 'tags', negative: 'blurry, low quality' },
   sdxl: { label: 'SDXL', style: 'natural', negative: 'blurry, low quality' },
+  anima: { label: 'Anima Base v1', style: 'tags', negative: 'worst quality, low quality, blurry' },
   illustrious: { label: 'Illustrious', style: 'tags', negative: 'low quality, blurry' },
 };
 export const keywords = [

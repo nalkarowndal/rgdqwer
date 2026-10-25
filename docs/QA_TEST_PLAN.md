@@ -276,3 +276,13 @@ Windows에서 실제 unsigned NSIS 설치 → 저장소 밖 cwd의 설치된 ASA
 [Windows x64 검증용 설치본 아티팩트](https://github.com/nalkarowndal/rgdqwer/actions/runs/40132233958/artifacts/12575940897): `rgdqwer-windows-x64-unsigned`,127,903,291 bytes, 설치 exe·blockmap·SHA256SUMS·설치 안내 포함,14일 보존. 아티팩트 ZIP digest는 `f2350fe4312ac3abc8786f1144412951a118c08ec34bfda3d61ef8dc3437f232`이며 설치 exe 자체의 해시와 구분한다. exe 검증에는 ZIP 안의 `release/SHA256SUMS.txt`를 사용한다.
 
 [초안 PR #8](https://github.com/nalkarowndal/rgdqwer/pull/8), base `codex/m7-model-manager`; 병합·공개 릴리스 없음. 이후 최종 기록 커밋은 문서/검증 JSON만 변경한다. 호스팅 Windows CI 성공은 깨끗한 Windows10/11 PC·실제 GPU/모델·서명 수락을 대신하지 않는다.
+
+## M8 후속 패키지 보강 — 2026-10-25 (KST)
+
+PR8에서 보류한 production 의존성 테스트/fixture/benchmark224개(내용1,036,889 bytes)를 제외했다. 폴더/헤더를 포함한 Linux ASAR는72,077,484→70,975,174 bytes로1,102,310 bytes 감소했고, 항목 수는5727→5473이다. 실제 ASAR 검사에서 필수 런타임/WASM·외부 Python·82개 의존성 고지를 확인했다. 중첩·스코프·Windows 구분자 경로의 거부와 runtime test.js/specification.json 등 파일 보존 테스트 RED→GREEN, 타입/lint·JS146 통과.
+
+Linux 실제 설치본을 한글·공백이 포함된 설치 경로로 복사하고 한글·공백 프로필을 사용해 seed/restart, 실제 cwd/profile 일치, 설정·모델 보존과 외부 Python status를 확인했다. Windows CI의 설치/재설치/제거 경로도 같은 문자 조건으로 확장했다. Windows 실행 결과는 후속 기록한다. 기존 M8 측정 JSON과 이전 검증 링크는 해당 커밋의 역사적 기록으로 유지한다.
+
+후속 최종 구현 코드 `f31decee8634f720b1cb1ac95537a5e103532f0d`의 [Windows/Ubuntu CI #43](https://github.com/nalkarowndal/rgdqwer/actions/runs/40153440698)가 모두 성공했다. 두 플랫폼에서 타입/lint/build, JS146, Python22, 브라우저16, 실제 Python HTTP smoke와20회 반복 검사 통과. Windows의 `rgdqwer 한글 QA <UUID>` 설치 디렉터리와 `프로필 data`에서 실제 ASAR exe를 실행하고 재설치/제거 후 격리 DB/모델·기본 프로필 sentinel 보존을 확인했다. 실제 패키지5473항목/82개 의존성 고지, 외부 Python 및 sandbox 설정을 확인했다. [설치 검사 JSON](qa/m8-hardening-installer-windows.json)은 QA ZIP SHA256 일치를 확인한 뒤 보존했다.
+
+[새 Windows 설치본·체크섬 아티팩트](https://github.com/nalkarowndal/rgdqwer/actions/runs/40153440698/artifacts/12583985492)는127,763,756 bytes,14일 보존이다. ZIP digest `2d2beea9ca7c4e468fb9112e5221094c888d1c537d5f1a1ab1a98cae749d34e1`과 설치 exe용 `release/SHA256SUMS.txt`를 구분한다. [초안 PR #9](https://github.com/nalkarowndal/rgdqwer/pull/9)는 #8 위에 쌓았으며 병합하지 않았다. 최종 후속 커밋은 문서/검증 JSON만 변경한다. 기존 패키지 파일224개 잔존 Minor는 이번 변경으로 해소됐다. 클린 Windows·실제 모델/GPU·서명·접근성 수락은 계속 보류한다.

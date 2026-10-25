@@ -1,8 +1,8 @@
 {
   "name": "rgdqwer",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "private": true,
-  "description": "ComfyUI \uae30\ubc18 Windows \ub85c\uceec AI \uc2a4\ud29c\ub514\uc624",
+  "description": "ComfyUI 기반 Windows 로컬 AI 스튜디오",
   "type": "module",
   "main": "dist/desktop/main.js",
   "engines": {
@@ -20,7 +20,12 @@
     "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.node.json --noEmit",
     "lint": "eslint .",
-    "check": "npm run typecheck && npm run lint && npm test"
+    "check": "npm run typecheck && npm run lint && npm test",
+    "prepare:release": "tsx scripts/prepare-release.ts",
+    "pack:dir": "npm run build && npm run prepare:release && electron-builder --dir --publish never",
+    "dist:win": "npm run build && npm run prepare:release && electron-builder --win nsis --x64 --publish never",
+    "soak": "node --expose-gc --import tsx scripts/soak.ts",
+    "smoke:packaged": "tsx scripts/smoke-packaged.ts"
   },
   "dependencies": {
     "@fastify/static": "10.1.6",
@@ -33,6 +38,7 @@
     "zod": "3.25.76"
   },
   "devDependencies": {
+    "@electron/asar": "3.4.1",
     "@eslint/js": "9.39.2",
     "@playwright/test": "1.58.2",
     "@tailwindcss/vite": "4.1.18",
@@ -45,6 +51,7 @@
     "@vitejs/plugin-react": "4.7.0",
     "concurrently": "9.2.5",
     "electron": "43.8.1",
+    "electron-builder": "26.18.0",
     "eslint": "9.39.2",
     "eslint-plugin-react-hooks": "7.0.1",
     "globals": "16.5.0",
@@ -55,5 +62,6 @@
     "vite": "7.3.7",
     "vitest": "4.1.12",
     "ws": "8.22.0"
-  }
+  },
+  "license": "UNLICENSED"
 }

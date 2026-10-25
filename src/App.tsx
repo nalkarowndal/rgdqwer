@@ -111,7 +111,7 @@ export default function App() {
       <div className="sidebar-bottom">
         <div className="local-note"><ShieldCheck size={17} /><span>로컬에서, 나만의 작업</span></div>
         <p>모델과 파일을 내 컴퓨터에서 관리합니다.</p>
-        <div className="version">v0.8.0 <span>M7 · 모델 관리</span></div>
+        <div className="version">v0.9.0 <span>M8 · 설치 검증</span></div>
       </div>
     </aside>
     <div className="workspace">
@@ -130,7 +130,7 @@ export default function App() {
           <div className="page-heading"><div><p className="eyebrow">YOUR LOCAL CREATIVE SPACE</p>
             <h1>당신의 아이디어,<br className="mobile-break" /> 당신의 컴퓨터에서.</h1>
             <p className="subtitle">이미지부터 영상, 목소리까지. 나만의 AI 작업 공간을 준비하세요.</p>
-          </div><span className="milestone-tag">M7 MODEL WORKSPACE</span></div>
+          </div><span className="milestone-tag">LOCAL AI WORKSPACE</span></div>
           <section className="onboarding">
             <div className="onboarding-copy"><span className="hero-label"><Plug size={14} /> 처음 시작하시나요?</span>
               <h2>ComfyUI를 연결하고<br />창작할 준비를 시작하세요.</h2>
@@ -158,7 +158,7 @@ export default function App() {
           <section className="studio-grid">
             {sections.slice(1, 7).map((section, index) => <button key={section.id} className="studio-card" onClick={() => setPage(section.id)}>
               <div className={`studio-icon tone-${index}`}><section.icon size={24} /></div>
-              <span className="phase-chip">{section.id === 'image' ? 'T2I 지원' : section.id === 'prompt' ? '편집 지원' : section.id === 'caption' ? '로컬 분석' : section.id === 'krea' ? 'RAW · Turbo' : section.id === 'video' ? 'Wan · FFmpeg' : `${section.phase} 예정`}</span>
+              <span className="phase-chip">{section.id === 'image' ? 'T2I 지원' : section.id === 'prompt' ? '편집 지원' : section.id === 'caption' ? '로컬 분석' : section.id === 'krea' ? 'RAW · Turbo' : section.id === 'video' ? 'Wan · FFmpeg' : section.id === 'voice' ? 'TTS · VC · RVC' : `${section.phase} 예정`}</span>
               <h3>{section.title}</h3><p>{section.description}</p>
               <span className="card-link">개발 범위 보기 <ArrowRight size={15} /></span>
             </button>)}

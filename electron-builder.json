@@ -1,0 +1,81 @@
+{
+  "appId": "io.github.nalkarowndal.rgdqwer",
+  "productName": "rgdqwer",
+  "executableName": "rgdqwer",
+  "directories": {
+    "output": "release",
+    "buildResources": "build-resources"
+  },
+  "asar": true,
+  "asarUnpack": [
+    "**/*.wasm"
+  ],
+  "npmRebuild": false,
+  "files": [
+    "dist/desktop/**/*",
+    "dist/server/**/*",
+    "dist/src/**/*",
+    "dist/ui/**/*",
+    "package.json"
+  ],
+  "extraResources": [
+    {
+      "from": "worker",
+      "to": "python/worker",
+      "filter": [
+        "*.py",
+        "requirements*.txt"
+      ]
+    },
+    {
+      "from": "voice_worker",
+      "to": "python/voice_worker",
+      "filter": [
+        "*.py",
+        "requirements*.txt"
+      ]
+    },
+    {
+      "from": "docs",
+      "to": "docs",
+      "filter": [
+        "*.md"
+      ]
+    },
+    {
+      "from": "build-resources/THIRD_PARTY_NOTICES.txt",
+      "to": "THIRD_PARTY_NOTICES.txt"
+    },
+    {
+      "from": "build-resources/dependencies.json",
+      "to": "dependencies.json"
+    }
+  ],
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": [
+          "x64"
+        ]
+      }
+    ],
+    "artifactName": "rgdqwer-${version}-windows-${arch}-unsigned-setup.${ext}"
+  },
+  "nsis": {
+    "oneClick": true,
+    "perMachine": false,
+    "allowElevation": false,
+    "runAfterFinish": false,
+    "deleteAppDataOnUninstall": false,
+    "createDesktopShortcut": false,
+    "createStartMenuShortcut": true
+  },
+  "linux": {
+    "target": [
+      "dir"
+    ],
+    "category": "Graphics"
+  },
+  "publish": null
+}

@@ -3,7 +3,7 @@ import ts from 'typescript-eslint';
 import globals from 'globals';
 import hooks from 'eslint-plugin-react-hooks';
 export default ts.config(
-  { ignores: ['.venv/**', '.venv-chatterbox/**', '.venv-rvc/**', '.worktrees/**', 'dist/**', 'node_modules/**', 'playwright-report/**', 'test-results/**'] },
+  { ignores: ['.venv/**', '.venv-chatterbox/**', '.venv-rvc/**', '.worktrees/**', 'dist/**', 'release/**', 'build-resources/**', 'node_modules/**', 'playwright-report/**', 'test-results/**'] },
   js.configs.recommended,
   ...ts.configs.recommended,
   { languageOptions: { globals: { ...globals.node, ...globals.browser } } },

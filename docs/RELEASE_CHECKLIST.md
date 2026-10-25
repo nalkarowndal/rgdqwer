@@ -33,3 +33,11 @@ npm run soak -- --duration-ms 20000 --cycles 20 --report test-results/m8-soak-ci
 ARM64·관리자용 전체 사용자 설치·자동 업데이트는 이 산출물 범위 밖입니다. 정확한 실행 증거는 [QA 기록](QA_TEST_PLAN.md)에 남깁니다.
 
 M8 후속 패키지 보강: production 의존성 내부의 test/tests/__tests__/spec/fixtures/bench/benchmark/benchmarks 디렉터리를 제외하고 실제 ASAR에서도 거부한다. 런타임 JS/JSON/WASM와 고지는 유지한다. 향후 의존성이 이 디렉터리 이름을 런타임에 사용하면 내용을 검토하고 예외를 좁게 정의해야 한다. 설치 QA는 소유한 설치/프로필 경로에 한글과 공백을 넣어 실행한다. 이 경로 검사도 호스팅 Windows 범위이며 전체 실기 수락을 의미하지 않는다.
+
+## 설치 없는 ZIP 배포 검증
+
+- Windows CI에서 `*-unsigned-standalone.zip`을 실제 압축 해제하고 `rgdqwer.exe` 실행을 검사한다.
+- 한글/공백 경로에서 최초 실행 → 설정/합성 모델 가져오기 → 종료 → 앱 폴더 이동 → 재실행을 검증한다.
+- 독립 QA 프로필을 사용하며 실제 사용자 AppData 또는 실제 GPU/모델 추론 검증을 대신하지 않는다.
+- 설치형과 별도 `rgdqwer-windows-x64-standalone-unsigned` 아티팩트 및 SHA256SUMS-standalone.txt를 제공한다.
+- 사용자에게 전체 폴더 유지, AppData 공유, 외부 엔진 준비, 서명되지 않은 상태를 안내한다.

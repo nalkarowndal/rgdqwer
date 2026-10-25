@@ -59,11 +59,21 @@
         "arch": [
           "x64"
         ]
+      },
+      {
+        "target": "zip",
+        "arch": [
+          "x64"
+        ]
       }
     ],
-    "artifactName": "rgdqwer-${version}-windows-${arch}-unsigned-setup.${ext}"
+    "artifactName": "rgdqwer-${version}-windows-${arch}-unsigned-standalone.${ext}",
+    "extraFiles": [
+      { "from": "docs/START_HERE.txt", "to": "START_HERE.txt" }
+    ]
   },
   "nsis": {
+    "artifactName": "rgdqwer-${version}-windows-${arch}-unsigned-setup.${ext}",
     "oneClick": true,
     "perMachine": false,
     "allowElevation": false,

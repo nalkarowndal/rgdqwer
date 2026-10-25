@@ -18,9 +18,11 @@ ComfyUI를 연결해 사용하는 Windows 로컬 AI 스튜디오입니다.
 - 세션 인증, loopback 제한, 연결 시간 초과 및 오류 안내
 - API·Worker·브라우저 테스트와 Windows/Linux CI 설정
 
-## Windows 설치본
+## Windows 실행 파일 다운로드
 
-현재 사용자용 x64 NSIS 설치본을 CI 검증 아티팩트로 만듭니다. 서명되지 않은 검증용이며 자동 업데이트·공개 릴리스는 없습니다. [설치·별도 엔진 준비·백업/제거 안내](docs/INSTALLATION.md), [실기 검증 목록](docs/RELEASE_CHECKLIST.md)을 확인하세요. 설치본 실행에 Node.js 개발 환경은 필요하지 않습니다.
+**[설치 없이 실행하는 Windows ZIP 받기](https://github.com/nalkarowndal/rgdqwer/actions/runs/40170610776/artifacts/12590301455)** — GitHub 아티팩트를 받은 뒤 안쪽 `*-standalone.zip`을 새 폴더에 모두 풀고 **`rgdqwer.exe`를 더블클릭**하세요. DLL·`resources` 등 전체 폴더가 필요하며 Node.js 개발 환경은 필요하지 않습니다. 같은 Windows 계정의 설정/기록은 `%APPDATA%\rgdqwer\studio`에 저장됩니다.
+
+[설치형 Setup 받기](https://github.com/nalkarowndal/rgdqwer/actions/runs/40170610776/artifacts/12590665658)도 제공됩니다. 두 파일은 [Windows/Ubuntu CI #49](https://github.com/nalkarowndal/rgdqwer/actions/runs/40170610776)를 통과한 x64/unsigned 검증용이며, 아티팩트는 14일 보존됩니다. GitHub 로그인과 저장소 접근 권한이 필요합니다. [실행·설치·엔진 준비·백업 안내](docs/INSTALLATION.md), [실기 검증 목록](docs/RELEASE_CHECKLIST.md)을 확인하세요. 자동 업데이트·공개 릴리스는 없습니다.
 
 ## 소스에서 빠른 시작 (Windows PowerShell)
 
@@ -40,7 +42,7 @@ npm start
 
 Electron 실행 파일을 별도로 설치하는 `setup:desktop`은 최초 1회 인터넷을 사용합니다.
 ComfyUI 및 모델은 별도로 준비해야 합니다. 정상 설치 이후 앱의 구현된 기능은 인터넷을 요구하지 않습니다.
-Windows 설치 프로그램은 M8 범위이며 아직 없습니다.
+Windows 실행형 ZIP과 설치 프로그램은 위 다운로드에서 제공합니다.
 
 ### Python Worker (선택)
 

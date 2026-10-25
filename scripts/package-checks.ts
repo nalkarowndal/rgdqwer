@@ -2,6 +2,14 @@ import {createHash} from 'node:crypto';
 import {createReadStream} from 'node:fs';
 import {mkdir,writeFile,readFile,lstat} from 'node:fs/promises';
 import {isAbsolute,join,basename} from 'node:path';
+export function releaseArtifactFiles(files:string[],kind:'installer'|'standalone'){
+ if(kind!=='installer'&&kind!=='standalone')throw new Error('Unknown release kind');
+ const pattern=kind==='installer'?/^rgdqwer-[\w.+-]+-windows-x64-unsigned-setup\.exe$/:/^rgdqwer-[\w.+-]+-windows-x64-unsigned-standalone\.zip$/;
+ const primary=files.filter(file=>pattern.test(file));
+ if(primary.length!==1)throw new Error(`Exactly one ${kind} artifact required`);
+ const blockmap=`${primary[0]}.blockmap`;
+ return kind==='installer'&&files.includes(blockmap)?[primary[0],blockmap]:primary;
+}
 export function parseSmokeArgs(args:string[]){
  const flags=new Map<string,string>();
  for(let i=0;i<args.length;i+=2){if(!['--executable','--profile','--mode','--report'].includes(args[i])||!args[i+1]||flags.has(args[i]))throw new Error('Invalid smoke arguments');flags.set(args[i],args[i+1]);}

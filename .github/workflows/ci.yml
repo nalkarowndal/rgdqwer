@@ -35,13 +35,26 @@ jobs:
       - run: npm run test:e2e
       - name: Short simulated-engine lifecycle soak
         run: npm run soak -- --duration-ms 20000 --cycles 20 --report test-results/m8-soak-ci.json
-      - name: Build unsigned Windows installer
+      - name: Build unsigned Windows installer and standalone ZIP
         if: runner.os == 'Windows'
         run: npm run dist:win
       - name: Verify install, upgrade and retained data after uninstall
         if: runner.os == 'Windows'
         shell: pwsh
         run: ./scripts/verify-installer.ps1
+      - name: Verify extracted and relocated standalone executable
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./scripts/verify-standalone.ps1
+      - uses: actions/upload-artifact@v4
+        if: success() && runner.os == 'Windows'
+        with:
+          name: rgdqwer-windows-x64-standalone-unsigned
+          retention-days: 14
+          if-no-files-found: error
+          path: |
+            release/*-windows-x64-unsigned-standalone.zip
+            release/SHA256SUMS-standalone.txt
       - uses: actions/upload-artifact@v4
         if: success() && runner.os == 'Windows'
         with:

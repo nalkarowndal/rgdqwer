@@ -27,9 +27,9 @@ Interfaces: ImageInventory, inspectImage(raw), imageIssues(input,inventory); GET
 ### Task2: UI and catalog
 Files: src/ImageStudio.tsx, src/ImageLoras.tsx, App.tsx, model-catalog.ts, CSS; e2e/image-lora-anima.spec.ts; docs.
 Interfaces: existing image draft includes rows, inventory UI loads image/status, download feature anima selects3files.
-- [ ] RED browser tests for row toggles retaining file/strength, profile reset/reuse and Anima fields; catalog test all9.
-- [ ] Implement UI, source/setup docs and Anima catalog.
-- [ ] Check/build/full browser tests and screenshots; commit.
+- [x] RED browser tests for row toggles retaining file/strength, profile reset/reuse and Anima fields; catalog test all9.
+- [x] Implement UI, source/setup docs and Anima catalog.
+- [x] Check/build/full browser tests and screenshots; commit.
 
 ### Task3: Review and Windows distribution
 - [ ] One independent final review, resolve findings, preserve rulings in review record.

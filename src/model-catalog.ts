@@ -3,6 +3,7 @@ import type {ModelKind} from './models.js';
 export interface CatalogFile {id:string;repo:string;path:string;kind:ModelKind;family:string;bundle:string;license:string;licenseUrl:string;estimatedBytes:number}
 export interface ModelFeature {id:string;name:string;description:string;fileIds:string[];setup:string}
 const repositories={
+ anima:{repo:'circlestone-labs/Anima',family:'anima',license:'CircleStone Labs Non-Commercial License · NVIDIA derivative terms',licenseUrl:'https://huggingface.co/circlestone-labs/Anima'},
  sdxl:{repo:'stabilityai/stable-diffusion-xl-base-1.0',family:'sdxl',license:'CreativeML Open RAIL++-M',licenseUrl:'https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/blob/main/LICENSE.md'},
  krea:{repo:'Comfy-Org/Krea-2',family:'krea2',license:'Krea AI Community License',licenseUrl:'https://www.krea.ai/krea-2-licensing'},
  wan:{repo:'Comfy-Org/Wan_2.2_ComfyUI_Repackaged',family:'wan22',license:'Apache-2.0',licenseUrl:'https://huggingface.co/Wan-AI/Wan2.2-TI2V-5B'},
@@ -12,6 +13,9 @@ const repositories={
 };
 function file(id:string,repository:keyof typeof repositories,path:string,kind:ModelKind,estimatedBytes:number):CatalogFile{return {id,...repositories[repository],path,kind,bundle:`catalog-${repository}`,estimatedBytes};}
 export const catalogFiles:CatalogFile[]=[
+ file('anima-base','anima','split_files/diffusion_models/anima-base-v1.0.safetensors','video',4e9),
+ file('anima-text','anima','split_files/text_encoders/qwen_3_06b_base.safetensors','text_encoder',1.2e9),
+ file('anima-vae','anima','split_files/vae/qwen_image_vae.safetensors','vae',254e6),
  file('sdxl-base','sdxl','sd_xl_base_1.0.safetensors','checkpoint',6.94e9),
  file('krea-turbo','krea','diffusion_models/krea2_turbo_fp8_scaled.safetensors','video',13.1e9),
  file('krea-raw','krea','diffusion_models/krea2_raw_fp8_scaled.safetensors','video',13.1e9),
@@ -27,6 +31,7 @@ export const catalogFiles:CatalogFile[]=[
 ];
 const comfySetup='다운로드 후 경로·메모리 탭에서 ComfyUI 경로 설정을 생성하고 적용·재시작하세요. 해당 스튜디오에서 모델을 선택하고 실행 환경을 확인하세요.';
 export const modelFeatures:ModelFeature[]=[
+ {id:'anima',name:'이미지 생성 · Anima',description:'Base v1 · 애니메이션·일러스트 · Qwen 인코더/VAE 포함',fileIds:['anima-base','anima-text','anima-vae'],setup:comfySetup+' 이미지 스튜디오에서 Anima Base v1 프로필을 선택하세요. 최신 ComfyUI가 필요하며 LoRA는 Anima용만 사용하세요.'},
  {id:'sdxl',name:'이미지 생성 · SDXL',description:'SDXL Base 1.0 · 기본 이미지 모델',fileIds:['sdxl-base'],setup:comfySetup},
  {id:'krea-turbo',name:'Krea 2 · Turbo',description:'FP8 기본 모델 · 빠른 이미지 생성',fileIds:['krea-turbo','krea-text','krea-vae'],setup:comfySetup},
  {id:'krea-raw',name:'Krea 2 · RAW',description:'FP8 기본 모델 · 전체 단계 이미지 생성',fileIds:['krea-raw','krea-text','krea-vae'],setup:comfySetup},
@@ -36,7 +41,7 @@ export const modelFeatures:ModelFeature[]=[
  {id:'tts',name:'음성 합성 · Chatterbox',description:'Multilingual v2 · 한국어 등 다국어 TTS',fileIds:['tts-ve','tts-s3','tts-t3','tts-tokenizer'],setup:'별도 Chatterbox Python 환경과 FFmpeg를 준비하고 STUDIO_CHATTERBOX_DIR에 아래 모델 폴더를 지정한 뒤 앱을 재시작하세요. resources/docs/VOICE_SYSTEM.md를 참고하세요.'},
  {id:'vc',name:'음성 변환 · ChatterboxVC',description:'참고 음성 기반 음성 변환',fileIds:['vc-s3'],setup:'TTS와 같은 Chatterbox 환경/모델 폴더를 사용합니다. STUDIO_CHATTERBOX_DIR과 FFmpeg를 준비한 뒤 음성 스튜디오에서 상태를 확인하세요.'},
 ];
-export const featureDownloadSchema=z.object({featureIds:z.array(z.string().refine(id=>modelFeatures.some(f=>f.id===id),'알 수 없는 기능입니다.')).min(1).max(8),confirmed:z.literal(true)}).strict();
+export const featureDownloadSchema=z.object({featureIds:z.array(z.string().refine(id=>modelFeatures.some(f=>f.id===id),'알 수 없는 기능입니다.')).min(1).max(modelFeatures.length),confirmed:z.literal(true)}).strict();
 export function selectCatalogFiles(ids:string[]){const selected=new Set<string>();for(const id of ids){const feature=modelFeatures.find(f=>f.id===id);if(!feature)throw new Error('알 수 없는 기능입니다.');feature.fileIds.forEach(fileId=>selected.add(fileId));}return catalogFiles.filter(f=>selected.has(f.id));}
 export interface CatalogFileStatus {id:string;name:string;installed:boolean;bytes:number;estimatedBytes:number;path:string;issue?:string}
 export interface FeatureStatus extends ModelFeature {ready:boolean;files:CatalogFileStatus[]}

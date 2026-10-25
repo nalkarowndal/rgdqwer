@@ -5,6 +5,7 @@
 | 기능 | 기본 구성 |
 |---|---|
 | 이미지 생성 | SDXL Base 1.0 단일 체크포인트 |
+| Anima Base v1 | 확산 모델 + Qwen3-0.6B 인코더 + Qwen Image VAE (3개 파일) |
 | Krea 2 Turbo / RAW | 해당 FP8 확산 모델 + 공통 Qwen3VL-4B 인코더 + Qwen Image VAE |
 | 영상 생성 | Wan2.2 TI2V 5B FP16 + UMT5 FP8 인코더 + Wan2.2 VAE |
 | 이미지 설명 | native Florence-2-base 가중치 + processor/tokenizer 설정 파일 |
@@ -48,3 +49,5 @@ Krea Turbo/RAW를 함께 선택하면 공통 인코더·VAE는 한 번만 받습
 개별 이용 조건은 카드에 표시합니다. 인증/접근 승인이 필요한 제공자 상태나 HTTP 오류를 우회하지 않습니다. 기존 내장 다운로드와 동일하게 공개 HTTPS만 지원하며 프록시 환경에서는 브라우저 다운로드 후 수동 가져오기를 사용합니다. Python/ComfyUI/드라이버/FFmpeg 설치와 GPU·실제 모델 추론 검증은 별도입니다.
 
 단위/통합 테스트는 작은 합성 응답으로 실제 파일·DB·해시·취소/재시도/재시작을 검사합니다. Windows 공개 카탈로그 검사는 실제 제공자 메타데이터와 작은 설정 파일을 확인합니다. 추가로 WD14 태그 CSV와 Chatterbox 음성 인코더 ve.pt 두 작은 구성 파일만 실제 스트림 다운로드·해시 검증·임시 파일 정리까지 수행합니다(각8MiB 상한). 다GB 가중치 전체나 실제 추론은 검사하지 않습니다.
+
+Anima는 이미지 스튜디오에서 Base v1 프로필로 생성하고 Anima용 LoRA를 개별 활성화할 수 있습니다. [Anima·LoRA 사용 안내](IMAGE_SYSTEM.md#anima-base-v1). 출처와 이용 조건: [circlestone-labs/Anima](https://huggingface.co/circlestone-labs/Anima).

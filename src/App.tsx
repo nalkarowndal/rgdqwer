@@ -56,7 +56,7 @@ export default function App() {
   }
   function sendPrompt(next = promptDraft) {
     setImageDraft(value => ({ ...value, profile: next.profile, promptDocument: { ...next.document },
-      ...(value.profile !== next.profile ? { width: next.profile === 'sd15' ? 512 : 1024, height: next.profile === 'sd15' ? 512 : 1024 } : {}) }));
+      ...(value.profile !== next.profile ? { checkpoint:'',textEncoder:undefined,vae:undefined,loras:value.loras?.map(l=>({...l,enabled:false})),steps:next.profile==='anima'?30:next.profile==='sd15'?20:25,cfg:next.profile==='anima'?4:next.profile==='sd15'?7:5,width: next.profile === 'sd15' ? 512 : 1024, height: next.profile === 'sd15' ? 512 : 1024 } : {}) }));
     setPage('image');
   }
   const [busy, setBusy] = useState(false);
@@ -174,7 +174,7 @@ export default function App() {
           : page === 'prompt' ? <PromptStudio draft={promptDraft} setDraft={setPromptDraft} send={() => sendPrompt()} />
           : page === 'caption' ? null
           : page === 'library' ? <LibraryStudio reuse={reuse}/>
-          : page === 'models' ? <ModelManager engine={engine} refreshEngine={refresh} select={asset=>{const profile=asset.family.toLowerCase()==='sd15'?'sd15':'sdxl';setImageDraft(value=>({...value,profile,checkpoint:asset.relativePath.replaceAll('\\','/').split('/').slice(1).join('/'),width:profile==='sd15'?512:1024,height:profile==='sd15'?512:1024}));void refresh();setPage('image');}}/>
+          : page === 'models' ? <ModelManager engine={engine} refreshEngine={refresh} select={asset=>{const profile=asset.family.toLowerCase()==='sd15'?'sd15':'sdxl';setImageDraft(value=>({...value,profile,textEncoder:undefined,vae:undefined,loras:value.profile===profile?value.loras:value.loras?.map(l=>({...l,enabled:false})),checkpoint:asset.relativePath.replaceAll('\\','/').split('/').slice(1).join('/'),width:profile==='sd15'?512:1024,height:profile==='sd15'?512:1024}));void refresh();setPage('image');}}/>
           : <><PageTitle title={current.title} text={current.description ?? ''} />
             <div className="panel feature-detail"><span className="phase-chip">{current.phase} 개발 예정</span><current.icon size={42} />
               <h2>다음 창작 도구를 준비하고 있습니다.</h2>

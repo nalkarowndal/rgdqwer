@@ -32,4 +32,6 @@
 - [x] Add Windows CI-only actual ZIP extraction, seed, move and verify script; use unique Korean/space paths and explicit reports, validate SHA256 against selected ZIP. Upload independent standalone artifact after both lifecycle checks pass. Add quick-start and update documentation.
 - [x] Run `npm run check` and `npm run build`. Expected all pass; commit implementation.
 - [x] One fresh whole-branch review, resolve Important/Critical in one test-backed pass and record rulings.
-- [ ] Push branch/open attached draft PR based on codex/m8-package-hardening; inspect Windows/Ubuntu CI and actual standalone artifact/reports. Expected ZIP extraction+relocation successful, existing checks green. Save review/evidence and download link, keep manual device gates explicit.
+- [x] Push branch/open attached draft PR based on codex/m8-package-hardening; inspect Windows/Ubuntu CI and actual standalone artifact/reports. Expected ZIP extraction+relocation successful, existing checks green. Save review/evidence and download link, keep manual device gates explicit.
+
+Completed: draft PR10, final packaged revision e92c501, Windows/Ubuntu CI49 all green. Download/evidence links are in INSTALLATION.md and the permanent review record. Final documentation also updates README discovery links and removes its stale claim that no installer exists.

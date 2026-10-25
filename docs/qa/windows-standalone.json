@@ -1,0 +1,11 @@
+{
+  "archive": "rgdqwer-0.9.0-windows-x64-unsigned-standalone.zip",
+  "signed": false,
+  "unicodeAndSpacePaths": true,
+  "isolatedQaProfile": true,
+  "relocated": true,
+  "archiveSha256": "cc449c627b344900b9d58eaf49a454faff4b060ae2bf15cd23da90eeaaeae974",
+  "extracted": true,
+  "realInferenceVerified": false,
+  "settingsAndModelRetained": true
+}

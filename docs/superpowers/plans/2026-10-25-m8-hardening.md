@@ -22,16 +22,18 @@
 ### Task1: Package contents
 **Files:** electron-builder.json, scripts/verify-payload.ts, tests/payload.test.ts.
 **Interfaces:** validateArchiveEntries(entries:string[]) rejects dependency test/spec/fixture/benchmark directories; verifyPayload still checks external Python/WASM/notices.
-- [ ] Add RED nested/scoped/Windows-separator cases and positive runtime filename cases.
-- [ ] Implement negative globs and independent validator rule.
-- [ ] Run npm run check; build actual Linux pack; verify smaller ASAR and retained required resources. Expected PASS.
-- [ ] Commit.
+- [x] Add RED nested/scoped/Windows-separator cases and positive runtime filename cases.
+- [x] Implement negative globs and independent validator rule.
+- [x] Run npm run check; build actual Linux pack; verify smaller ASAR and retained required resources. Expected PASS.
+- [x] Commit.
 
 ### Task2: Unicode paths, documentation and verification
 **Files:** scripts/verify-installer.ps1, docs/DEVELOPMENT_PHASES.md, docs/QA_TEST_PLAN.md, docs/RELEASE_CHECKLIST.md.
 **Interfaces:** existing smoke CLI with Korean/space absolute executable/profile paths; actual runtime cwd/profile assertion.
-- [ ] Set owned CI installation/profile names to include Korean and spaces; retain all ownership guards and NSIS syntax.
-- [ ] Launch actual Linux package from Korean/space installation path, seed/restart with Korean/space profile. Expected PASS.
-- [ ] Update stale roadmap and payload finding status; commit.
-- [ ] One fresh final review; one Important/Critical fix pass with regressions, defer Minors.
-- [ ] Create/attach draft PR over M8; Windows/Ubuntu CI including actual installer lifecycle PASS; record exact code/artifact evidence.
+- [x] Set owned CI installation/profile names to include Korean and spaces; retain all ownership guards and NSIS syntax.
+- [x] Launch actual Linux package from Korean/space installation path, seed/restart with Korean/space profile. Expected PASS.
+- [x] Update stale roadmap and payload finding status; commit.
+- [x] One fresh final review; one Important/Critical fix pass with regressions, defer Minors.
+- [x] Create/attach draft PR over M8; Windows/Ubuntu CI including actual installer lifecycle PASS; record exact code/artifact evidence.
+
+Completed: implementation f31dece, Windows/Ubuntu CI43 success including actual Korean/space NSIS lifecycle. Real-device/signing/accessibility gates remain open.

@@ -28,15 +28,15 @@ jobs:
       - run: npm ci
       - run: npm run check
       - run: npm run build
-      - name: Verify public model catalog and small component downloads
-        if: runner.os == 'Windows'
-        timeout-minutes: 5
-        run: node --import tsx scripts/verify-model-catalog.ts
       - run: python -m pip install -r worker/requirements-lock.txt
       - run: python -m pytest worker/tests voice_worker/tests -q
       - run: node scripts/smoke-analysis.mjs
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+      - name: Verify public model catalog and small component downloads
+        if: runner.os == 'Windows'
+        timeout-minutes: 5
+        run: node --import tsx scripts/verify-model-catalog.ts
       - name: Short simulated-engine lifecycle soak
         run: npm run soak -- --duration-ms 20000 --cycles 20 --report test-results/m8-soak-ci.json
       - name: Build unsigned Windows installer and standalone ZIP

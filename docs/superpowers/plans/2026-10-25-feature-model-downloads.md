@@ -37,9 +37,9 @@
 
 ### Task 3: Feature download screen, documentation and distributable
 **Files:** src/FeatureModels.tsx, src/ModelManager.tsx, src CSS, e2e/model-catalog.spec.ts, docs/README, scripts/verify-model-catalog.ts, CI.
-**Interfaces:** UI uses catalog API and current model tasks; no URL/hash input for curated bundles. Metadata smoke queries public providers/small config files only, separate from fixture tests.
+**Interfaces:** UI uses catalog API and current model tasks; no URL/hash input for curated bundles. Metadata smoke queries public providers/small config files and downloads two components capped at 8 MiB each, separate from fixture tests.
 - [x] Browser coverage first: select/multi-select, shared estimate, rights/button states, submit/error/progress/retry/file-ready and mobile/keyboard. Expected missing UI RED.
 - [x] Add screenshot-like two-column feature cards, sizes, count, file/source/setup details and selected download action. Keep manual import/download available.
 - [x] Run check/build/e2e, inspect rendered screenshots, commit. Expected GREEN.
 - [x] One fresh whole-branch review; one Important/Critical fix pass; record all rulings.
-- [ ] Open attached draft PR on codex/windows-standalone, inspect Windows/Ubuntu CI, public metadata smoke and built ZIP execution. Supply updated Windows executable download and evidence. No merge/public release.
+- [x] Open attached draft PR on codex/windows-standalone, inspect Windows/Ubuntu CI, public metadata smoke and built ZIP execution. Supply updated Windows executable download and evidence. No merge/public release.

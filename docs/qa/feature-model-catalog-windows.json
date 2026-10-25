@@ -1,0 +1,23 @@
+{
+  "source": "Windows CI job log (full JSON report was cleared by subsequent Playwright run)",
+  "jobUrl": "https://github.com/nalkarowndal/rgdqwer/actions/runs/40191758197/job/121164036724",
+  "testedCommit": "1aec20f31c285f0603c865ec61d494767639f999",
+  "checkedAt": "2026-10-25T12:09:42Z",
+  "publicMetadataVerified": true,
+  "realInferenceVerified": false,
+  "files": 26,
+  "repositories": 6,
+  "downloaded": [
+    {
+      "id": "wd14-tags",
+      "bytes": 253906,
+      "sha256": "8c8750600db36233a1b274ac88bd46289e588b338218c2e4c62bbc9f2b516368"
+    },
+    {
+      "id": "tts-ve",
+      "bytes": 5698626,
+      "sha256": "4b16d836bc598509860f6fa068165a8bb5e9ac84f05582dfcf278a5a372879f1"
+    }
+  ],
+  "largeWeightDownloads": false
+}

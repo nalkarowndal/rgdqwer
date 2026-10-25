@@ -22,4 +22,15 @@ One fresh read-only gpt-6-astra/high reviewer inspected `c59a9a2..b1c8d78`. No C
 
 Local typecheck/lint/JS161/build and browser18 pass. New lifecycle tests cover shared/reused files, partial failure/retry, abort/temp cleanup, retained IDs for missing files, changed bytes, current-root status, unmanaged collisions, symlinks, DB reopen, space rejection and DB rollback. Browser tests cover real catalog API, selection/rights, error/cancel/retry/status, keyboard and390px layout. Desktop/mobile screenshots inspected.
 
-Verification extension after review: the Windows live smoke also downloads WD14 tags CSV and the small Chatterbox ve.pt component (each capped at8MiB) through the existing production downloader and removes only its owned temporary directory. This closes the real redirect/stream/hash path gap without downloading full multiGB bundles or executing model code. Final live metadata, Windows/Ubuntu CI and executable artifact evidence pending.
+Verification extension after review: the Windows live smoke also downloads WD14 tags CSV and the small Chatterbox ve.pt component (each capped at8MiB) through the existing production downloader and removes only its owned temporary directory. This closes the real redirect/stream/hash path gap without downloading full multiGB bundles or executing model code. Final CI evidence follows.
+
+
+## Final distributable evidence — 2026-10-26 (KST)
+
+[CI57](https://github.com/nalkarowndal/rgdqwer/actions/runs/40191758197), implementation `1aec20f31c285f0603c865ec61d494767639f999`, passed on Windows and Ubuntu. Each ran JS161, Python22, browser18, typecheck/lint/build and 20 simulated-engine lifecycle cycles. Windows verified public metadata for all26 files/six repositories and really downloaded WD14 tags (253,906 bytes) and Chatterbox ve.pt (5,698,626 bytes) with production stream/size/SHA256 verification. No full bundle/GPU inference was run.
+
+Windows produced and executed both the NSIS installer and standalone ZIP. The ZIP was extracted into a Korean/space path, launched, moved and launched again with settings and the synthetic model retained. Installer install/upgrade/uninstall retained data. QA artifact SHA256 was independently checked after downloading. Reports: [catalog log evidence](../../qa/feature-model-catalog-windows.json), [packaged evidence](../../qa/feature-model-downloads-windows.json).
+
+The live catalog JSON was absent from the QA archive: Playwright clears its default test-results directory after the earlier live check. The successful step and exact component hashes remain in the job log; the committed catalog evidence is explicitly a log summary, not the missing full report. Move the live check after browser tests so future QA archives retain it. This CI ordering correction does not change the distributed application; the linked executable remains the tested `1aec20f` build. No extra app test cycle or review was needed for evidence/docs and this ordering-only correction.
+
+[Standalone artifact](https://github.com/nalkarowndal/rgdqwer/actions/runs/40191758197/artifacts/12598890339) expires 2026-11-08 21:18 KST. [Draft PR11](https://github.com/nalkarowndal/rgdqwer/pull/11) is stacked on `codex/windows-standalone`, attached to the task; not merged or publicly released.

@@ -14,7 +14,7 @@ export async function inspectCatalog(root:string,assets:InstalledAsset[]){
  }
  const files=new Map<string,CatalogFileStatus>();
  for(const file of catalogFiles){const asset=records.get(file.id),path=join(root,catalogRelativePath(file));let issue:string|undefined;
-  if(asset){try{await noSymlinks(path);const info=await lstat(path);if(!info.isFile()||info.size!==asset.bytes)issue='파일 크기나 형식이 변경되었습니다. 모델 삭제 후 다시 다운로드하세요.';else installed.set(file.id,asset);}catch{issue='파일을 찾을 수 없거나 경로를 읽을 수 없습니다.';}}
+  if(asset){try{await noSymlinks(path);const info=await lstat(path);if(!info.isFile()||info.size!==asset.bytes)issue='파일 크기나 형식이 변경되었습니다. 이 경로의 파일을 백업해 다른 위치로 옮긴 후 기능 다운로드를 다시 시작하세요.';else installed.set(file.id,asset);}catch{issue='파일을 찾을 수 없거나 경로를 읽을 수 없습니다.';}}
   if(conflicts.has(file.repo)){installed.delete(file.id);issue='서로 다른 버전의 모델이 섞여 있습니다. 이 묶음을 삭제한 뒤 다시 다운로드하세요.';}
   files.set(file.id,{id:file.id,name:file.path.split('/').pop()!,installed:installed.has(file.id),bytes:asset?.bytes??0,estimatedBytes:file.estimatedBytes,path,...(issue?{issue}:{})});
  }

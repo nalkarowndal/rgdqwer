@@ -50,8 +50,8 @@ export class ModelManager {
    const missing=files.filter(file=>!state.installed.has(file.id));
    for(const file of files){
     signal.throwIfAborted();const asset=state.installed.get(file.id);const path=join(root,catalogRelativePath(file));
-    if(asset){detail({currentFile:`기존 파일 확인: ${asset.fileName}`});const hash=await hashFile(path,signal);if(hash.sha256!==asset.sha256||hash.bytes!==asset.bytes)throw new Error(`설치 후 변경된 파일입니다: ${asset.fileName}. 모델 삭제/경로를 확인하세요.`);}
-    else{await noSymlinks(dirname(path),true);try{await lstat(path);throw new Error(`기존 파일을 덮어쓰지 않습니다: ${path}. 설치 목록과 경로를 확인하세요.`);}catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}}
+    if(asset){detail({currentFile:`기존 파일 확인: ${asset.fileName}`});const hash=await hashFile(path,signal);if(hash.sha256!==asset.sha256||hash.bytes!==asset.bytes)throw new Error(`설치 후 변경된 파일입니다: ${asset.fileName}. 표시된 경로의 파일을 백업해 다른 위치로 옮긴 후 다시 다운로드하세요.`);}
+    else{await noSymlinks(dirname(path),true);try{await lstat(path);throw new Error(`기존 파일을 덮어쓰지 않습니다: ${path}. 해당 파일을 백업해 다른 위치로 옮긴 후 다시 다운로드하세요.`);}catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}}
    }
    if(!missing.length){detail({total:0,currentFile:'선택한 모델 파일이 이미 준비되어 있습니다.'});return undefined;}
    detail({currentFile:'공식 저장소에서 다운로드 정보 확인 중'});

@@ -24,22 +24,22 @@
 ### Task 1: Curated catalog and metadata resolver
 **Files:** src/model-catalog.ts, server/models/catalog.ts, tests/model-catalog.test.ts, model schema/files extensions for CSV.
 **Interfaces:** feature definitions reference unique file IDs; resolver accepts catalog file IDs plus revision hints and injected HTTPS transport, returns DownloadModelInput values. Pure catalog selection and status contracts shared with UI.
-- [ ] Write failing resolver tests for LFS, Git config hash, pinning, bad metadata and duplicate/shared IDs; observe RED.
-- [ ] Implement bounded metadata/redirect reader and allowlisted file catalog. Keep file names and Worker bundles intact; permit WD14 CSV as data only.
-- [ ] Run focused tests, type/lint; commit. Expected GREEN.
+- [x] Write failing resolver tests for LFS, Git config hash, pinning, bad metadata and duplicate/shared IDs; observe RED.
+- [x] Implement bounded metadata/redirect reader and allowlisted file catalog. Keep file names and Worker bundles intact; permit WD14 CSV as data only.
+- [x] Run focused tests, type/lint; commit. Expected GREEN.
 
 ### Task 2: Batch installation and authenticated readiness API
 **Files:** server/models/manager.ts, server/models/routes.ts, tests/model-catalog-install.test.ts, tests/model-api.test.ts.
 **Interfaces:** GET /api/models/catalog returns root/features/file readiness; POST /api/models/catalog/download {featureIds,confirmed:true} returns existing ModelTask. Add optional currentFile to task; use existing cancel endpoint.
-- [ ] Failing tests using actual DB/files and injected bounded response streams: shared/reused files, partial failure/cancel/retry, fixed revision, modified files/conflicts, busy lock and bad inputs.
-- [ ] Implement batch download under existing task lifecycle and maintenance lock. Preflight total space and keep verified prior components. Current root only, consistent bundle versions.
-- [ ] Run full check and commit. Expected all tests pass.
+- [x] Failing tests using actual DB/files and injected bounded response streams: shared/reused files, partial failure/cancel/retry, fixed revision, modified files/conflicts, busy lock and bad inputs.
+- [x] Implement batch download under existing task lifecycle and maintenance lock. Preflight total space and keep verified prior components. Current root only, consistent bundle versions.
+- [x] Run full check and commit. Expected all tests pass.
 
 ### Task 3: Feature download screen, documentation and distributable
 **Files:** src/FeatureModels.tsx, src/ModelManager.tsx, src CSS, e2e/model-catalog.spec.ts, docs/README, scripts/verify-model-catalog.ts, CI.
 **Interfaces:** UI uses catalog API and current model tasks; no URL/hash input for curated bundles. Metadata smoke queries public providers/small config files only, separate from fixture tests.
-- [ ] Browser coverage first: select/multi-select, shared estimate, rights/button states, submit/error/progress/retry/file-ready and mobile/keyboard. Expected missing UI RED.
-- [ ] Add screenshot-like two-column feature cards, sizes, count, file/source/setup details and selected download action. Keep manual import/download available.
-- [ ] Run check/build/e2e, inspect rendered screenshots, commit. Expected GREEN.
-- [ ] One fresh whole-branch review; one Important/Critical fix pass; record all rulings.
+- [x] Browser coverage first: select/multi-select, shared estimate, rights/button states, submit/error/progress/retry/file-ready and mobile/keyboard. Expected missing UI RED.
+- [x] Add screenshot-like two-column feature cards, sizes, count, file/source/setup details and selected download action. Keep manual import/download available.
+- [x] Run check/build/e2e, inspect rendered screenshots, commit. Expected GREEN.
+- [x] One fresh whole-branch review; one Important/Critical fix pass; record all rulings.
 - [ ] Open attached draft PR on codex/windows-standalone, inspect Windows/Ubuntu CI, public metadata smoke and built ZIP execution. Supply updated Windows executable download and evidence. No merge/public release.

@@ -1,18 +1,22 @@
+import {featureDownloadSchema,selectCatalogFiles} from '../../src/model-catalog.js';
+import {resolveCatalogFiles,type CatalogTransport} from './catalog.js';
+import {catalogRelativePath,inspectCatalog} from './catalog-state.js';
+import {httpsResponse} from './network.js';
 import {randomUUID} from 'node:crypto';
-import {join,resolve} from 'node:path';
+import {join,resolve,dirname} from 'node:path';
 import {rm,lstat} from 'node:fs/promises';
 import {modelFolders,importModelSchema,downloadModelSchema,nodeInstallSchema,type DownloadModelInput,type NodeInstallInput,type ImportModelInput,type ModelTask,type ModelRemoval,type InstalledAsset} from '../../src/models.js';
 import type {openStore} from '../store.js';
 import {GenerationManager,GenerationError} from '../generation/manager.js';
 import {ComfyClient} from '../generation/client.js';
-import {noSymlinks,importFile,hashFile,scanModels} from './files.js';
+import {noSymlinks,importFile,hashFile,scanModels,ensureSpace} from './files.js';
 import {downloadAsset} from './download.js';
 import {diagnoseAssets,exportPaths} from './diagnostics.js';
 import {stagePack,activatePack,removePack,packPaths} from './nodes.js';
 export type ModelStore=Awaited<ReturnType<typeof openStore>>;
 export class ModelManager {
  private abort?:AbortController;private task?:Promise<void>;private active?:ModelTask;private stopped=false;private failedTasks=new Map<string,ModelTask>();private setupWarnings:string[]=[];
- constructor(readonly store:ModelStore,readonly dataDir:string,readonly generation:GenerationManager){}
+ constructor(readonly store:ModelStore,readonly dataDir:string,readonly generation:GenerationManager,private readonly transport:CatalogTransport=httpsResponse){}
  root(){return this.store.getModelRoot()??resolve(this.dataDir,'models');}
  async ready(){this.setupWarnings=[];for(const path of [this.root(),join(this.dataDir,'custom_nodes')]){try{await noSymlinks(path,true);}catch{this.setupWarnings.push(`폴더를 사용할 수 없습니다. 경로와 권한을 확인하거나 새 관리 경로를 선택하세요: ${path}`);}}for(const task of this.store.listModelTasks())if(task.state==='running'){
   let cleanup='';try{if(task.operation==='stage-node'){const path=join(this.dataDir,'node-staging',task.id);await noSymlinks(path);await rm(path,{recursive:true,force:true});}else if(task.root){await noSymlinks(task.root);await rm(join(task.root,`.install-${task.id}.tmp`),{force:true});}}catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')cleanup=' 임시 파일 정리는 경로 권한을 확인한 뒤 수동으로 진행하세요.';}
@@ -20,10 +24,10 @@ export class ModelManager {
  for(const removal of this.store.listModelRemovals()){let release:(()=>void)|undefined;try{release=this.generation.acquireMaintenance();await this.engineIdle(AbortSignal.timeout(10000));await this.finishRemoval(removal);}catch{/* Retain durable intent and show a retry diagnostic; startup remains available. */}finally{release?.();}}}
  async engineIdle(signal:AbortSignal){try{const queue=await new ComfyClient(this.store.getSettings().comfyUrl,signal).queue();if(queue.length)throw new GenerationError(409,'ComfyUI에 다른 작업이 있습니다.');}catch(error){signal.throwIfAborted();const cause=error instanceof TypeError?error.cause:undefined;if(cause&&typeof cause==='object'&&'code' in cause&&cause.code==='ECONNREFUSED')return;throw error;}}
  private update(task:ModelTask,patch:Partial<ModelTask>){Object.assign(task,patch,{updatedAt:new Date().toISOString()});this.store.putModelTask(task);}
- start(operation:ModelTask['operation'],name:string,total:number|null,work:(signal:AbortSignal,progress:(bytes:number)=>void,taskId:string)=>Promise<string|undefined>):ModelTask {
+ start(operation:ModelTask['operation'],name:string,total:number|null,work:(signal:AbortSignal,progress:(bytes:number)=>void,taskId:string,detail:(patch:Pick<Partial<ModelTask>,'currentFile'|'total'>)=>void)=>Promise<string|undefined>):ModelTask {
   this.assertSettled();if(this.stopped||this.active)throw new GenerationError(409,'다른 설치 작업이 진행 중입니다.');const release=this.generation.acquireMaintenance();const now=new Date().toISOString();const task:ModelTask={id:randomUUID(),root:this.root(),operation,name,total,received:0,state:'running',error:null,createdAt:now,updatedAt:now};
   try{this.store.putModelTask(task);}catch(error){release();throw error;}this.active=task;this.abort=new AbortController();const signal=this.abort.signal;let lastWrite=0;
-  this.task=(async()=>{try{await this.engineIdle(signal);const assetId=await work(signal,bytes=>{task.received=bytes;if(Date.now()-lastWrite>250){lastWrite=Date.now();this.update(task,{});}},task.id);this.update(task,{state:'completed',assetId});}catch(error){const patch:Partial<ModelTask>={state:signal.aborted&&!this.stopped?'cancelled':'failed',error:signal.aborted?'작업이 중단되었습니다.':error instanceof Error?error.message:'설치 실패'};try{this.update(task,patch);}catch{Object.assign(task,patch,{error:`${patch.error} (설치 기록 저장 실패)`,updatedAt:new Date().toISOString()});this.failedTasks.set(task.id,{...task});}}finally{this.active=undefined;release();}})();return task;
+  this.task=(async()=>{try{await this.engineIdle(signal);const assetId=await work(signal,bytes=>{task.received=bytes;if(Date.now()-lastWrite>250){lastWrite=Date.now();this.update(task,{});}},task.id,patch=>this.update(task,patch));this.update(task,{state:'completed',assetId});}catch(error){const patch:Partial<ModelTask>={state:signal.aborted&&!this.stopped?'cancelled':'failed',error:signal.aborted?'작업이 중단되었습니다.':error instanceof Error?error.message:'설치 실패'};try{this.update(task,patch);}catch{Object.assign(task,patch,{error:`${patch.error} (설치 기록 저장 실패)`,updatedAt:new Date().toISOString()});this.failedTasks.set(task.id,{...task});}}finally{this.active=undefined;release();}})();return task;
  }
  startImport(raw:ImportModelInput){const input=importModelSchema.parse(raw);const root=this.root();return this.start('import',input.manifest.name,null,async(signal,progress,taskId)=>{
   const id=randomUUID();const relativePath=join(modelFolders[input.manifest.kind],input.manifest.bundle,`${id}-${input.manifest.fileName}`);
@@ -37,6 +41,33 @@ export class ModelManager {
   const saved=await downloadAsset(input.manifest.sourceUrl,root,path,input.bytes,input.sha256,signal,progress,taskId);
   try{this.store.putAsset({...input.manifest,id,root,relativePath:path,sha256:saved.sha256,bytes:saved.bytes,method:'download',installedAt:new Date().toISOString()});}catch(error){await rm(saved.destination,{force:true});throw error;}return id;
  });}
+ async catalog(){return (await inspectCatalog(this.root(),this.store.listAssets())).status;}
+ startCatalog(raw:unknown){
+  const input=featureDownloadSchema.parse(raw),files=selectCatalogFiles(input.featureIds),root=this.root();
+  return this.start('download','기능별 모델 다운로드',null,async(signal,progress,taskId,detail)=>{
+   detail({currentFile:'모델 파일과 버전 확인 중'});const state=await inspectCatalog(root,this.store.listAssets());
+   for(const file of files)if(state.conflicts.has(file.repo))throw new Error('서로 다른 모델 버전이 섞여 있습니다. 해당 묶음을 삭제한 뒤 다시 다운로드하세요.');
+   const missing=files.filter(file=>!state.installed.has(file.id));
+   for(const file of files){
+    signal.throwIfAborted();const asset=state.installed.get(file.id);const path=join(root,catalogRelativePath(file));
+    if(asset){detail({currentFile:`기존 파일 확인: ${asset.fileName}`});const hash=await hashFile(path,signal);if(hash.sha256!==asset.sha256||hash.bytes!==asset.bytes)throw new Error(`설치 후 변경된 파일입니다: ${asset.fileName}. 모델 삭제/경로를 확인하세요.`);}
+    else{await noSymlinks(dirname(path),true);try{await lstat(path);throw new Error(`기존 파일을 덮어쓰지 않습니다: ${path}. 설치 목록과 경로를 확인하세요.`);}catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}}
+   }
+   if(!missing.length){detail({total:0,currentFile:'선택한 모델 파일이 이미 준비되어 있습니다.'});return undefined;}
+   detail({currentFile:'공식 저장소에서 다운로드 정보 확인 중'});
+   const resolved=await resolveCatalogFiles(missing,state.revisions,signal,this.transport);
+   await noSymlinks(root,true);const total=resolved.reduce((sum,item)=>sum+item.input.bytes,0);await ensureSpace(root,total);detail({total});let received=0;
+   for(const {file,input:download} of resolved){
+    signal.throwIfAborted();detail({currentFile:download.manifest.fileName});const path=catalogRelativePath(file),existing=state.records.get(file.id);
+    if(existing&&(existing.sha256!==download.sha256||existing.bytes!==download.bytes))throw new Error(`등록된 모델과 제공자 해시가 다릅니다: ${download.manifest.fileName}`);
+    const saved=await downloadAsset(download.manifest.sourceUrl,root,path,download.bytes,download.sha256,signal,bytes=>progress(received+bytes),taskId,this.transport);
+    const id=existing?.id??randomUUID();
+    try{if(!existing)this.store.putAsset({...download.manifest,id,root,relativePath:path,sha256:saved.sha256,bytes:saved.bytes,method:'download',installedAt:new Date().toISOString()});}catch(error){await rm(saved.destination,{force:true});throw error;}
+    received+=saved.bytes;progress(received);
+   }
+   detail({currentFile:'선택한 모델 파일 다운로드 완료'});return undefined;
+  });
+ }
  startNode(raw:NodeInstallInput){const input=nodeInstallSchema.parse(raw);return this.start('stage-node',input.name,null,async(signal,_progress,taskId)=>{const pack=await stagePack(input,this.dataDir,taskId,signal);try{this.store.putNodePack(pack);}catch(error){await rm(pack.root,{recursive:true,force:true});throw error;}return pack.id;});}
  private assertSettled(){if(this.store.listModelRemovals().length)throw new GenerationError(409,'미완료 삭제·비활성화 기록이 있습니다. 같은 작업을 다시 요청하거나 앱을 재시작하세요.');}
  private async finishRemoval(removal:ModelRemoval){

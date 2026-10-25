@@ -11,7 +11,7 @@ export const downloadModelSchema=z.object({manifest:modelManifestSchema,bytes:z.
 export type ImportModelInput=z.infer<typeof importModelSchema>;
 export type DownloadModelInput=z.infer<typeof downloadModelSchema>;
 export interface InstalledAsset extends ModelManifest {id:string;root:string;relativePath:string;bytes:number;sha256:string;installedAt:string;method:'import'|'download'}
-export interface ModelTask {id:string;root:string;operation:'import'|'download'|'stage-node';name:string;state:'running'|'completed'|'failed'|'cancelled';received:number;total:number|null;error:string|null;createdAt:string;updatedAt:string;assetId?:string}
+export interface ModelTask {id:string;root:string;operation:'import'|'download'|'stage-node';name:string;state:'running'|'completed'|'failed'|'cancelled';received:number;total:number|null;error:string|null;createdAt:string;updatedAt:string;assetId?:string;currentFile?:string}
 export interface DiscoveredModel {root:string;relativePath:string;bytes:number;managed:boolean}
 export interface AssetDiagnostics {id:string;issues:string[];historicalJobs:number;dependents:string[];engineVisible:boolean|null}
 export interface NodePack {id:string;name:string;repository:string;commit:string;root:string;treeHash:string;bytes:number;files:number;requirements:string;license:string;installedAt:string;activePath?:string}

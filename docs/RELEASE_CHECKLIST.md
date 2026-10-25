@@ -31,3 +31,5 @@ npm run soak -- --duration-ms 20000 --cycles 20 --report test-results/m8-soak-ci
 - [ ] 실제 대용량 모델 다운로드와 필요한 확장 패키지 설치, 각 모델/의존성 이용 조건 확인.
 
 ARM64·관리자용 전체 사용자 설치·자동 업데이트는 이 산출물 범위 밖입니다. 정확한 실행 증거는 [QA 기록](QA_TEST_PLAN.md)에 남깁니다.
+
+M8 후속 패키지 보강: production 의존성 내부의 test/tests/__tests__/spec/fixtures/bench/benchmark/benchmarks 디렉터리를 제외하고 실제 ASAR에서도 거부한다. 런타임 JS/JSON/WASM와 고지는 유지한다. 향후 의존성이 이 디렉터리 이름을 런타임에 사용하면 내용을 검토하고 예외를 좁게 정의해야 한다. 설치 QA는 소유한 설치/프로필 경로에 한글과 공백을 넣어 실행한다. 이 경로 검사도 호스팅 Windows 범위이며 전체 실기 수락을 의미하지 않는다.

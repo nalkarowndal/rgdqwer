@@ -13,14 +13,14 @@ $installers = @(Get-ChildItem 'release\*-windows-x64-unsigned-setup.exe')
 if ($installers.Count -ne 1) { throw 'Exactly one installer required' }
 $installer = $installers[0].FullName
 $id = [Guid]::NewGuid().ToString()
-$installDir = Join-Path $env:LOCALAPPDATA "Programs\rgdqwer-m8-$id"
-$qaRoot = Join-Path ([IO.Path]::GetTempPath()) "rgdqwer-m8-$id"
+$installDir = Join-Path $env:LOCALAPPDATA "Programs\rgdqwer 한글 QA $id"
+$qaRoot = Join-Path ([IO.Path]::GetTempPath()) "rgdqwer 한글 QA $id"
 if ((Test-Path $installDir) -or (Test-Path $qaRoot)) { throw 'QA directory collision' }
 New-Item -ItemType Directory -Path $qaRoot | Out-Null
 New-Item -ItemType Directory -Path $defaultProfile | Out-Null
 $defaultSentinel = Join-Path $defaultProfile '.m8-retention-sentinel'
 Set-Content -Path $defaultSentinel -Value $id
-$profile = Join-Path $qaRoot 'profile'
+$profile = Join-Path $qaRoot '프로필 data'
 $exe = Join-Path $installDir 'rgdqwer.exe'
 function Invoke-Installer {
   # NSIS /D must be last and must not be quoted, including paths with spaces.
@@ -50,7 +50,7 @@ if ((Test-Path $exe) -or (Test-Path (Join-Path $installDir 'resources\app.asar')
 if ((Get-FileHash $database).Hash -ne $dbHash -or (Get-FileHash $before.modelFile).Hash -ne $modelHash) { throw 'Upgrade/uninstall changed retained data' }
 if (-not (Test-Path (Join-Path $profile '.rgdqwer-qa-profile'))) { throw 'QA profile was removed' }
 if ((Get-Content $defaultSentinel -Raw).Trim() -ne $id) { throw 'Default profile sentinel was removed or changed' }
-@{ installed = $true; upgraded = $true; uninstalled = $true; isolatedDataRetained = $true; defaultProfileSentinelRetained = $true; signed = $false; realInferenceVerified = $false } | ConvertTo-Json | Set-Content 'test-results\m8-installer-win32.json'
+@{ unicodeAndSpacePaths = $true; installed = $true; upgraded = $true; uninstalled = $true; isolatedDataRetained = $true; defaultProfileSentinelRetained = $true; signed = $false; realInferenceVerified = $false } | ConvertTo-Json | Set-Content 'test-results\m8-installer-win32.json'
 & node --import tsx scripts/release-checksums.ts
 if ($LASTEXITCODE -ne 0) { throw 'Checksum generation failed' }
 # Deliberately leave the unique QA profile for runner disposal, never delete user data here.

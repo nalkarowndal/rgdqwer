@@ -276,3 +276,9 @@ Windows에서 실제 unsigned NSIS 설치 → 저장소 밖 cwd의 설치된 ASA
 [Windows x64 검증용 설치본 아티팩트](https://github.com/nalkarowndal/rgdqwer/actions/runs/40132233958/artifacts/12575940897): `rgdqwer-windows-x64-unsigned`,127,903,291 bytes, 설치 exe·blockmap·SHA256SUMS·설치 안내 포함,14일 보존. 아티팩트 ZIP digest는 `f2350fe4312ac3abc8786f1144412951a118c08ec34bfda3d61ef8dc3437f232`이며 설치 exe 자체의 해시와 구분한다. exe 검증에는 ZIP 안의 `release/SHA256SUMS.txt`를 사용한다.
 
 [초안 PR #8](https://github.com/nalkarowndal/rgdqwer/pull/8), base `codex/m7-model-manager`; 병합·공개 릴리스 없음. 이후 최종 기록 커밋은 문서/검증 JSON만 변경한다. 호스팅 Windows CI 성공은 깨끗한 Windows10/11 PC·실제 GPU/모델·서명 수락을 대신하지 않는다.
+
+## M8 후속 패키지 보강 — 2026-10-25 (KST)
+
+PR8에서 보류한 production 의존성 테스트/fixture/benchmark224개(내용1,036,889 bytes)를 제외했다. 폴더/헤더를 포함한 Linux ASAR는72,077,484→70,975,174 bytes로1,102,310 bytes 감소했고, 항목 수는5727→5473이다. 실제 ASAR 검사에서 필수 런타임/WASM·외부 Python·82개 의존성 고지를 확인했다. 중첩·스코프·Windows 구분자 경로의 거부와 runtime test.js/specification.json 등 파일 보존 테스트 RED→GREEN, 타입/lint·JS146 통과.
+
+Linux 실제 설치본을 한글·공백이 포함된 설치 경로로 복사하고 한글·공백 프로필을 사용해 seed/restart, 실제 cwd/profile 일치, 설정·모델 보존과 외부 Python status를 확인했다. Windows CI의 설치/재설치/제거 경로도 같은 문자 조건으로 확장했다. Windows 실행 결과는 후속 기록한다. 기존 M8 측정 JSON과 이전 검증 링크는 해당 커밋의 역사적 기록으로 유지한다.

@@ -268,3 +268,11 @@ v0.9.0의 per-user Windows x64 NSIS 패키징, 외부 Python 소스 경로, ASAR
 Windows 설치/재설치/제거 및 보존 검사는 CI에서 실제 NSIS와 설치된 exe로 수행하며 실행 URL·결과를 최종 기록에 추가한다. [설치 안내](INSTALLATION.md), [실기 수락 조건](RELEASE_CHECKLIST.md) 참조. 깨끗한 Windows10/11 일반 계정·실제 모델/GPU·음질/마이크·8GB 수시간 실행·서명 게이트가 남아 있으므로 M8 전체 수락 판정은 보류한다.
 
 최종 리뷰 후: 저장소 cwd 상속에 의존하지 않도록 설치본 QA의 실행 디렉터리를 소유한 프로필로 지정했다. 실제 프로세스 cwd 검사 RED→GREEN, 저장소 밖의 신규 프로필 생성/재시작·외부 Python status 통과, 타입/lint·JS144 재검증 통과. 독립 리뷰의 유일한 Minor는 production 의존성 안의 테스트/fixture/benchmark 파일224개(약1.04MB) 잔존이며 사용자 데이터 노출은 발견하지 않았다. 용량/allowlist 정리는 보류한다. [전체 리뷰·판단 기록](superpowers/reviews/2026-10-25-m8-review.md).
+
+M8 최종 구현 코드 `3ab21de3d3cf97a27117dac146bd487a676eb511`의 [Windows/Ubuntu CI #39](https://github.com/nalkarowndal/rgdqwer/actions/runs/40132233958)가 모두 성공했다. 두 OS에서 타입/lint/build, JS144, Python22, 브라우저16, Python HTTP smoke, 20회 반복 검사 통과. Windows 반복 검사는20.900초, 재시작1·취소2·마지막 엔진 연결0이었다.
+
+Windows에서 실제 unsigned NSIS 설치 → 저장소 밖 cwd의 설치된 ASAR exe 실행 → 재설치 → 설정/가져온 모델 파일 보존 → 제거 → 격리 DB/모델 및 기본 프로필 sentinel 보존을 통과했다. 제품 sandbox/contextIsolation/webSecurity=true, nodeIntegration=false였고 Windows에는 Linux 테스트용 sandbox override를 적용하지 않았다. 외부 Python status와 ASAR5727 entries/82개 의존성 고지도 확인했다. [Windows 설치 수명주기 JSON](qa/m8-installer-windows.json), [Windows 반복 검사 JSON](qa/m8-soak-windows-ci.json)은 CI 아티팩트 ZIP의 SHA256 일치를 확인한 뒤 보존했다.
+
+[Windows x64 검증용 설치본 아티팩트](https://github.com/nalkarowndal/rgdqwer/actions/runs/40132233958/artifacts/12575940897): `rgdqwer-windows-x64-unsigned`,127,903,291 bytes, 설치 exe·blockmap·SHA256SUMS·설치 안내 포함,14일 보존. 아티팩트 ZIP digest는 `f2350fe4312ac3abc8786f1144412951a118c08ec34bfda3d61ef8dc3437f232`이며 설치 exe 자체의 해시와 구분한다. exe 검증에는 ZIP 안의 `release/SHA256SUMS.txt`를 사용한다.
+
+[초안 PR #8](https://github.com/nalkarowndal/rgdqwer/pull/8), base `codex/m7-model-manager`; 병합·공개 릴리스 없음. 이후 최종 기록 커밋은 문서/검증 JSON만 변경한다. 호스팅 Windows CI 성공은 깨끗한 Windows10/11 PC·실제 GPU/모델·서명 수락을 대신하지 않는다.

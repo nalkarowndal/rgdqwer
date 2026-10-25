@@ -1,0 +1,344 @@
+{
+  "evidence": "simulated ComfyUI; real local HTTP, SQLite and files; no GPU inference",
+  "platform": "win32",
+  "node": "v24.22.1",
+  "gcExposed": true,
+  "elapsedMs": 20900,
+  "cycles": 20,
+  "restarts": 1,
+  "cancellations": 2,
+  "samples": [
+    {
+      "cycle": 5,
+      "elapsedMs": 5029,
+      "heapUsed": 23415952,
+      "rss": 127946752,
+      "resources": [
+        "FSReqPromise",
+        "PipeWrap",
+        "PipeWrap",
+        "TCPServerWrap",
+        "TCPServerWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap"
+      ]
+    },
+    {
+      "cycle": 6,
+      "elapsedMs": 5952,
+      "heapUsed": 23430928,
+      "rss": 133554176,
+      "resources": [
+        "FSReqPromise",
+        "PipeWrap",
+        "PipeWrap",
+        "TCPServerWrap",
+        "TCPServerWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap"
+      ]
+    },
+    {
+      "cycle": 7,
+      "elapsedMs": 6939,
+      "heapUsed": 23479888,
+      "rss": 133537792,
+      "resources": [
+        "FSReqPromise",
+        "PipeWrap",
+        "PipeWrap",
+        "TCPServerWrap",
+        "TCPServerWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap"
+      ]
+    },
+    {
+      "cycle": 8,
+      "elapsedMs": 7959,
+      "heapUsed": 23583072,
+      "rss": 125857792,
+      "resources": [
+        "FSReqPromise",
+        "PipeWrap",
+        "PipeWrap",
+        "TCPServerWrap",
+        "TCPServerWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap"
+      ]
+    },
+    {
+      "cycle": 9,
+      "elapsedMs": 8941,
+      "heapUsed": 23956472,
+      "rss": 130752512,
+      "resources": [
+        "FSReqPromise",
+        "PipeWrap",
+        "PipeWrap",
+        "TCPServerWrap",
+        "TCPServerWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap"
+      ]
+    },
+    {
+      "cycle": 10,
+      "elapsedMs": 10696,
+      "heapUsed": 24111912,
+      "rss": 127340544,
+      "resources": [
+        "FSReqPromise",
+        "PipeWrap",
+        "PipeWrap",
+        "TCPServerWrap",
+        "TCPServerWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap"
+      ]
+    },
+    {
+      "cycle": 11,
+      "elapsedMs": 11627,
+      "heapUsed": 24132432,
+      "rss": 130994176,
+      "resources": [
+        "FSReqPromise",
+        "PipeWrap",
+        "PipeWrap",
+        "TCPServerWrap",
+        "TCPServerWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap"
+      ]
+    },
+    {
+      "cycle": 12,
+      "elapsedMs": 12536,
+      "heapUsed": 24161200,
+      "rss": 131371008,
+      "resources": [
+        "FSReqPromise",
+        "PipeWrap",
+        "PipeWrap",
+        "TCPServerWrap",
+        "TCPServerWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap"
+      ]
+    },
+    {
+      "cycle": 13,
+      "elapsedMs": 13470,
+      "heapUsed": 24247560,
+      "rss": 140378112,
+      "resources": [
+        "FSReqPromise",
+        "PipeWrap",
+        "PipeWrap",
+        "TCPServerWrap",
+        "TCPServerWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap"
+      ]
+    },
+    {
+      "cycle": 14,
+      "elapsedMs": 14426,
+      "heapUsed": 24364280,
+      "rss": 133787648,
+      "resources": [
+        "FSReqPromise",
+        "PipeWrap",
+        "PipeWrap",
+        "TCPServerWrap",
+        "TCPServerWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap"
+      ]
+    },
+    {
+      "cycle": 15,
+      "elapsedMs": 15370,
+      "heapUsed": 24445472,
+      "rss": 127545344,
+      "resources": [
+        "FSReqPromise",
+        "PipeWrap",
+        "PipeWrap",
+        "TCPServerWrap",
+        "TCPServerWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap"
+      ]
+    },
+    {
+      "cycle": 16,
+      "elapsedMs": 16311,
+      "heapUsed": 24479400,
+      "rss": 132050944,
+      "resources": [
+        "FSReqPromise",
+        "PipeWrap",
+        "PipeWrap",
+        "TCPServerWrap",
+        "TCPServerWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap"
+      ]
+    },
+    {
+      "cycle": 17,
+      "elapsedMs": 17218,
+      "heapUsed": 24483456,
+      "rss": 132116480,
+      "resources": [
+        "FSReqPromise",
+        "PipeWrap",
+        "PipeWrap",
+        "TCPServerWrap",
+        "TCPServerWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap"
+      ]
+    },
+    {
+      "cycle": 18,
+      "elapsedMs": 18163,
+      "heapUsed": 24512680,
+      "rss": 133689344,
+      "resources": [
+        "FSReqPromise",
+        "PipeWrap",
+        "PipeWrap",
+        "TCPServerWrap",
+        "TCPServerWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap"
+      ]
+    },
+    {
+      "cycle": 19,
+      "elapsedMs": 19138,
+      "heapUsed": 24529736,
+      "rss": 127700992,
+      "resources": [
+        "FSReqPromise",
+        "PipeWrap",
+        "PipeWrap",
+        "TCPServerWrap",
+        "TCPServerWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap"
+      ]
+    },
+    {
+      "cycle": 20,
+      "elapsedMs": 20890,
+      "heapUsed": 24978448,
+      "rss": 129777664,
+      "resources": [
+        "Immediate",
+        "PipeWrap",
+        "PipeWrap",
+        "TCPServerWrap",
+        "TCPServerWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap"
+      ]
+    }
+  ],
+  "memory": {
+    "baseline": {
+      "cycle": 5,
+      "elapsedMs": 5029,
+      "heapUsed": 23415952,
+      "rss": 127946752,
+      "resources": [
+        "FSReqPromise",
+        "PipeWrap",
+        "PipeWrap",
+        "TCPServerWrap",
+        "TCPServerWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap"
+      ]
+    },
+    "end": {
+      "cycle": 20,
+      "elapsedMs": 20890,
+      "heapUsed": 24978448,
+      "rss": 129777664,
+      "resources": [
+        "Immediate",
+        "PipeWrap",
+        "PipeWrap",
+        "TCPServerWrap",
+        "TCPServerWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap",
+        "TCPSocketWrap"
+      ]
+    },
+    "retainedGrowth": {
+      "heapUsed": 1562496,
+      "rss": 1830912
+    },
+    "peakGrowth": {
+      "heapUsed": 1562496,
+      "rss": 12431360
+    },
+    "thresholds": {
+      "heapUsed": 134217728,
+      "rss": 268435456
+    },
+    "passed": true,
+    "interpretation": "Finite simulated-engine diagnostic; not proof of leak freedom or GPU stability"
+  },
+  "finalEngineConnections": 0,
+  "temporaryDataRemoved": true,
+  "finalResources": [
+    "FSReqCallback",
+    "PipeWrap",
+    "PipeWrap"
+  ],
+  "passed": true
+}

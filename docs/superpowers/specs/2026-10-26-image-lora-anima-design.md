@@ -1,0 +1,13 @@
+# Image LoRA toggles and Anima
+
+User requests LoRA file configuration with click enable/disable in Image Studio, plus Anima. Continue implementation directly under session authorization; design choices below are executor defaults, not separately approved choices.
+
+Use existing React/TypeScript/ComfyUI pipeline and managed downloads. Extend ImageInput with optional loras (maximum4, each name/profile/enabled/strength -2..2), textEncoder and vae. Old jobs remain valid. Off rows retain settings but do not create nodes, need files or require LoRA nodes. Active rows chain in order; SD uses LoraLoader on model+CLIP, Anima uses LoraLoaderModelOnly. Reject active mismatched profile and duplicate active file. Switching profile disables rows and clears incompatible base model/encoder choices. LoRA files are picked from ComfyUI inventory; import via existing model manager or copy into models/loras, then refresh. No arbitrary filesystem picker bypassing management.
+
+Anima Base v1 profile shares prompt editor/history but uses UNETLoader(default), CLIPLoader(stable_diffusion/default), VAELoader, EmptyLatentImage, CLIPTextEncode positive/negative, KSampler(er_sde/simple), VAEDecode and SaveImage. Defaults1024x1024/30steps/CFG4; bounded256..1024 as existing studio. Official template blob71466ab44b22aa8d7262e0bed1b4f2fc58700408 in Comfy-Org/workflow_templates blueprints/text_to_image_anima_base_1_0.json. Qwen encoder detection is in ComfyUI; CLIPLoader type is stable_diffusion, NOT invented anima enum. Require supported options before submission; recommend updating ComfyUI for Anima support.
+
+Add ninth download feature with three circlestone-labs/Anima split_files paths from https://docs.comfy.org/tutorials/image/anima/anima . Display CircleStone Labs Non-Commercial License + NVIDIA derivative terms linked to https://huggingface.co/circlestone-labs/Anima . No model redistribution/GPU success claim. Existing pinning/hashes/partial retries preserved. VAE is from Anima bundle rather than reusing Krea's separate-provider record; same filenames do not prove bytes/license identity.
+
+Approaches considered: single LoRA selector insufficient for toggling multiple saved files; separate Anima studio duplicates image tools; extend current image studio with profile-specific graph/inventory (chosen). No new dependencies, external runtime installer, Krea changes or automatic LoRA downloads. Settings saved in jobs and restored; unsent drafts remain session-only as before.
+
+Validation: graph wiring/off equivalence/schema, inventory missing node/options/files, authenticated API job persistence+simulation, browser toggles and reuse/profile transitions/mobile, live29file catalog metadata, Windows packaged smoke. Actual full model/GPU inference unavailable.

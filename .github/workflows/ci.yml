@@ -28,7 +28,7 @@ jobs:
       - run: npm ci
       - run: npm run check
       - run: npm run build
-      - name: Verify public model catalog metadata (no weight downloads)
+      - name: Verify public model catalog and small component downloads
         if: runner.os == 'Windows'
         timeout-minutes: 5
         run: node --import tsx scripts/verify-model-catalog.ts

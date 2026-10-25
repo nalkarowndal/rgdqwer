@@ -22,4 +22,4 @@ One fresh read-only gpt-6-astra/high reviewer inspected `c59a9a2..b1c8d78`. No C
 
 Local typecheck/lint/JS161/build and browser18 pass. New lifecycle tests cover shared/reused files, partial failure/retry, abort/temp cleanup, retained IDs for missing files, changed bytes, current-root status, unmanaged collisions, symlinks, DB reopen, space rejection and DB rollback. Browser tests cover real catalog API, selection/rights, error/cancel/retry/status, keyboard and390px layout. Desktop/mobile screenshots inspected.
 
-Final live metadata, Windows/Ubuntu CI and executable artifact evidence pending.
+Verification extension after review: the Windows live smoke also downloads WD14 tags CSV and the small Chatterbox ve.pt component (each capped at8MiB) through the existing production downloader and removes only its owned temporary directory. This closes the real redirect/stream/hash path gap without downloading full multiGB bundles or executing model code. Final live metadata, Windows/Ubuntu CI and executable artifact evidence pending.

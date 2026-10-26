@@ -20,7 +20,7 @@ ComfyUI를 연결해 사용하는 Windows 로컬 AI 스튜디오입니다.
 
 ## 앱에서 모델 받기
 
-**모델·확장 관리자 → 기능별 다운로드**에서 SDXL, Anima, Krea 2, Wan 영상, Florence/WD14 분석, Chatterbox 음성 기능을 선택하고 **선택 모델 다운로드**를 누르세요. 필요한 파일·공통 인코더를 함께 받고 진행률·취소·재시도를 지원합니다. [모델 다운로드와 엔진 연결 안내](docs/FEATURE_MODEL_DOWNLOADS.md)
+**모델·확장 관리자 → 기능별 다운로드**에서 SDXL, Anima, Krea 2, Wan 영상, Florence/WD14 분석, Chatterbox 음성 기능을 선택하고 **선택 모델 다운로드**를 누르세요. 필요한 파일·공통 인코더를 함께 받고 진행률·취소·재시도를 지원합니다. [모델 다운로드와 엔진 연결 안내](docs/FEATURE_MODEL_DOWNLOADS.md) · [속도·연결 중단 복구](docs/model-downloads.md)
 
 ## Windows 실행 파일 다운로드
 

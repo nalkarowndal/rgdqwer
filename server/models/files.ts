@@ -14,12 +14,15 @@ export function inside(root:string,path:string){const rel=relative(resolve(root)
 export async function ensureSpace(directory:string,bytes:number){const disk=await statfs(directory);if(disk.bavail*disk.bsize<bytes+64*1024**2)throw new Error('디스크 여유 공간이 부족합니다.');}
 export async function hashFile(file:string,signal?:AbortSignal){await noSymlinks(file);const handle=await open(file,constants.O_RDONLY|constants.O_NOFOLLOW);try{const info=await handle.stat();if(!info.isFile())throw new Error('일반 파일이 필요합니다.');const hash=createHash('sha256');let size=0;for await(const chunk of handle.createReadStream({autoClose:false})){signal?.throwIfAborted();size+=chunk.length;if(size>MAX_MODEL_BYTES)throw new Error('모델 크기 상한 초과');hash.update(chunk);}return {sha256:hash.digest('hex'),bytes:size};}finally{await handle.close();}}
 /** Stage in the destination volume; hard-link commit is atomic and never overwrites. */
-export async function storeStream(source:Readable,root:string,relativePath:string,total:number,expectedHash:string|undefined,signal:AbortSignal,onProgress:(bytes:number)=>void,temporaryId:string=randomUUID()){
+export async function storeStream(source:Readable,root:string,relativePath:string,total:number,expectedHash:string|undefined,signal:AbortSignal,onProgress:(bytes:number)=>void,temporaryId:string=randomUUID(),abortSource?:(error:Error)=>void){
  if(!Number.isSafeInteger(total)||total<=0||total>MAX_MODEL_BYTES)throw new Error('모델 크기는 1B–64GiB여야 합니다.');
  const destination=inside(root,join(root,relativePath));await noSymlinks(root,true);await noSymlinks(dirname(destination),true);await ensureSpace(root,total);
  const temporary=join(root,`.install-${temporaryId}.tmp`);let committed=false;const hash=createHash('sha256');let received=0;
  try{const counter=new Transform({transform(chunk:Buffer,_encoding,callback){received+=chunk.length;if(received>total){callback(new Error('선언한 파일 크기를 초과했습니다.'));return;}hash.update(chunk);try{onProgress(received);callback(null,chunk);}catch(error){callback(error as Error);}}});
-  await pipeline(source,counter,createWriteStream(temporary,{flags:'wx',mode:0o600}),{signal});
+  const writer=createWriteStream(temporary,{flags:'wx',mode:0o600});
+  // Cancel upstream requests before pipeline waits for async-generator teardown.
+  if(abortSource){counter.once('error',abortSource);writer.once('error',abortSource);}
+  await pipeline(source,counter,writer,{signal});
   if(received!==total)throw new Error('파일 크기가 일치하지 않습니다.');const sha256=hash.digest('hex');if(expectedHash&&sha256!==expectedHash)throw new Error('SHA256이 일치하지 않습니다.');
   signal.throwIfAborted();await noSymlinks(dirname(destination));await link(temporary,destination);committed=true;return {sha256,bytes:received,destination};
  }catch(error){source.destroy();if(committed)await rm(destination,{force:true});throw error;}finally{await rm(temporary,{force:true});}

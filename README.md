@@ -20,13 +20,13 @@ ComfyUI를 연결해 사용하는 Windows 로컬 AI 스튜디오입니다.
 
 ## 앱에서 모델 받기
 
-**모델·확장 관리자 → 기능별 다운로드**에서 SDXL, Anima, Krea 2, Wan 영상, Florence/WD14 분석, Chatterbox 음성 기능을 선택하고 **선택 모델 다운로드**를 누르세요. 필요한 파일·공통 인코더를 함께 받고 진행률·취소·재시도를 지원합니다. [모델 다운로드와 엔진 연결 안내](docs/FEATURE_MODEL_DOWNLOADS.md)
+**모델·확장 관리자 → 기능별 다운로드**에서 SDXL, Anima, Krea 2, Wan 영상, Florence/WD14 분석, Chatterbox 음성 기능을 선택하고 **선택 모델 다운로드**를 누르세요. 필요한 파일·공통 인코더를 함께 받고 진행률·취소·재시도를 지원합니다. [모델 다운로드와 엔진 연결 안내](docs/FEATURE_MODEL_DOWNLOADS.md) · [속도·연결 중단 복구](docs/model-downloads.md)
 
 ## Windows 실행 파일 다운로드
 
-**[설치 없이 실행하는 Windows ZIP 받기](https://github.com/nalkarowndal/rgdqwer/actions/runs/40262277365/artifacts/12625102914)** — GitHub 아티팩트를 받은 뒤 안쪽 `*-standalone.zip`을 새 폴더에 모두 풀고 **`rgdqwer.exe`를 더블클릭**하세요. DLL·`resources` 등 전체 폴더가 필요하며 Node.js 개발 환경은 필요하지 않습니다. 같은 Windows 계정의 설정/기록은 `%APPDATA%\rgdqwer\studio`에 저장됩니다.
+**[설치 없이 실행하는 Windows ZIP 받기](https://github.com/nalkarowndal/rgdqwer/actions/runs/40316979809/artifacts/12648120760)** — GitHub 아티팩트를 받은 뒤 안쪽 `*-standalone.zip`을 새 폴더에 모두 풀고 **`rgdqwer.exe`를 더블클릭**하세요. DLL·`resources` 등 전체 폴더가 필요하며 Node.js 개발 환경은 필요하지 않습니다. 같은 Windows 계정의 설정/기록은 `%APPDATA%\rgdqwer\studio`에 저장됩니다.
 
-[설치형 Setup 받기](https://github.com/nalkarowndal/rgdqwer/actions/runs/40262277365/artifacts/12624748739)도 제공됩니다. 두 파일은 [Windows/Ubuntu CI #63](https://github.com/nalkarowndal/rgdqwer/actions/runs/40262277365)를 통과한 x64/unsigned 검증용이며, 아티팩트는 14일 보존됩니다. GitHub 로그인과 저장소 접근 권한이 필요합니다. [실행·설치·엔진 준비·백업 안내](docs/INSTALLATION.md), [실기 검증 목록](docs/RELEASE_CHECKLIST.md)을 확인하세요. 자동 업데이트·공개 릴리스는 없습니다.
+[설치형 Setup 받기](https://github.com/nalkarowndal/rgdqwer/actions/runs/40316979809/artifacts/12647447548)도 제공됩니다. 두 파일은 [Windows/Ubuntu CI #67](https://github.com/nalkarowndal/rgdqwer/actions/runs/40316979809)를 통과한 x64/unsigned 검증용이며, 아티팩트는 14일 보존됩니다. GitHub 로그인과 저장소 접근 권한이 필요합니다. [실행·설치·엔진 준비·백업 안내](docs/INSTALLATION.md), [실기 검증 목록](docs/RELEASE_CHECKLIST.md)을 확인하세요. 자동 업데이트·공개 릴리스는 없습니다.
 
 ## 소스에서 빠른 시작 (Windows PowerShell)
 

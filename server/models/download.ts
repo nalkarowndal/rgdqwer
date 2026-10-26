@@ -6,7 +6,7 @@ export async function downloadAsset(source:string,root:string,path:string,bytes:
  validateDownloadUrl(source);signal.throwIfAborted();
  const controller=new AbortController();const combined=AbortSignal.any([signal,controller.signal]);
  const stream=Readable.from(transfer(source,bytes,combined,controller,transport),{objectMode:false});
- try{return await storeStream(stream,root,path,bytes,sha256,combined,progress,id);}
+ try{return await storeStream(stream,root,path,bytes,sha256,combined,progress,id,error=>controller.abort(error));}
  catch(error){if(controller.signal.aborted&&!signal.aborted)throw controller.signal.reason;throw error;}
  finally{controller.abort();stream.destroy();}
 }

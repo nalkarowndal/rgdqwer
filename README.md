@@ -1,7 +1,7 @@
 # rgdqwer
 
 ComfyUI를 연결해 사용하는 Windows 로컬 AI 스튜디오입니다.
-**현재 v0.9.0 / M8 설치 패키징·안정성 QA와 모델 관리·라이브러리·음성·영상·Krea 2·이미지 분석·프롬프트·이미지 생성 구현 버전입니다. FFmpeg 실제 변환·재생을 검증했으며, Wan/Krea/SD 실제 모델·GPU 실행은 실기 검증 전입니다. 음성 엔진 연동의 실제 모델 추론도 검증 전입니다.**
+**현재 v0.9.0 / M8 설치 패키징·안정성 QA와 모델 관리·라이브러리·음성·영상·Krea 2·이미지 분석·프롬프트·이미지 생성 구현 버전입니다. FFmpeg 실제 변환·재생을 검증했으며, Wan/Krea/SD/Anima 실제 모델·GPU 실행은 실기 검증 전입니다. 음성 엔진 연동의 실제 모델 추론도 검증 전입니다.**
 
 ## 현재 사용할 수 있는 기능
 
@@ -20,13 +20,13 @@ ComfyUI를 연결해 사용하는 Windows 로컬 AI 스튜디오입니다.
 
 ## 앱에서 모델 받기
 
-**모델·확장 관리자 → 기능별 다운로드**에서 SDXL, Krea 2, Wan 영상, Florence/WD14 분석, Chatterbox 음성 기능을 선택하고 **선택 모델 다운로드**를 누르세요. 필요한 파일·공통 인코더를 함께 받고 진행률·취소·재시도를 지원합니다. [모델 다운로드와 엔진 연결 안내](docs/FEATURE_MODEL_DOWNLOADS.md)
+**모델·확장 관리자 → 기능별 다운로드**에서 SDXL, Anima, Krea 2, Wan 영상, Florence/WD14 분석, Chatterbox 음성 기능을 선택하고 **선택 모델 다운로드**를 누르세요. 필요한 파일·공통 인코더를 함께 받고 진행률·취소·재시도를 지원합니다. [모델 다운로드와 엔진 연결 안내](docs/FEATURE_MODEL_DOWNLOADS.md)
 
 ## Windows 실행 파일 다운로드
 
-**[설치 없이 실행하는 Windows ZIP 받기](https://github.com/nalkarowndal/rgdqwer/actions/runs/40191758197/artifacts/12598890339)** — GitHub 아티팩트를 받은 뒤 안쪽 `*-standalone.zip`을 새 폴더에 모두 풀고 **`rgdqwer.exe`를 더블클릭**하세요. DLL·`resources` 등 전체 폴더가 필요하며 Node.js 개발 환경은 필요하지 않습니다. 같은 Windows 계정의 설정/기록은 `%APPDATA%\rgdqwer\studio`에 저장됩니다.
+**[설치 없이 실행하는 Windows ZIP 받기](https://github.com/nalkarowndal/rgdqwer/actions/runs/40262277365/artifacts/12625102914)** — GitHub 아티팩트를 받은 뒤 안쪽 `*-standalone.zip`을 새 폴더에 모두 풀고 **`rgdqwer.exe`를 더블클릭**하세요. DLL·`resources` 등 전체 폴더가 필요하며 Node.js 개발 환경은 필요하지 않습니다. 같은 Windows 계정의 설정/기록은 `%APPDATA%\rgdqwer\studio`에 저장됩니다.
 
-[설치형 Setup 받기](https://github.com/nalkarowndal/rgdqwer/actions/runs/40191758197/artifacts/12598094125)도 제공됩니다. 두 파일은 [Windows/Ubuntu CI #57](https://github.com/nalkarowndal/rgdqwer/actions/runs/40191758197)를 통과한 x64/unsigned 검증용이며, 아티팩트는 14일 보존됩니다. GitHub 로그인과 저장소 접근 권한이 필요합니다. [실행·설치·엔진 준비·백업 안내](docs/INSTALLATION.md), [실기 검증 목록](docs/RELEASE_CHECKLIST.md)을 확인하세요. 자동 업데이트·공개 릴리스는 없습니다.
+[설치형 Setup 받기](https://github.com/nalkarowndal/rgdqwer/actions/runs/40262277365/artifacts/12624748739)도 제공됩니다. 두 파일은 [Windows/Ubuntu CI #63](https://github.com/nalkarowndal/rgdqwer/actions/runs/40262277365)를 통과한 x64/unsigned 검증용이며, 아티팩트는 14일 보존됩니다. GitHub 로그인과 저장소 접근 권한이 필요합니다. [실행·설치·엔진 준비·백업 안내](docs/INSTALLATION.md), [실기 검증 목록](docs/RELEASE_CHECKLIST.md)을 확인하세요. 자동 업데이트·공개 릴리스는 없습니다.
 
 ## 소스에서 빠른 시작 (Windows PowerShell)
 
@@ -81,7 +81,7 @@ Worker가 없어도 ComfyUI 연결 검사는 가능합니다.
 한 번에 이미지 1개를 생성합니다. 간편 모드는 지원 한국어 키워드를 변환하며, 최종 입력은 직접 편집할 수 있습니다.
 자유 문장 전체를 번역하지 않습니다. 정확한 원문 전달은 전문가 모드를 사용하세요.
 SD1.5는 512px, SDXL/Illustrious는 1024px가 기본이며 8GB 안정성은 실기 검증 전입니다.
-Anima·Krea·LoRA는 현재 기본 그래프에서 지원하지 않습니다.
+이미지 스튜디오는 Anima Base v1과 최대4개 LoRA 파일의 강도·개별 활성/비활성 설정을 지원합니다. 꺼진 설정도 보존하며 작업 기록에서 재사용합니다. Anima 모델은 기능별 다운로드에서 받을 수 있습니다. [설정 안내](docs/IMAGE_SYSTEM.md) · Krea는 별도 Krea 2 스튜디오를 사용하세요.
 상태 미확인 시 **상태 추적 재개**로 기존 작업부터 확인합니다. 자동 재제출하지 않습니다.
 구버전 ComfyUI가 안전 취소를 지원하지 않으면 ComfyUI에서 직접 취소해야 합니다.
 자세한 제한과 복구 동작은 [이미지 시스템](docs/IMAGE_SYSTEM.md)을 참고하세요.

@@ -54,7 +54,9 @@ export interface Job {
 }
 export interface ImageInput {
   promptDocument?: PromptDocument;
-  profile: 'sd15' | 'sdxl' | 'illustrious'; checkpoint: string;
+  profile: 'sd15' | 'sdxl' | 'illustrious' | 'anima'; checkpoint: string;
+  textEncoder?: string; vae?: string;
+  loras?: {name:string;profile:ImageInput['profile'];enabled:boolean;strength:number}[];
   prompt: string; negative: string; width: number; height: number;
   seed: number; steps: number; cfg: number;
 }

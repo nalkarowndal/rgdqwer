@@ -1,15 +1,15 @@
-# 이미지 시스템 — M1 구현
+# 이미지 스튜디오 — SD · Anima · LoRA
 
 기존 ComfyUI Server API에 실제 API JSON을 제출한다. SD1.5, SDXL,
 Illustrious/WAI-Illustrious 계열의 기본 Text to Image 그래프를 제공한다.
 모델 파일명으로 계열을 추측하지 않으며 사용자가 모델 설명에 맞는 프로필을 선택한다.
 현재 환경에는 모델/GPU가 없어 모델별 실기 적합성과 생성 품질은 미검증이다.
-Anima, Krea, LoRA, img2img는 이 기본 그래프의 지원 범위가 아니다.
+Anima Base v1 전용 그래프와 프로필별 LoRA를 지원한다. Krea는 별도 스튜디오를 사용하며 img2img는 이 화면에서 지원하지 않는다.
 
 ## 생성과 기록
 
 `CheckpointLoaderSimple → CLIPTextEncode(positive/negative) → EmptyLatentImage →
-KSampler → VAEDecode → SaveImage` 표준 노드, 그래프 버전 `sd-base-v1`.
+KSampler → VAEDecode → SaveImage` 표준 노드, 그래프 버전 `sd-lora-v2` (이전 기록 `sd-base-v1`도 재사용 가능).
 샘플러 euler, 스케줄러 normal, batch 1을 사용한다.
 
 - SD1.5 기본 512×512, 각 변 256–768px. SDXL/Illustrious 기본 1024×1024, 각 변 256–1024px.
@@ -57,3 +57,30 @@ PNG의 ComfyUI 메타데이터는 원본 바이트를 보존한다.
 
 근거: [공식 API 예제](https://docs.comfy.org/development/comfyui-server/api-examples),
 [ComfyUI server.py](https://github.com/Comfy-Org/ComfyUI/blob/master/server.py).
+
+
+## LoRA 파일 설정과 활성화
+
+1. **모델·확장 관리자 → 모델 추가**에서 종류를 LoRA로 선택하고 로컬 파일을 가져온다. 관리 폴더의 ComfyUI 경로 설정을 적용하고 ComfyUI를 재시작한다. 이미 ComfyUI `models/loras`에 설치한 파일도 사용할 수 있다.
+2. **이미지 스튜디오 → 모델·LoRA 목록 새로고침 → LoRA 추가**를 누른다.
+3. 파일과 강도(-2~2)를 설정하고 각 행의 스위치를 클릭해 활성/비활성으로 전환한다. 키보드 Space도 지원한다. 최대4개를 위에서 아래 순서로 적용한다.
+4. 끄면 파일·강도는 남지만 해당 LoRA 노드를 생성하지 않는다. 꺼진 파일이 없어도 생성을 막지 않는다. 제거는 목록 설정만 지우며 디스크 파일은 삭제하지 않는다.
+5. 생성한 작업에는 꺼진 항목을 포함한 설정을 저장한다. **설정 재사용**으로 복원할 수 있다. 생성하지 않은 초안은 현재 앱 세션에서만 유지된다.
+
+프로필을 바꾸면 기존 LoRA는 모두 비활성화된다. 각 행의 원래 계열로 돌아간 뒤 다시 켤 수 있다. 파일명만으로 가중치 호환성을 검증할 수 없으므로 SD1.5/SDXL/Illustrious/Anima에 맞는 LoRA를 선택한다. 필요한 트리거는 프롬프트에 직접 입력한다. SD에서는 모델·CLIP에 같은 강도를, Anima에서는 모델에만 강도를 적용한다. 다른 계열이나 같은 파일의 중복 활성화, 없는 활성 파일은 제출 전에 차단한다.
+
+## Anima Base v1
+
+**모델·확장 관리자 → 기능별 다운로드 → 이미지 생성 · Anima**에서 다음3개 파일을 받는다.
+
+- `diffusion_models/catalog-anima/anima-base-v1.0.safetensors`
+- `text_encoders/catalog-anima/qwen_3_06b_base.safetensors`
+- `vae/catalog-anima/qwen_image_vae.safetensors`
+
+ComfyUI를 업데이트하고 관리 폴더 경로 설정을 적용·재시작한 뒤 이미지 스튜디오의 **Anima Base v1**을 선택한다. 해당 확산 모델·텍스트 인코더·VAE를 지정한다. 목록 새로고침은 설치/업데이트 자체를 수행하지 않는다.
+
+공식 Base v1 구성: `UNETLoader(default)` + `CLIPLoader(stable_diffusion, default)` + `VAELoader` → positive/negative CLIPTextEncode → EmptyLatentImage → KSampler(er_sde/simple) → VAEDecode → SaveImage. 기본1024×1024, 30스텝, CFG4, 배치1. 앱 해상도 범위는 최대1024이며 실제8GB 안정성은 미검증이다. 선택한 Anima LoRA는 `LoraLoaderModelOnly`로 샘플러 앞에 연결한다. 그래프 버전은 `anima-base-v1`.
+
+[공식 ComfyUI 안내](https://docs.comfy.org/tutorials/image/anima/anima), [모델 제공자·이용 조건](https://huggingface.co/circlestone-labs/Anima), [공식 Base v1 템플릿](https://github.com/Comfy-Org/workflow_templates/blob/main/blueprints/text_to_image_anima_base_1_0.json)을 참고한다. 모델은 CircleStone Labs Non-Commercial License와 NVIDIA 파생 모델 조건을 확인해야 한다. 모델 이용과 생성 이미지의 이용 조건은 다를 수 있으므로 제공자 설명을 따른다.
+
+테스트는 합성 ComfyUI HTTP/PNG로 그래프·설정 보존·실패 처리를 확인한다. 실제 Anima/LoRA 가중치 로드, 이미지 품질, GPU/VRAM은 별도 실기 검증 대상이다.

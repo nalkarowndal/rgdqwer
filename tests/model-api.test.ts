@@ -7,7 +7,7 @@ it('protects model and library routes, requires rights and rejects invalid filte
  expect((await app.inject({method:'POST',url:'/api/models/nodes',headers,payload:{name:'fixture',repository:'https://github.com/test/test',commit:'main',confirmed:true,codeRiskAccepted:true}})).statusCode).toBe(400);
  expect((await app.inject({method:'PUT',url:'/api/library/unknown',headers,payload:{favorite:true,title:'unknown'}})).statusCode).toBe(404);
  expect((await app.inject({url:'/api/models',headers})).json().assets).toEqual([]);
- expect((await app.inject({url:'/api/models/catalog',headers})).json().features).toHaveLength(8);
+ expect((await app.inject({url:'/api/models/catalog',headers})).json().features).toHaveLength(9);
  for(const featureIds of [[],['unknown'],['../bad']])expect((await app.inject({url:'/api/models/catalog/download',method:'POST',headers,payload:{featureIds,confirmed:true}})).statusCode).toBe(400);
  }finally{await app.close();await rm(dir,{recursive:true,force:true});}
 });

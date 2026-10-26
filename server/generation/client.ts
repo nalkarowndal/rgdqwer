@@ -1,6 +1,9 @@
+import type {ImageInput} from '../../src/contracts.js';
+import {imageIssues} from '../../src/image.js';
+import {inspectImage} from './image.js';
 import { z } from 'zod';
 import { isLocalEndpoint } from '../settings.js';
-import { requiredNodes, type Workflow } from './workflow.js';
+import { type Workflow } from './workflow.js';
 
 export class EngineHttpError extends Error {
   constructor(public status: number, message: string) { super(message); }
@@ -43,13 +46,9 @@ export class ComfyClient {
   async json(path: string, body?: unknown): Promise<unknown> {
     return JSON.parse((await boundedBytes(await this.request(path, body), 16 * 1024 ** 2)).toString());
   }
-  async preflight(checkpoint: string) {
-    const nodes = z.record(z.unknown()).parse(await this.json('/object_info'));
-    for (const name of requiredNodes) if (!nodes[name]) throw new Error(`필수 ComfyUI 노드가 없습니다: ${name}`);
-    const loader = z.object({ input: z.object({ required: z.object({ ckpt_name: z.tuple([z.array(z.string())]).rest(z.unknown()) }) }) }).parse(nodes.CheckpointLoaderSimple);
-    if (!loader.input.required.ckpt_name[0].includes(checkpoint)) throw new Error('선택한 체크포인트가 없습니다. 모델 목록을 다시 확인하세요.');
-    const sampler = z.object({ input: z.object({ required: z.object({ sampler_name: z.tuple([z.array(z.string())]).rest(z.unknown()), scheduler: z.tuple([z.array(z.string())]).rest(z.unknown()) }) }) }).parse(nodes.KSampler);
-    if (!sampler.input.required.sampler_name[0].includes('euler') || !sampler.input.required.scheduler[0].includes('normal')) throw new Error('euler/normal 샘플러 설정을 지원하지 않는 ComfyUI입니다.');
+  async preflight(input: ImageInput) {
+    const issues=imageIssues(input,inspectImage(await this.json('/object_info')));
+    if(issues.length)throw new Error(issues.join(' · '));
     const queue = await this.queue();
     if (queue.length) throw new Error('ComfyUI에 다른 작업이 있습니다. 작업이 끝난 뒤 다시 시도하세요.');
   }

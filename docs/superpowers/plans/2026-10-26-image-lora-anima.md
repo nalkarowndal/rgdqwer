@@ -32,6 +32,6 @@ Interfaces: existing image draft includes rows, inventory UI loads image/status,
 - [x] Check/build/full browser tests and screenshots; commit.
 
 ### Task3: Review and Windows distribution
-- [ ] One independent final review, resolve findings, preserve rulings in review record.
+- [x] One independent final review, resolve findings, preserve rulings in review record.
 - [ ] Push draft PR stacked on feature-model-downloads and attach; inspect Windows/Ubuntu CI and actual live model metadata + executable reports.
 - [ ] Update artifact links and verification records; final Korean usage instructions. No merge/public release.

@@ -24,9 +24,9 @@ ComfyUI를 연결해 사용하는 Windows 로컬 AI 스튜디오입니다.
 
 ## Windows 실행 파일 다운로드
 
-**[설치 없이 실행하는 Windows ZIP 받기](https://github.com/nalkarowndal/rgdqwer/actions/runs/40191758197/artifacts/12598890339)** — GitHub 아티팩트를 받은 뒤 안쪽 `*-standalone.zip`을 새 폴더에 모두 풀고 **`rgdqwer.exe`를 더블클릭**하세요. DLL·`resources` 등 전체 폴더가 필요하며 Node.js 개발 환경은 필요하지 않습니다. 같은 Windows 계정의 설정/기록은 `%APPDATA%\rgdqwer\studio`에 저장됩니다.
+**[설치 없이 실행하는 Windows ZIP 받기](https://github.com/nalkarowndal/rgdqwer/actions/runs/40262277365/artifacts/12625102914)** — GitHub 아티팩트를 받은 뒤 안쪽 `*-standalone.zip`을 새 폴더에 모두 풀고 **`rgdqwer.exe`를 더블클릭**하세요. DLL·`resources` 등 전체 폴더가 필요하며 Node.js 개발 환경은 필요하지 않습니다. 같은 Windows 계정의 설정/기록은 `%APPDATA%\rgdqwer\studio`에 저장됩니다.
 
-[설치형 Setup 받기](https://github.com/nalkarowndal/rgdqwer/actions/runs/40191758197/artifacts/12598094125)도 제공됩니다. 두 파일은 [Windows/Ubuntu CI #57](https://github.com/nalkarowndal/rgdqwer/actions/runs/40191758197)를 통과한 x64/unsigned 검증용이며, 아티팩트는 14일 보존됩니다. GitHub 로그인과 저장소 접근 권한이 필요합니다. [실행·설치·엔진 준비·백업 안내](docs/INSTALLATION.md), [실기 검증 목록](docs/RELEASE_CHECKLIST.md)을 확인하세요. 자동 업데이트·공개 릴리스는 없습니다.
+[설치형 Setup 받기](https://github.com/nalkarowndal/rgdqwer/actions/runs/40262277365/artifacts/12624748739)도 제공됩니다. 두 파일은 [Windows/Ubuntu CI #63](https://github.com/nalkarowndal/rgdqwer/actions/runs/40262277365)를 통과한 x64/unsigned 검증용이며, 아티팩트는 14일 보존됩니다. GitHub 로그인과 저장소 접근 권한이 필요합니다. [실행·설치·엔진 준비·백업 안내](docs/INSTALLATION.md), [실기 검증 목록](docs/RELEASE_CHECKLIST.md)을 확인하세요. 자동 업데이트·공개 릴리스는 없습니다.
 
 ## 소스에서 빠른 시작 (Windows PowerShell)
 

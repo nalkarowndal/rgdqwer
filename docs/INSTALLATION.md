@@ -4,7 +4,7 @@
 
 ## 설치 없이 실행 (ZIP)
 
-**[Windows 실행형 ZIP 다운로드](https://github.com/nalkarowndal/rgdqwer/actions/runs/40262277365/artifacts/12625102914)** · [검증 CI #63](https://github.com/nalkarowndal/rgdqwer/actions/runs/40262277365) · 검증 커밋 `c38bb5b`.
+**[Windows 실행형 ZIP 다운로드](https://github.com/nalkarowndal/rgdqwer/actions/runs/40316979809/artifacts/12648120760)** · [검증 CI #67](https://github.com/nalkarowndal/rgdqwer/actions/runs/40316979809) · 검증 커밋 `1837227`.
 
 `rgdqwer-windows-x64-standalone-unsigned` Actions 아티팩트는 **설치 없이 바로 실행하는 스튜디오**입니다. 성공한 Windows 검사의 아티팩트를 내려받고 바깥쪽 GitHub 아티팩트 압축을 풀면 아래 두 파일이 나옵니다. 아티팩트 보존 기간은 14일이며 GitHub 로그인/저장소 접근 권한이 필요합니다.
 
@@ -34,7 +34,7 @@ AI 기능별 외부 준비는 아래 설치형과 같습니다. 아래 Worker �
 
 ## 설치
 
-검증된 빌드: [CI #63](https://github.com/nalkarowndal/rgdqwer/actions/runs/40262277365), 검증 커밋 `c38bb5b`. [Windows x64 설치본 받기](https://github.com/nalkarowndal/rgdqwer/actions/runs/40262277365/artifacts/12624748739)에서 설치 exe와 체크섬을 함께 받습니다. GitHub 로그인 및 저장소 접근 권한이 필요하며 아티팩트는 보존 기간 후 만료됩니다.
+검증된 빌드: [CI #67](https://github.com/nalkarowndal/rgdqwer/actions/runs/40316979809), 검증 커밋 `1837227`. [Windows x64 설치본 받기](https://github.com/nalkarowndal/rgdqwer/actions/runs/40316979809/artifacts/12647447548)에서 설치 exe와 체크섬을 함께 받습니다. GitHub 로그인 및 저장소 접근 권한이 필요하며 아티팩트는 보존 기간 후 만료됩니다.
 
 1. 해당 PR의 **Studio validation** Actions 실행에서 Windows 검사가 성공했는지 확인합니다. 로그인 후 `rgdqwer-windows-x64-unsigned` 아티팩트를 내려받아 압축을 풉니다. 아티팩트 보존 기간은 14일입니다.
 2. `rgdqwer-0.9.0-windows-x64-unsigned-setup.exe`와 `SHA256SUMS.txt`를 함께 확인합니다. PowerShell `Get-FileHash .\rgdqwer-0.9.0-windows-x64-unsigned-setup.exe -Algorithm SHA256`의 값이 목록과 같아야 합니다. 체크섬은 파일 일치 검사이며 게시자 서명을 대신하지 않습니다.
